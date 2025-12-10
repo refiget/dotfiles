@@ -33,15 +33,27 @@ require("luasnip.loaders.from_lua").lazy_load({ paths = "~/dotfiles/nvim/lua/sni
 require("luasnip.loaders.from_vscode").lazy_load()
 
 -- === Keymaps for Snippet Expansion ===
--- Expand or jump forward
+-- Tab for expand/jump; fallback to indent when no snippet/ completion
+local has_words_before = function()
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
+
 vim.keymap.set({ "i", "s" }, "<Tab>", function()
-  if vim.fn.mode() == "i" and ls.expand_or_jumpable() then
+  -- Luasnip expansion/jump takes priority
+  if ls.expand_or_jumpable() then
     return "<Plug>luasnip-expand-or-jump"
-  elseif ls.expand_or_jumpable() then
-    ls.expand_or_jump()
-  else
-    return "<Tab>"
   end
+  -- coc completion confirm if popup visible
+  local pumvisible = vim.fn.pumvisible() == 1
+  if pumvisible then
+    return vim.api.nvim_replace_termcodes("<C-y>", true, true, true)
+  end
+  -- trigger coc completion when there are words before cursor
+  if has_words_before() then
+    return vim.api.nvim_replace_termcodes("<C-Space>", true, true, true)
+  end
+  return "<Tab>"
 end, { expr = true, silent = true, noremap = true })
 
 
