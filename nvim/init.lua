@@ -38,23 +38,39 @@ local has_words_before = function()
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
   return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 end
+local function feedkeys(keys, mode)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(keys, true, true, true), mode or "", true)
+end
 
+local function check_backspace()
+  local col = vim.fn.col(".") - 1
+  return col <= 0 or vim.fn.getline("."):sub(col, col):match("%s") ~= nil
+end
+
+-- Tab 优先 Luasnip，其次 coc 补全，可回退缩进
 vim.keymap.set({ "i", "s" }, "<Tab>", function()
-  -- Luasnip expansion/jump takes priority
   if ls.expand_or_jumpable() then
     return "<Plug>luasnip-expand-or-jump"
   end
-  -- coc completion confirm if popup visible
-  local pumvisible = vim.fn.pumvisible() == 1
-  if pumvisible then
-    return vim.api.nvim_replace_termcodes("<C-y>", true, true, true)
+  if vim.fn["coc#pum#visible"]() == 1 then
+    return vim.fn["coc#pum#confirm"]()
   end
-  -- trigger coc completion when there are words before cursor
-  if has_words_before() then
-    return vim.api.nvim_replace_termcodes("<C-Space>", true, true, true)
+  if not check_backspace() then
+    vim.fn["coc#refresh"]()
+    return ""
   end
   return "<Tab>"
-end, { expr = true, silent = true, noremap = true })
+end, { silent = true, noremap = true, expr = true })
+
+vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
+  if vim.fn["coc#pum#visible"]() == 1 then
+    return vim.fn["coc#pum#prev"](1)
+  end
+  if ls.jumpable(-1) then
+    return "<Plug>luasnip-jump-prev"
+  end
+  return "<S-Tab>"
+end, { silent = true, noremap = true, expr = true })
 
 
 
