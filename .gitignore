@@ -1,0 +1,15 @@
+# Generated / runtime
+nvim/plugged/
+nvim/.netrwhist
+nvim/.lsp*/
+nvim/.ts*/
+nvim/.mypy_cache/
+node_modules/
+*.pyc
+__pycache__/
+.DS_Store
+
+# Local overrides
+.zshrc.local
+.tmux.conf.local
+.viminfo

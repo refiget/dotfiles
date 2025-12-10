@@ -1,0 +1,39 @@
+{
+  // ========================
+  // Python 格式化（Black）
+  // ========================
+  "python.analysis.autoImportCompletions": true,
+  "python.formatting.provider": "black",
+  "python.formatting.blackPath": "black",
+  "python.formatting.blackArgs": ["--fast"],
+  "coc.preferences.formatOnSaveFiletypes": ["python"],
+
+  // 强制 Black 成为 format provider
+  "coc.format.enable": true,
+  "[python]": {
+    "coc.preferences.formatOnSave": true
+  },
+
+  // ========================
+  // Inlay Hints 全局关闭
+  // ========================
+  "inlayHint.enable": false,
+  "coc.preferences.inlayHint.enable": false,
+
+  // ========================
+  // Pyright Inlay Hints 全关闭
+  // ========================
+  "pyright.inlayHints.variableTypes": false,
+  "pyright.inlayHints.functionLikeReturnTypes": false,
+  "pyright.inlayHints.parameterNames": false,
+  "pyright.inlayHints.parameterTypes": false,
+  "pyright.inlayHints.enumMemberValues": false,
+
+  // ========================
+  // Pyright 性能 / 智能补全优化
+  // ========================
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.useLibraryCodeForTypes": true
+}
+
