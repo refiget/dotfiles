@@ -108,47 +108,116 @@ keymap("x", "C", '"_C', opts)
 -- DeepSeek CLI 路径：可通过环境变量覆盖
 local function resolve_ds_cli()
   local sysname = vim.loop.os_uname().sysname or ""
-  local default_root = sysname == "Darwin" and "~/Projects/deepseek-cli" or "~/projects/deepseek-cli"
+  local default_root = sysname == "Darwin" and "~/Projects/codex-projects/deepseek-cli" or "~/projects/deepseek-cli"
   local root = vim.fn.expand(vim.env.DS_CLI_ROOT or default_root)
-  local cmd = vim.fn.expand(vim.env.DS_CLI_CMD or (root .. "/ds"))
-  if vim.fn.executable(cmd) == 1 then
-    return root, cmd
+
+  -- 1. 优先使用全局 ds
+  if vim.fn.executable("ds") == 1 then
+    return root, "ds"
   end
+
+  -- 2. 尝试虚拟环境
+  local function python_from_venv(venv_path)
+    if not venv_path or venv_path == "" then
+      return nil
+    end
+    venv_path = vim.fn.expand(venv_path)
+    local candidates = {
+      venv_path .. "/bin/python",
+      venv_path .. "/bin/python3",
+      venv_path .. "/Scripts/python.exe",
+    }
+    for _, p in ipairs(candidates) do
+      if vim.fn.executable(p) == 1 then
+        return p .. " -m ds"
+      end
+    end
+    return nil
+  end
+
+  local venv_cmd = python_from_venv(vim.env.DS_CLI_VENV)
+  if venv_cmd then
+    return root, venv_cmd
+  end
+
+  local config_file = vim.fn.expand("~/.config/deepseek-cli/config.env")
+  if vim.fn.filereadable(config_file) == 1 then
+    for line in io.lines(config_file) do
+      local venv_path = line:match("^DEEPSEEK_VENV_PATH=(.*)$")
+      if venv_path then
+        venv_cmd = python_from_venv(venv_path)
+        if venv_cmd then
+          return root, venv_cmd
+        end
+      end
+    end
+  end
+
+  -- 3. 回退到项目目录下的 python -m ds
+  if vim.fn.isdirectory(root) == 1 and vim.fn.executable("python3") == 1 then
+    return root, "python3 -m ds"
+  end
+
   return root, nil
 end
 
 local DS_CMD_ROOT, DS_CMD = resolve_ds_cli()
 
-local function ensure_ds_cmd()
-  if DS_CMD and vim.fn.executable(DS_CMD) == 1 then
-    return true
+local function build_ds_command(arg_str)
+  if not DS_CMD then
+    return nil
   end
+  local prefix = ""
+  local env_prefix = "env DS_NO_SPINNER=1 DS_NO_COLOR=1 "
+  if DS_CMD_ROOT and DS_CMD_ROOT ~= "" then
+    prefix = "cd " .. vim.fn.shellescape(DS_CMD_ROOT) .. " && "
+  end
+  return prefix .. env_prefix .. DS_CMD .. " " .. arg_str
+end
+
+local function ensure_ds_cmd()
+  if not DS_CMD then
+    vim.notify(
+      "DeepSeek CLI 未找到，可设置 DS_CLI_ROOT/DS_CLI_VENV",
+      vim.log.levels.WARN,
+      { title = "DeepSeek CLI" }
+    )
+    return false
+  end
+
+  -- 检查是否是虚拟环境方式
+  if DS_CMD:match("python") and DS_CMD:match("%-m ds") then
+    local python_path = DS_CMD:match("^(.-)%s+%-m ds")
+    if python_path and vim.fn.executable(python_path) == 1 then
+      return true
+    end
+  else
+    if vim.fn.executable(DS_CMD) == 1 then
+      return true
+    end
+  end
+
   vim.notify(
-    "DeepSeek CLI 未找到，可设置 DS_CLI_ROOT/DS_CLI_CMD；当前尝试路径: " .. (DS_CMD or "未检测到"),
+    "DeepSeek CLI 未找到，可设置 DS_CLI_ROOT/DS_CLI_VENV；当前尝试路径: " .. DS_CMD,
     vim.log.levels.WARN,
     { title = "DeepSeek CLI" }
   )
   return false
 end
 
--- 在右侧新建一个终端窗口，流式运行命令
-local function open_ds_term(cmd)
+-- 在右侧新建终端窗口，宽度固定 30
+local function open_ds_split(cmd)
   if not ensure_ds_cmd() then
     return
   end
-  -- 在右侧竖分屏中新建一个空窗口
-  vim.cmd("botright vnew")
-
-  -- 获取当前窗口，用来设置宽度
+  vim.cmd("botright 30vnew")
   local win = vim.api.nvim_get_current_win()
-
-  -- 在这个新窗口 / buffer 里打开终端
-  vim.fn.termopen({ "bash", "-lc", "cd " .. DS_CMD_ROOT .. " && " .. cmd })
-
-  -- 右侧窗口宽度，可按需要调整
-  vim.api.nvim_win_set_width(win, 50)
-
-  -- 进入插入模式方便看输出
+  vim.api.nvim_win_set_width(win, 30)
+  local buf = vim.api.nvim_get_current_buf()
+  pcall(vim.api.nvim_buf_set_name, buf, "deepseek_cli_terminal")
+  vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
+  vim.api.nvim_buf_set_option(buf, "buftype", "")
+  vim.fn.termopen({ "bash", "-lc", cmd })
   vim.cmd("startinsert")
 end
 
@@ -184,8 +253,10 @@ local function ds_ask_in_term()
   
   local esc = vim.fn.shellescape(concise_q)
   if ensure_ds_cmd() then
-    local cmd = DS_CMD .. " " .. esc
-    open_ds_term(cmd)
+    local cmd = build_ds_command("-ns -nc " .. esc)
+    if cmd then
+      open_ds_split(cmd)
+    end
   end
 end
 
@@ -223,8 +294,10 @@ local function ds_review_visual_in_term()
 
   local esc = vim.fn.shellescape(prompt)
   if ensure_ds_cmd() then
-    local cmd = DS_CMD .. " " .. esc
-    open_ds_term(cmd)
+    local cmd = build_ds_command("-ns -nc " .. esc)
+    if cmd then
+      open_ds_split(cmd)
+    end
   end
 end
 
@@ -255,78 +328,122 @@ local function ds_doctest_current_buffer()
   }, "\n")
 
   local esc = vim.fn.shellescape(prompt)
-  local cmd = "cd " .. DS_CMD_ROOT .. " && " .. DS_CMD .. " " .. esc
-  local output = vim.fn.system({ "bash", "-lc", cmd })
-
-  if vim.v.shell_error ~= 0 or output == nil or output == "" then
-    vim.notify("DeepSeek doctest 生成失败", vim.log.levels.ERROR, { title = "DeepSeek Doctest" })
+  -- 禁用流式输出与颜色，避免 spinner/ANSI 混入结果
+  local cmd = build_ds_command("-ns -nc " .. esc)
+  if not cmd then
     return
   end
 
-  -- 过滤 ANSI 颜色、主题说明、Markdown 代码围栏
-  local function clean_lines(raw)
-    local cleaned = {}
-    for _, line in ipairs(raw) do
-      line = line:gsub("\27%[[0-9;]*m", "")  -- ESC 开头
-      line = line:gsub("%[[0-9;]*m", "")     -- 部分 CLI 直接渲染出的 [90m 形式
-      if not line:match("^```") and not line:match("^%s*%-%-%-") then
-        table.insert(cleaned, line)
+  -- 显示正在生成的提示
+  local progress_id = 12345
+  vim.notify("正在生成 doctest...", vim.log.levels.INFO, { 
+    title = "DeepSeek Doctest",
+    icon = "⏳",
+    timeout = false,
+    replace_id = progress_id
+  })
+
+  local stdout, stderr = {}, {}
+  vim.fn.jobstart({ "bash", "-lc", cmd }, {
+    stdout_buffered = true,
+    stderr_buffered = true,
+    on_stdout = function(_, data)
+      if data then
+        vim.list_extend(stdout, data)
       end
-    end
-    return cleaned
-  end
-
-  local cleaned = clean_lines(vim.split(output, "\n", { plain = true, trimempty = true }))
-
-  if #cleaned == 0 then
-    vim.notify("未获取到可插入的 doctest 内容", vim.log.levels.WARN, { title = "DeepSeek Doctest" })
-    return
-  end
-
-  local function get_shiftwidth()
-    local sw = vim.bo.shiftwidth
-    if sw == 0 or sw == nil then
-      sw = vim.o.shiftwidth
-    end
-    if sw == 0 or sw == nil then
-      sw = 2
-    end
-    return sw
-  end
-
-  -- 忽略光标，尽量把 doctest 放到第一个 def/class 等块的内部（下一层缩进）
-  local function decide_insert_pos()
-    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-    for i, line in ipairs(lines) do
-      local trimmed = vim.trim(line)
-      if trimmed ~= "" and trimmed:sub(-1) == ":" then
-        local base_indent = line:match("^(%s*)") or ""
-        local indent = base_indent .. string.rep(" ", get_shiftwidth())
-        return i, indent  -- i 是 0-based，插在该行之后
+    end,
+    on_stderr = function(_, data)
+      if data then
+        vim.list_extend(stderr, data)
       end
-    end
-    return 0, ""  -- 没找到块，放到文件开头，无缩进
-  end
+    end,
+    on_exit = function(_, code)
+      vim.schedule(function()
+        vim.notify("Doctest 生成完成", vim.log.levels.INFO, { 
+          title = "DeepSeek Doctest",
+          icon = "✅",
+          replace_id = progress_id
+        })
 
-  local insert_row, indent = decide_insert_pos()
+        if code ~= 0 then
+          vim.notify("DeepSeek doctest 生成失败: " .. table.concat(stderr, ""), 
+                    vim.log.levels.ERROR, { title = "DeepSeek Doctest" })
+          return
+        end
 
-  local function with_indent(line)
-    if indent == "" then
-      return line
-    end
-    if line == "" then
-      return indent
-    end
-    return indent .. line
-  end
+        local output = table.concat(stdout, "\n")
+        if output == nil or output == "" then
+          vim.notify("DeepSeek doctest 生成失败", vim.log.levels.ERROR, { title = "DeepSeek Doctest" })
+          return
+        end
 
-  local insert_lines = { with_indent('"""') }
-  for _, line in ipairs(cleaned) do
-    table.insert(insert_lines, with_indent(line))
-  end
-  table.insert(insert_lines, with_indent('"""'))
+        -- 过滤 ANSI 颜色、主题说明、Markdown 代码围栏
+        local function clean_lines(raw)
+          local cleaned = {}
+          for _, line in ipairs(raw) do
+            line = line:gsub("\27%[[0-9;]*m", "")  -- ESC 开头
+            line = line:gsub("%[[0-9;]*m", "")     -- 部分 CLI 直接渲染出的 [90m 形式
+            if not line:match("^```") and not line:match("^%s*%-%-%-") then
+              table.insert(cleaned, line)
+            end
+          end
+          return cleaned
+        end
 
-  vim.api.nvim_buf_set_lines(0, insert_row + 1, insert_row + 1, false, insert_lines)
+        local cleaned = clean_lines(vim.split(output, "\n", { plain = true, trimempty = true }))
+
+        if #cleaned == 0 then
+          vim.notify("未获取到可插入的 doctest 内容", vim.log.levels.WARN, { title = "DeepSeek Doctest" })
+          return
+        end
+
+        local function get_shiftwidth()
+          local sw = vim.bo.shiftwidth
+          if sw == 0 or sw == nil then
+            sw = vim.o.shiftwidth
+          end
+          if sw == 0 or sw == nil then
+            sw = 2
+          end
+          return sw
+        end
+
+        -- 忽略光标，尽量把 doctest 放到第一个 def/class 等块的内部（下一层缩进）
+        local function decide_insert_pos()
+          local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+          for i, line in ipairs(lines) do
+            local trimmed = vim.trim(line)
+            if trimmed ~= "" and trimmed:sub(-1) == ":" then
+              local base_indent = line:match("^(%s*)") or ""
+              local indent = base_indent .. string.rep(" ", get_shiftwidth())
+              return i, indent  -- i 是 0-based，插在该行之后
+            end
+          end
+          return 0, ""  -- 没找到块，放到文件开头，无缩进
+        end
+
+        local insert_row, indent = decide_insert_pos()
+
+        local function with_indent(line)
+          if indent == "" then
+            return line
+          end
+          if line == "" then
+            return indent
+          end
+          return indent .. line
+        end
+
+        local insert_lines = { with_indent('"""') }
+        for _, line in ipairs(cleaned) do
+          table.insert(insert_lines, with_indent(line))
+        end
+        table.insert(insert_lines, with_indent('"""'))
+
+        vim.api.nvim_buf_set_lines(0, insert_row + 1, insert_row + 1, false, insert_lines)
+      end)
+    end,
+  })
 end
 
 vim.keymap.set(

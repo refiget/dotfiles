@@ -27,7 +27,6 @@ function M.setup()
     "coc-tsserver",
     "coc-sh",
     "coc-explorer",
-    "coc-snippets",
   }
 end
 
