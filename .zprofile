@@ -5,3 +5,4 @@ if command -v tmux >/dev/null 2>&1; then
         tmux new-session -A -s main
     fi
 fi
+# tmux new-session -A -s main => build a new-session `-A` means attached if exists, `-s` means new session and `main` means the name of the new session.

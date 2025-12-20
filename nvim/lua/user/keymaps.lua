@@ -108,7 +108,7 @@ keymap("x", "C", '"_C', opts)
 -- DeepSeek CLI 路径：可通过环境变量覆盖
 local function resolve_ds_cli()
   local sysname = vim.loop.os_uname().sysname or ""
-  local default_root = sysname == "Darwin" and "~/Projects/codex-projects/deepseek-cli" or "~/projects/deepseek-cli"
+  local default_root = sysname == "Darwin" and "~/Projects/deepseek-cli" or "~/Projects/deepseek-cli"
   local root = vim.fn.expand(vim.env.DS_CLI_ROOT or default_root)
 
   -- 1. 优先使用全局 ds
@@ -205,14 +205,14 @@ local function ensure_ds_cmd()
   return false
 end
 
--- 在右侧新建终端窗口，宽度固定 30
+-- 在右侧新建终端窗口，宽度固定 40
 local function open_ds_split(cmd)
   if not ensure_ds_cmd() then
     return
   end
-  vim.cmd("botright 30vnew")
+  vim.cmd("botright 40vnew")
   local win = vim.api.nvim_get_current_win()
-  vim.api.nvim_win_set_width(win, 30)
+  vim.api.nvim_win_set_width(win, 40)
   local buf = vim.api.nvim_get_current_buf()
   pcall(vim.api.nvim_buf_set_name, buf, "deepseek_cli_terminal")
   vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
