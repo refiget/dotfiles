@@ -10,3 +10,4 @@ if [[ -d "$ZSH_CONF_DIR" ]]; then
 else
   echo "警告：未找到 zsh 模块目录 $ZSH_CONF_DIR"
 fi
+
