@@ -7,6 +7,12 @@
   "python.analysis.autoImportCompletions": true,
   "python.analysis.autoSearchPaths": true,
   "python.analysis.useLibraryCodeForTypes": true,
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportUnusedVariable": "none",
+    "reportUnusedImport": "none",
+    "reportUnusedFunction": "none",
+    "reportUnusedClass": "none"
+  },
   "python.formatting.provider": "black",
   "python.formatting.blackPath": "~/venvs/nvim/bin/black",
   "python.formatting.blackArgs": ["--fast"],
@@ -23,6 +29,7 @@
   "suggest.timeout": 500,
   "suggest.maxCompleteItemCount": 80,
   "suggest.detailField": "abbr",          // 仅显示缩写信息，避免详情里带仓库/URL
+  "suggest.formatItems": ["abbr", "kind", "shortcut"],
   "suggest.detailMaxLength": 60,          // 截断过长的详情，减少噪声
   "suggest.labelMaxLength": 60,           // 截断 label，避免长路径
   "suggest.floatMaxWidth": 60,            // 浮窗宽度限制，减少长链接显示
@@ -75,6 +82,7 @@
   // ========================
   "diagnostic.virtualText": false,
   "diagnostic.refreshOnInsertMode": false,
+  "diagnostic.showUnused": false,
   "diagnostic.hintSign": " ",
   "diagnostic.infoSign": " ",
   "diagnostic.warningSign": " ",
