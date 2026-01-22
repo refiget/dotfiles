@@ -1,0 +1,32 @@
+{
+  "@jupyterlab/terminal-extension:plugin": {
+    "fontFamily": "monospace",
+    "fontSize": 13,
+    "lineHeight": 1,
+    "theme": "dark",
+    "screenReaderMode": false,
+    "scrollback": 1000,
+    "shutdownOnClose": false,
+    "closeOnExit": true,
+    "pasteWithCtrlV": true,
+    "macOptionIsMeta": false,
+    "cursorBlink": true,
+    "showStatusBarItem": "if-any"
+  },
+  "@jupyterlab/apputils-extension:notification": {
+    "fetchNews": "false"
+  },
+  "@jupyterlab/lsp-extension:plugin": {
+    "languageServers": {
+      "LSP": {
+        "configuration": {
+          "python": "python -m pylsp"
+        },
+        "rank": 50
+      }
+    },
+    "activate": "on",
+    "setTrace": "off",
+    "logAllCommunication": true
+  }
+}
