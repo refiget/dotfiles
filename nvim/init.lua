@@ -3,9 +3,8 @@
 require("user.core")        -- env/options/autocmds
 require("user.clipboard")   -- tmux+OSC52 提供者
 require("user.plugins")     -- 插件与插件配置
-require("user.coc").setup() -- Coc 扩展列表
+require("user.cmp")         -- nvim-cmp 配置
 require("user.keymaps")     -- 基础按键
 require("user.snippets")    -- LuaSnip + 补全相关按键
 require("user.tmux").setup_mode_sync()  -- 将插入/普通模式同步给 tmux，驱动配色
 require("user.ime").setup() -- macOS 输入法切换（依赖 im-select）
-require("user.deepseek")

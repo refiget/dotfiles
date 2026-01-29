@@ -23,16 +23,33 @@ vim.keymap.set("i", "<Tab>", function()
   if ls.expand_or_jumpable() then
     return "<Plug>luasnip-expand-or-jump"
   end
-  -- 如果coc补全可见，使用Tab选择下一项
-  if vim.fn["coc#pum#visible"]() == 1 then
-    return vim.fn["coc#pum#next"](1)
+  -- 检查nvim-cmp补全是否可见
+  local cmp = require("cmp")
+  if cmp.visible() then
+    return cmp.mapping.confirm({ select = true })
   end
-  -- 由于已经移除了coc-snippets，不再需要检查coc的snippet
-  -- 否则，刷新coc补全
-  return vim.fn["coc#refresh"]()
+  -- 否则返回Tab
+  return "\<Tab>"
 end, { silent = true, noremap = true, expr = true })
 
-vim.keymap.set("i", "<S-Tab>", [[coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"]],
-  { silent = true, noremap = true, expr = true })
+vim.keymap.set("i", "<S-Tab>", function()
+  -- 检查LuaSnip是否可以跳回
+  if ls.jumpable(-1) then
+    return "<Plug>luasnip-jump-prev"
+  end
+  -- 检查nvim-cmp补全是否可见
+  local cmp = require("cmp")
+  if cmp.visible() then
+    cmp.select_prev_item()
+    return ""
+  end
+  -- 否则返回C-h
+  return "\<C-h>"
+end, { silent = true, noremap = true, expr = true })
 
-vim.keymap.set("i", "<C-Space>", "coc#refresh()", { silent = true, noremap = true, expr = true })
+vim.keymap.set("i", "<C-Space>", function()
+  local cmp = require("cmp")
+  cmp.complete()
+  return ""
+end, { silent = true, noremap = true, expr = true })
+

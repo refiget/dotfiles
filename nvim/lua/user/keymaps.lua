@@ -22,8 +22,16 @@ keymap("n", "<leader>k", "<C-w>k", opts)
 keymap("n", "<leader>j", "<C-w>j", opts)
 keymap("n", "<leader>h", "<C-w>h", opts)
 
--- File tree (coc-explorer)
-keymap("n", "<leader>e", ":CocCommand explorer<CR>", { silent = true, noremap = true, desc = "Open file explorer" })
+-- File tree (nvim-tree) - Toggle open/close
+keymap("n", "<leader>e", function()
+  local ok, api = pcall(require, "nvim-tree.api")
+  if not ok then
+    vim.notify("nvim-tree 未安装或加载失败", vim.log.levels.WARN, { title = "nvim-tree" })
+    return
+  end
+  -- Use built-in toggle function
+  api.tree.toggle({ find_file = true, focus = true })
+end, { silent = true, noremap = true, desc = "Toggle file explorer" })
 
 -- Markdown preview (browser)
 keymap("n", "<leader>mp", ":MarkdownPreview<CR>", { silent = true, noremap = true, desc = "Markdown preview" })
@@ -50,22 +58,27 @@ keymap("n", "gT", function()
 end, { silent = true, noremap = true, desc = "Tab prev (wrap)" })
 
 
--- Coc.nvim format --
+-- LSP format --
 vim.keymap.set(
   "n",
   "<leader>f",
-  ":CocCommand editor.action.formatDocument<CR>",
-  { silent = true, noremap = true, desc = "Format document with Coc" }
+  function()
+    vim.lsp.buf.format({ async = true })
+  end,
+  { silent = true, noremap = true, desc = "Format document with LSP" }
 )
-keymap("n", "cr", "<Plug>(coc-rename)", { silent = true })
+keymap("n", "cr", "<cmd>Lspsaga rename<CR>", { silent = true, desc = "Rename with LSP" })
 -- Markdown + Wrap toggle
 keymap("n", "<leader>sw", ":set wrap!<CR>", { desc = "Toggle wrap" })
-vim.keymap.set(
-  "i",
-  "<CR>",
-  'pumvisible() ? coc#_select_confirm() : "<CR>"',
-  { noremap = true, silent = true, expr = true }
-)
+
+-- LSP 相关快捷键 (使用 LSP Saga)
+keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { silent = true, desc = "Go to definition" })
+keymap("n", "gi", "<cmd>Lspsaga goto_implementation<CR>", { silent = true, desc = "Go to implementation" })
+keymap("n", "gr", "<cmd>Lspsaga lsp_finder<CR>", { silent = true, desc = "Go to references" })
+keymap("n", "K", "<cmd>Lspsaga hover_doc<CR>", { silent = true, desc = "Show hover information" })
+keymap("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { silent = true, desc = "Code action" })
+keymap("n", "<leader>cd", "<cmd>Lspsaga show_line_diagnostics<CR>", { silent = true, desc = "Show line diagnostics" })
+keymap("n", "<leader>xx", "<cmd>TroubleToggle<CR>", { silent = true, desc = "Toggle trouble" })
 
 
 -- Compile/Run
@@ -102,9 +115,7 @@ keymap("x", "c", '"_c', opts)
 keymap("x", "C", '"_C', opts) 
 
 
--- ===================== DeepSeek CLI 集成 =====================
--- 相关功能已移至 deepseek.lua 文件
-local deepseek = require("user.deepseek")
+
 
 -- ===================== Telescope: Projects + dotfiles 文件搜索 =====================
 vim.keymap.set("n", "<leader>w", function()

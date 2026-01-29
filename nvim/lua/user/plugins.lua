@@ -12,28 +12,12 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- CoC 依赖检查：Node、npm/pnpm/yarn、python3 host
-local function check_coc_deps()
+-- LSP 依赖检查：python3 host
+local function check_lsp_deps()
   local warns = {}
 
   local function has_exec(bin)
     return fn.executable(bin) == 1
-  end
-
-  if not has_exec("node") then
-    table.insert(warns, "未检测到 node，请安装 nodejs（Arch: pacman -S nodejs npm；macOS: brew install node）")
-  else
-    local ok, out = pcall(fn.systemlist, { "node", "-v" })
-    if ok and out and out[1] then
-      local major = tonumber((out[1]:match("v(%d+)") or "0"))
-      if major < 14 then
-        table.insert(warns, "Node 版本过低(" .. out[1] .. ")，建议 >=16 以保证 coc 稳定")
-      end
-    end
-  end
-
-  if not (has_exec("npm") or has_exec("pnpm") or has_exec("yarn")) then
-    table.insert(warns, "未检测到 npm/pnpm/yarn，无法安装/更新 coc 扩展（Arch: pacman -S npm；macOS: brew install node）")
   end
 
   local host = vim.g.python3_host_prog or "python3"
@@ -41,71 +25,50 @@ local function check_coc_deps()
     table.insert(warns, "未检测到 python3 host (" .. host .. ")，请安装对应解释器（Arch: pacman -S python；macOS: brew install python）")
   end
 
-  if #warns > 0 then
-    vim.schedule(function()
-      vim.notify(table.concat(warns, "\n"), vim.log.levels.WARN, { title = "CoC 依赖检查" })
-    end)
-  end
-end
+  -- 检查 LSP 服务器是否安装
+  local lsp_servers = {
+    { "pyright", "npm install -g pyright", "Python" },
+    { "lua-language-server", "brew install lua-language-server" or "npm install -g lua-language-server", "Lua" },
+    { "jsonls", "npm install -g vscode-langservers-extracted", "JSON" },
+    { "yamlls", "npm install -g yaml-language-server", "YAML" },
+    { "tsserver", "npm install -g typescript typescript-language-server", "TypeScript/JavaScript" },
+    { "bashls", "npm install -g bash-language-server", "Shell" }
+  }
 
--- 自动安装缺失的 coc 扩展（在 coc.nvim 可用时执行）
-local function ensure_coc_extensions()
-  if vim.g.__coc_extensions_installing then
-    return
-  end
-  local exts = vim.g.coc_global_extensions
-  if not exts or #exts == 0 then
-    return
-  end
-  if fn.exists("*coc#util#extension_root") == 0 then
-    return
-  end
-  local ok_root, ext_root = pcall(function()
-    return fn["coc#util#extension_root"]()
-  end)
-  local ext_home = (ok_root and ext_root and ext_root ~= "") and (ext_root .. "/node_modules")
-    or (fn.stdpath("data") .. "/coc/extensions/node_modules")
-  local missing = {}
-  for _, name in ipairs(exts) do
-    local path = ext_home .. "/" .. name
-    local exists = fn.isdirectory(path) == 1 and fn.empty(fn.glob(path .. "/package.json")) == 0
-    if not exists then
-      table.insert(missing, name)
+  for _, server in ipairs(lsp_servers) do
+    local bin, install_cmd, lang = server[1], server[2], server[3]
+    if not has_exec(bin) then
+      table.insert(warns, string.format("未检测到 %s (%s)，请安装：%s", lang, bin, install_cmd))
     end
   end
-  if #missing == 0 then
-    return
-  end
-  if fn.executable("node") == 0 then
+
+  if #warns > 0 then
     vim.schedule(function()
-      vim.notify("缺少 node，无法安装 coc 扩展: " .. table.concat(missing, ", "), vim.log.levels.WARN, { title = "Coc extensions" })
+      vim.notify(table.concat(warns, "\n"), vim.log.levels.WARN, { title = "LSP 依赖检查" })
     end)
-    return
   end
-  vim.g.__coc_extensions_installing = true
-  vim.defer_fn(function()
-    local list = table.concat(missing, " ")
-    vim.notify("后台安装 coc 扩展: " .. list, vim.log.levels.INFO, { title = "Coc extensions" })
-    vim.cmd("tabnew")
-    vim.cmd("silent! CocInstall " .. list)
-    vim.cmd("tabprevious")
-    vim.defer_fn(function()
-      vim.g.__coc_extensions_installing = false
-    end, 10000)
-  end, 500)
 end
 
-local function trigger_coc_extension_install()
-  if vim.fn.exists("*coc#util#extension_root") == 0 then
-    return
-  end
-  ensure_coc_extensions()
+-- 触发 LSP 依赖检查
+local function trigger_lsp_deps_check()
+  check_lsp_deps()
 end
 
 local plugins = {
   -- LSP / Completion
-  { "neoclide/coc.nvim", branch = "release", lazy = false },
-  { "fannheyward/coc-pyright", lazy = false },
+  { "neovim/nvim-lspconfig", lazy = false },
+  { "hrsh7th/nvim-cmp", lazy = false },
+  { "hrsh7th/cmp-nvim-lsp", lazy = false },
+  { "hrsh7th/cmp-buffer", lazy = false },
+  { "hrsh7th/cmp-path", lazy = false },
+  { "hrsh7th/cmp-cmdline", lazy = false },
+  { "L3MON4D3/LuaSnip", lazy = false },
+  { "saadparwaiz1/cmp_luasnip", lazy = false },
+  
+  -- LSP Enhancements
+  { "glepnir/lspsaga.nvim", event = "LspAttach" },
+  { "folke/trouble.nvim", event = "LspAttach" },
+  { "jose-elias-alvarez/null-ls.nvim", event = "BufReadPre" },
 
   -- Treesitter / icons
   { "nvim-treesitter/nvim-treesitter", event = { "BufReadPost", "BufNewFile" } },
@@ -187,7 +150,7 @@ local plugins = {
         options = {
           mode = "tabs",
           numbers = "ordinal",
-          diagnostics = "coc",
+          diagnostics = "nvim_lsp",
           separator_style = "slant",
           show_close_icon = false,
           show_buffer_close_icons = false,
@@ -217,7 +180,7 @@ local plugins = {
       })
     end,
   },
-  { "weirongxu/coc-explorer", lazy = false },
+
   {
     "nvim-tree/nvim-web-devicons",
     lazy = false,
@@ -272,6 +235,95 @@ local plugins = {
     end,
   },
   { "nvim-lua/plenary.nvim" },
+
+  -- File Explorer (nvim-tree)
+  {
+    "nvim-tree/nvim-tree.lua",
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
+    lazy = false,
+    config = function()
+      local ok, nvim_tree = pcall(require, "nvim-tree")
+      if not ok then
+        vim.notify("nvim-tree 加载失败", vim.log.levels.ERROR, { title = "插件加载" })
+        return
+      end
+      nvim_tree.setup({
+        auto_reload_on_write = true,
+        disable_netrw = true,
+        hijack_netrw = true,
+        hijack_cursor = true,
+        update_cwd = true,
+        update_focused_file = {
+          enable = true,
+          update_cwd = true,
+        },
+        diagnostics = {
+          enable = true,
+          show_on_dirs = true,
+        },
+        git = {
+          enable = true,
+          ignore = false,
+        },
+        view = {
+          width = 30,
+          side = "left",
+        },
+        renderer = {
+          indent_markers = {
+            enable = true,
+          },
+          icons = {
+            show = {
+              file = true,
+              folder = true,
+              folder_arrow = true,
+              git = true,
+            },
+            glyphs = {
+              folder = {
+                default = "",
+                open = "",
+                empty = "",
+                empty_open = "",
+              },
+            },
+          },
+        },
+      })
+      
+      -- Set up key mappings for nvim-tree buffers
+      local ok_api, api = pcall(require, "nvim-tree.api")
+      if ok_api then
+        -- Add autocmd to set mappings when entering nvim-tree buffer
+        vim.api.nvim_create_autocmd("BufEnter", {
+          pattern = "NvimTree_*",
+          callback = function()
+            local buf = vim.api.nvim_get_current_buf()
+            local function opts(desc)
+              return {
+                desc = "nvim-tree: " .. desc,
+                buffer = buf,
+                noremap = true,
+                silent = true,
+                nowait = true,
+              }
+            end
+            
+            -- Yazi-style mappings
+            vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
+            vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
+            vim.keymap.set("n", "q", api.tree.close, opts("Close"))
+          end,
+        })
+      end
+      
+      -- Set custom colors for nvim-tree (lighter purple icon to match status bar)
+      vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", { fg = "#c7a5fb" })
+    end,
+  },
 
   -- Editing Helpers
   { "windwp/nvim-autopairs", event = "InsertEnter" },
@@ -342,25 +394,117 @@ pcall(function()
   })
 end)
 
-local aug = vim.api.nvim_create_augroup("UserCocInstall", { clear = true })
+-- LSP 配置
+local function setup_lsp()
+  local lspconfig = require("lspconfig")
+  local cmp_nvim_lsp = require("cmp_nvim_lsp")
+  
+  -- 配置默认的 capabilities
+  local capabilities = vim.lsp.protocol.make_client_capabilities()
+  capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
+  
+  -- 配置 pyright (Python)
+  lspconfig.pyright.setup({
+    capabilities = capabilities,
+    settings = {
+      python = {
+        analysis = {
+          autoSearchPaths = true,
+          autoImportCompletions = true,
+          useLibraryCodeForTypes = true,
+          diagnosticMode = "openFilesOnly"
+        }
+      }
+    }
+  })
+  
+  -- 配置 lua_ls (Lua)
+  lspconfig.lua_ls.setup({
+    capabilities = capabilities,
+    settings = {
+      Lua = {
+        diagnostics = {
+          globals = {"vim"}
+        }
+      }
+    }
+  })
+  
+  -- 配置 jsonls (JSON)
+  lspconfig.jsonls.setup({
+    capabilities = capabilities
+  })
+  
+  -- 配置 yamlls (YAML)
+  lspconfig.yamlls.setup({
+    capabilities = capabilities
+  })
+  
+  -- 配置 tsserver (TypeScript/JavaScript)
+  lspconfig.tsserver.setup({
+    capabilities = capabilities
+  })
+  
+  -- 配置 bashls (Shell)
+  lspconfig.bashls.setup({
+    capabilities = capabilities
+  })
+end
+
+-- 配置 LSP 增强插件
+local function setup_lsp_enhancements()
+  -- 配置 lspsaga
+  pcall(function()
+    local ok, lspsaga = pcall(require, "lspsaga")
+    if not ok then
+      return
+    end
+    lspsaga.setup({
+      symbol_in_winbar = {
+        enable = true,
+      },
+      ui = {
+        border = "rounded",
+      },
+    })
+  end)
+  
+  -- 配置 trouble
+  pcall(function()
+    local ok, trouble = pcall(require, "trouble")
+    if not ok then
+      return
+    end
+    trouble.setup({})
+  end)
+  
+  -- 配置 null-ls
+  pcall(function()
+    local ok, null_ls = pcall(require, "null-ls")
+    if not ok then
+      return
+    end
+    null_ls.setup({
+      sources = {
+        -- Formatters
+        null_ls.builtins.formatting.black,
+        null_ls.builtins.formatting.stylua,
+        -- Linters
+        null_ls.builtins.diagnostics.flake8,
+      },
+    })
+  end)
+end
+
+-- 当插件加载完成后设置 LSP
+local aug = vim.api.nvim_create_augroup("UserLspSetup", { clear = true })
 vim.api.nvim_create_autocmd("User", {
   group = aug,
   pattern = "LazyDone",
   callback = function()
-    check_coc_deps()
-    vim.defer_fn(trigger_coc_extension_install, 500)
+    trigger_lsp_deps_check()
+    setup_lsp()
+    setup_lsp_enhancements()
   end,
 })
-vim.api.nvim_create_autocmd("User", {
-  group = aug,
-  pattern = "CocNvimInit",
-  callback = function()
-    vim.defer_fn(trigger_coc_extension_install, 200)
-  end,
-})
-vim.api.nvim_create_autocmd("VimEnter", {
-  group = aug,
-  callback = function()
-    vim.defer_fn(trigger_coc_extension_install, 1000)
-  end,
-})
+

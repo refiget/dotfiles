@@ -1,30 +1,233 @@
-# Dotfiles 指南
+# Dotfiles
 
-## 依赖与额外安装
-- 基础：tmux ≥3.2、fzf、ripgrep(`rg`)、git、Python3（含 `pynvim`）、Nerd Font 终端字体。
-- Neovim：v0.8+，Node 16+，npm/pnpm/yarn 任一；`markdown-preview.nvim` 首次会 `cd app && npm install`（已在 Plug 配置中）。
-- 剪贴板：终端需支持 OSC52；macOS 自带 `pbcopy/pbpaste`，Linux 建议 `wl-clipboard` 或 `xclip`。
-- 可选：starship（tmux pane 标题），rainbarf（tmux 右侧带宽条）。
+This repository contains my personal dotfiles configuration for Neovim, tmux, and zsh. It provides a comprehensive setup with numerous enhancements over the default configurations.
 
-## tmux（mac 前缀 C-s，服务器 C-b）
-- 状态栏：脚本位于 `tmux/tmux-status/left.sh|right.sh`，右侧显示时间（块保留，去掉箭头），可选 rainbarf；pane 顶栏用 starship 显示路径+git。
-- 复制：`M-v` 进入 copy-mode，`y` 复制 tmux buffer，`Y` 复制系统剪贴板（OSC52 支持 SSH 回传）；`C-S-v`/`M-V` 粘贴系统剪贴板。
-- 窗口/会话：`C-p/C-n` 切窗口；`M-1..9` 直达窗口；`C-1..9`/F1..F5 切会话；`M-o` 新窗口同路径，`M-O` 拆窗格成新窗口。
-- 分屏/移动：`h/j/k/l` 分割；`M-h/j/k/l` 移动 pane；`M-H/J/K/L` 调大小；`M-f` 缩放；`Space` 横竖切换。
-- 其他：`C-g` 切同步输入；`prefix + r` 重载配置。
+## Table of Contents
 
-## Zsh
-- 基于 Zim，启用 fzf-tab；`reload` 重载 shell；`o` 打开文件/目录；`update` 包更新。
-- nvm 懒加载，首次调用 node/npm 时初始化。
+- [Overview](#overview)
+- [Components](#components)
+- [Installation](#installation)
+- [Directory Structure](#directory-structure)
+- [Usage](#usage)
 
-## Neovim（Leader 空格）
-- 依赖：Node 16+、Python3 + `pynvim`，vim-plug 管理。
-- 快捷：`<leader>w` 查找（Telescope）；`<leader>e` 文件树（coc-explorer）；`r` 运行当前 Python；`<leader>f` 格式化；`cr` 重命名；`<leader>mp/mP` 打开/关闭 Markdown 预览（浏览器，KaTeX/Mermaid）。
-- 补全/LSP：coc.nvim + coc-pyright 等，缺失时后台新 tab 自动 `CocInstall`。
-- 片段：LuaSnip + friendly-snippets；Obsidian LaTeX Suite 常用触发已迁移为 Markdown autosnippet。
-- 复制：OSC52 + `unnamedplus`；可视 `Y` 复制系统剪贴板；`x/X/c/C` 写黑洞寄存器防止污染。
-- coc-explorer 目录图标配色已与 Yazi Dracula Pro 同步（紫色 `#bd93f9`）。
+## Overview
 
-## 部署与更新
-- 首次启动 Neovim：自动 `PlugInstall --sync`，随后自动检测并后台安装缺失 coc 扩展。
-- tmux 重载：`prefix + r`；zsh 重载：`reload`。
+This dotfiles repository includes:
+
+- **Neovim** configuration with plugins, key mappings, and enhanced settings
+- **tmux** configuration with session management, clipboard integration, and theme support
+- **zsh** configuration with history enhancements, aliases, and prompt customization
+
+All configurations are designed to work together seamlessly, providing a consistent and efficient development environment.
+
+## Components
+
+### Neovim
+
+A feature-rich Neovim configuration with:
+
+- **Plugin Management**: Uses `lazy.nvim` for efficient plugin loading
+- **LSP Integration**: Built-in support for Language Server Protocol
+- **Completion**: Enhanced code completion with `nvim-cmp`
+- **Syntax Highlighting**: Improved syntax highlighting with Treesitter
+- **Navigation**: Fuzzy file finding with Telescope
+- **Appearance**: Custom theme and status line
+- **Python Integration**: Virtual environment support and Python-specific features
+
+For detailed information, see [README-nvim.md](README-nvim.md).
+
+### tmux
+
+A comprehensive tmux configuration with:
+
+- **Session Management**: Enhanced session creation and switching
+- **Clipboard Integration**: Seamless integration with system clipboard
+- **Pane Navigation**: Easy navigation between panes
+- **Theme Support**: Dynamic theming that integrates with Neovim
+- **Mouse Support**: Full mouse support for easier interaction
+- **Scripting**: Utility scripts for common tasks
+
+For detailed information, see [README-tmux.md](README-tmux.md).
+
+### zsh
+
+An enhanced zsh configuration with:
+
+- **History Management**: Improved history handling and search
+- **Prompt Customization**: Informative prompt with git and virtual environment support
+- **Aliases**: Useful aliases for common commands
+- **Zim Framework**: Efficient plugin loading with Zim
+- **Tmux Integration**: Automatic tmux session management
+- **OS Detection**: OS-specific settings for macOS and Linux
+
+For detailed information, see [README-zsh.md](README-zsh.md).
+
+## Installation
+
+### Prerequisites
+
+- **Git**: For cloning the repository
+- **Neovim**: Version 0.8.0 or later
+- **tmux**: Version 3.0 or later
+- **zsh**: Version 5.0 or later
+- **Python 3**: For Neovim Python integration
+- **Node.js**: For LSP servers and certain plugins
+
+### Installation Steps
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url> ~/dotfiles
+   ```
+
+2. **Run the deploy script**:
+   ```bash
+   cd ~/dotfiles
+   ./deploy.sh
+   ```
+
+3. **Set up Python dependencies**:
+   ```bash
+   # Create a virtual environment for Neovim
+   python3 -m venv ~/venvs/nvim
+   
+   # Activate and install dependencies
+   source ~/venvs/nvim/bin/activate
+   pip install --upgrade pip
+   pip install pynvim
+   ```
+
+4. **Install Zim framework** (for zsh):
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh
+   ```
+
+5. **Install LSP servers**:
+   ```bash
+   # Install pyright for Python
+   npm install -g pyright
+   ```
+
+6. **Open Neovim to install plugins**:
+   ```bash
+   nvim
+   ```
+
+   The `lazy.nvim` plugin manager will automatically install all required plugins on first run.
+
+7. **Optional: Install additional dependencies**:
+   ```bash
+   # For macOS
+   brew install im-select fzf
+   
+   # For Linux
+   sudo pacman -S <required-packages>
+   ```
+
+## Directory Structure
+
+```
+dotfiles/
+├── .gitconfig          # Git configuration
+├── .gitignore          # Git ignore patterns
+├── .ignore             # Global ignore patterns
+├── .tmux.conf          # tmux configuration loader
+├── .zimrc              # Zim framework configuration
+├── .zprofile           # Zsh profile
+├── .zshrc              # Zsh configuration loader
+
+├── deploy.sh           # Deployment script
+├── iterm2/             # iTerm2 configuration
+├── jupyter/            # Jupyter configuration
+├── lazygit/            # LazyGit configuration
+├── nvim/               # Neovim configuration
+├── README-nvim.md      # Neovim documentation
+├── README-tmux.md      # tmux documentation
+├── README-zsh.md       # zsh documentation
+├── scripts/            # Utility scripts
+├── tmux/               # tmux configuration files
+├── yazi/               # Yazi file manager configuration
+└── zsh/                # zsh configuration files
+```
+
+## Usage
+
+### Neovim
+
+- Launch Neovim with `nvim`
+- Use `<leader>e` to open file explorer
+- Use `<leader>f` to format document with LSP
+- Use `r` to run Python files
+- Use `gt`/`gT` to navigate tabs
+
+For more key mappings and features, see [README-nvim.md](README-nvim.md).
+
+### tmux
+
+- Launch tmux with `tmux`
+- Use prefix + `r` to reload configuration
+- Use mouse to navigate between panes and windows
+- Use session management scripts for easier session handling
+
+For more key mappings and features, see [README-tmux.md](README-tmux.md).
+
+### zsh
+
+- Launch zsh with `zsh`
+- Use arrow keys to navigate history
+- Use `Ctrl+R` to search history
+- Use aliases for common commands
+- Enjoy the informative prompt with git and virtual environment status
+
+For more features and configuration options, see [README-zsh.md](README-zsh.md).
+
+## Customization
+
+### Local Overrides
+
+You can add local overrides without modifying the main configuration files:
+
+- **zsh**: Add overrides to `zsh/conf.d/08_local_overrides.conf`
+- **Neovim**: Add custom plugins and settings to the appropriate files in `nvim/lua/user/`
+- **tmux**: Add custom settings to a new file in `tmux/conf.d/`
+
+### Theme Customization
+
+The color scheme is primarily defined in the Neovim configuration, with tmux automatically syncing its colors. To change the theme:
+
+1. Modify the Neovim color scheme in `nvim/lua/user/plugins.lua`
+2. Update tmux theme colors in the appropriate tmux configuration files
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Python dependencies not found**:
+   - Ensure you've created and activated the Python virtual environment
+   - Verify `python3_host_prog` is set correctly in Neovim
+
+2. **Plugins not installing**:
+   - Ensure you have an internet connection
+   - Check Neovim error messages for specific issues
+
+3. **Tmux not starting**:
+   - Check tmux configuration for syntax errors
+   - Ensure required dependencies are installed
+
+4. **Zsh prompt not showing correctly**:
+   - Ensure Zim framework is installed
+   - Check for syntax errors in zsh configuration files
+
+### Debugging
+
+- **Neovim**: Run `nvim --headless -c 'echo $MYVIMRC' -c 'q'` to check configuration path
+- **tmux**: Run `tmux show-options -g` to see current settings
+- **zsh**: Run `zsh -x` to see verbose output of shell initialization
+
+## Contributing
+
+Feel free to fork this repository and make changes. Pull requests are welcome for improvements and bug fixes.
+
+## License
+
+This repository is licensed under the MIT License. See the LICENSE file for details.
