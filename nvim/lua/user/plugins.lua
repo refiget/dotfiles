@@ -87,7 +87,7 @@ local plugins = {
       end
       lspsaga.setup({
         symbol_in_winbar = {
-          enable = true,
+          enable = false,
         },
         ui = {
           border = "rounded",
