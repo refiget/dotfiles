@@ -267,7 +267,7 @@ local plugins = {
           default_icon = { icon = "", color = "#bd93f9", name = "folder" },
         },
       })
-      local purple = "#bd93f9"
+      local purple = "#a77fd9"
       local hl = vim.api.nvim_set_hl
       hl(0, "CocExplorerFolderIcon", { fg = purple })
       hl(0, "CocExplorerFileDirectory", { fg = purple })
@@ -348,11 +348,13 @@ local plugins = {
             show = {
               file = true,
               folder = true,
-              folder_arrow = true,
+              folder_arrow = false,
               git = true,
             },
             glyphs = {
               folder = {
+                arrow_closed = "",
+                arrow_open = "",
                 default = "",
                 open = "",
                 empty = "",
@@ -389,8 +391,15 @@ local plugins = {
         })
       end
       
-      -- Set custom colors for nvim-tree (lighter purple icon to match status bar)
-      vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", { fg = "#c7a5fb" })
+      -- Set custom colors for nvim-tree (dimmer purple)
+      local purple = "#a77fd9"
+      local hl = vim.api.nvim_set_hl
+      hl(0, "NvimTreeFolderIcon", { fg = purple })
+      hl(0, "NvimTreeFolderName", { fg = purple })
+      hl(0, "NvimTreeRootFolder", { fg = purple })
+      hl(0, "NvimTreeOpenedFolderName", { fg = purple })
+      hl(0, "NvimTreeEmptyFolderName", { fg = purple })
+      hl(0, "NvimTreeSymlink", { fg = purple })
     end,
   },
 
@@ -400,23 +409,6 @@ local plugins = {
   { "junegunn/vim-after-object", event = "VeryLazy" },
   { "lukas-reineke/indent-blankline.nvim", event = { "BufReadPost", "BufNewFile" } },
   { "Vimjas/vim-python-pep8-indent", ft = "python" },
-
-  -- Markdown Preview (browser)
-  {
-    "iamcco/markdown-preview.nvim",
-    lazy = false,
-    build = "cd app && npm install",
-    ft = { "markdown" },
-    init = function()
-      vim.g.mkdp_auto_start = 0
-      vim.g.mkdp_auto_close = 1
-      vim.g.mkdp_refresh_slow = 0
-      vim.g.mkdp_command_for_global = 0
-      vim.g.mkdp_open_to_the_world = 0
-      vim.g.mkdp_filetypes = { "markdown" }
-      vim.g.mkdp_browser = ""
-    end,
-  },
 
   -- LuaSnip
 }

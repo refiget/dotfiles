@@ -38,10 +38,6 @@ keymap("n", "<leader>e", function()
   api.tree.toggle({ find_file = true, focus = true })
 end, { silent = true, noremap = true, desc = "Toggle file explorer" })
 
--- Markdown preview (browser)
-keymap("n", "<leader>mp", ":MarkdownPreview<CR>", { silent = true, noremap = true, desc = "Markdown preview" })
-keymap("n", "<leader>mP", ":MarkdownPreviewStop<CR>", { silent = true, noremap = true, desc = "Markdown preview stop" })
-
 -- Tabs: 原生 gt/gT，支持循环切换，数字前缀生效
 local function tab_cycle(delta)
   local total = vim.fn.tabpagenr("$")
