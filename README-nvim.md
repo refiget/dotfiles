@@ -243,6 +243,13 @@ Steps:
 4. Use `F10` (step over), `F11` (step into), `F12` (step out).
 5. Use `<leader>dr` to toggle the REPL and `<leader>du` to toggle the DAP UI.
 
+### REPL Mode Example
+
+After the debugger stops at a breakpoint:
+1. Press `<leader>dr` to open the DAP REPL.
+2. Type `c` and press `<Enter>` to inspect the current value.
+3. You can also run Python expressions like `!print(c + 10)`.
+
 ## Installation
 
 1. **Clone the dotfiles repository**:

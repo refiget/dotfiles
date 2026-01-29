@@ -137,3 +137,32 @@ end
 
 prepend_path(pnpm_global_bin())
 prepend_path(yarn_global_bin())
+
+local function shell_command_path(bin)
+  local shell = vim.env.SHELL or vim.o.shell or "sh"
+  local ok, out = pcall(fn.systemlist, { shell, "-lc", "command -v " .. bin })
+  if not ok or not out or not out[1] or out[1] == "" then
+    return nil
+  end
+  return out[1]
+end
+
+local function ensure_bin_in_path(bin)
+  if fn.executable(bin) == 1 then
+    return
+  end
+  local path = shell_command_path(bin)
+  if path and path ~= "" then
+    prepend_path(fn.fnamemodify(path, ":h"))
+  end
+end
+
+for _, bin in ipairs({
+  "pyright-langserver",
+  "vscode-json-language-server",
+  "yaml-language-server",
+  "typescript-language-server",
+  "bash-language-server",
+}) do
+  ensure_bin_in_path(bin)
+end
