@@ -34,11 +34,22 @@ local function check_lsp_deps()
     { "tsserver", "npm install -g typescript typescript-language-server", "TypeScript/JavaScript" },
     { "bashls", "npm install -g bash-language-server", "Shell" }
   }
+  local tools = {
+    { "black", "pip install black", "Python formatter" },
+    { "flake8", "pip install flake8", "Python linter" },
+    { "stylua", "brew install stylua (macOS) or cargo install stylua", "Lua formatter" },
+  }
 
   for _, server in ipairs(lsp_servers) do
     local bin, install_cmd, lang = server[1], server[2], server[3]
     if not has_exec(bin) then
       table.insert(warns, string.format("未检测到 %s (%s)，请安装：%s", lang, bin, install_cmd))
+    end
+  end
+  for _, tool in ipairs(tools) do
+    local bin, install_cmd, name = tool[1], tool[2], tool[3]
+    if not has_exec(bin) then
+      table.insert(warns, string.format("未检测到 %s (%s)，请安装：%s", name, bin, install_cmd))
     end
   end
 
@@ -66,9 +77,61 @@ local plugins = {
   { "saadparwaiz1/cmp_luasnip", lazy = false },
   
   -- LSP Enhancements
-  { "glepnir/lspsaga.nvim", event = "LspAttach" },
-  { "folke/trouble.nvim", event = "LspAttach" },
-  { "jose-elias-alvarez/null-ls.nvim", event = "BufReadPre" },
+  {
+    "glepnir/lspsaga.nvim",
+    event = "LspAttach",
+    config = function()
+      local ok, lspsaga = pcall(require, "lspsaga")
+      if not ok then
+        return
+      end
+      lspsaga.setup({
+        symbol_in_winbar = {
+          enable = true,
+        },
+        ui = {
+          border = "rounded",
+        },
+      })
+    end,
+  },
+  {
+    "folke/trouble.nvim",
+    event = "LspAttach",
+    config = function()
+      local ok, trouble = pcall(require, "trouble")
+      if not ok then
+        return
+      end
+      trouble.setup({})
+    end,
+  },
+  {
+    "jose-elias-alvarez/null-ls.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      local ok, null_ls = pcall(require, "null-ls")
+      if not ok then
+        return
+      end
+      local sources = {}
+      local function has_exec(bin)
+        return vim.fn.executable(bin) == 1
+      end
+      if has_exec("black") then
+        table.insert(sources, null_ls.builtins.formatting.black)
+      end
+      if has_exec("stylua") then
+        table.insert(sources, null_ls.builtins.formatting.stylua)
+      end
+      if has_exec("flake8") then
+        table.insert(sources, null_ls.builtins.diagnostics.flake8)
+      end
+      null_ls.setup({
+        sources = sources,
+      })
+    end,
+  },
 
   -- Treesitter / icons
   { "nvim-treesitter/nvim-treesitter", event = { "BufReadPost", "BufNewFile" } },
@@ -350,7 +413,6 @@ local plugins = {
   },
 
   -- LuaSnip
-  { "L3MON4D3/LuaSnip", lazy = false },
   { "rafamadriz/friendly-snippets", lazy = false },
 }
 
@@ -396,115 +458,69 @@ end)
 
 -- LSP 配置
 local function setup_lsp()
-  local lspconfig = require("lspconfig")
-  local cmp_nvim_lsp = require("cmp_nvim_lsp")
-  
-  -- 配置默认的 capabilities
   local capabilities = vim.lsp.protocol.make_client_capabilities()
-  capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
-  
-  -- 配置 pyright (Python)
-  lspconfig.pyright.setup({
-    capabilities = capabilities,
-    settings = {
-      python = {
-        analysis = {
-          autoSearchPaths = true,
-          autoImportCompletions = true,
-          useLibraryCodeForTypes = true,
-          diagnosticMode = "openFilesOnly"
-        }
-      }
-    }
-  })
-  
-  -- 配置 lua_ls (Lua)
-  lspconfig.lua_ls.setup({
-    capabilities = capabilities,
-    settings = {
-      Lua = {
-        diagnostics = {
-          globals = {"vim"}
-        }
-      }
-    }
-  })
-  
-  -- 配置 jsonls (JSON)
-  lspconfig.jsonls.setup({
-    capabilities = capabilities
-  })
-  
-  -- 配置 yamlls (YAML)
-  lspconfig.yamlls.setup({
-    capabilities = capabilities
-  })
-  
-  -- 配置 tsserver (TypeScript/JavaScript)
-  lspconfig.tsserver.setup({
-    capabilities = capabilities
-  })
-  
-  -- 配置 bashls (Shell)
-  lspconfig.bashls.setup({
-    capabilities = capabilities
-  })
+  local ok_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+  if ok_cmp then
+    capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
+  end
+
+  local servers = {
+    pyright = {
+      settings = {
+        python = {
+          analysis = {
+            autoSearchPaths = true,
+            autoImportCompletions = true,
+            useLibraryCodeForTypes = true,
+            diagnosticMode = "openFilesOnly",
+          },
+        },
+      },
+    },
+    lua_ls = {
+      settings = {
+        Lua = {
+          diagnostics = {
+            globals = { "vim" },
+          },
+          workspace = {
+            checkThirdParty = false,
+          },
+          telemetry = {
+            enable = false,
+          },
+        },
+      },
+    },
+    jsonls = {},
+    yamlls = {},
+    tsserver = {},
+    bashls = {},
+  }
+
+  if type(vim.lsp.config) == "function" then
+    for name, cfg in pairs(servers) do
+      cfg.capabilities = capabilities
+      vim.lsp.config(name, cfg)
+    end
+    pcall(vim.api.nvim_create_augroup, "nvim.lsp.enable", { clear = false })
+    vim.lsp.enable(vim.tbl_keys(servers))
+  else
+    local lspconfig = require("lspconfig")
+    for name, cfg in pairs(servers) do
+      cfg.capabilities = capabilities
+      lspconfig[name].setup(cfg)
+    end
+  end
 end
 
--- 配置 LSP 增强插件
-local function setup_lsp_enhancements()
-  -- 配置 lspsaga
-  pcall(function()
-    local ok, lspsaga = pcall(require, "lspsaga")
-    if not ok then
-      return
-    end
-    lspsaga.setup({
-      symbol_in_winbar = {
-        enable = true,
-      },
-      ui = {
-        border = "rounded",
-      },
-    })
-  end)
-  
-  -- 配置 trouble
-  pcall(function()
-    local ok, trouble = pcall(require, "trouble")
-    if not ok then
-      return
-    end
-    trouble.setup({})
-  end)
-  
-  -- 配置 null-ls
-  pcall(function()
-    local ok, null_ls = pcall(require, "null-ls")
-    if not ok then
-      return
-    end
-    null_ls.setup({
-      sources = {
-        -- Formatters
-        null_ls.builtins.formatting.black,
-        null_ls.builtins.formatting.stylua,
-        -- Linters
-        null_ls.builtins.diagnostics.flake8,
-      },
-    })
-  end)
-end
-
--- 当插件加载完成后设置 LSP
-local aug = vim.api.nvim_create_augroup("UserLspSetup", { clear = true })
-vim.api.nvim_create_autocmd("User", {
-  group = aug,
-  pattern = "LazyDone",
-  callback = function()
-    trigger_lsp_deps_check()
-    setup_lsp()
-    setup_lsp_enhancements()
-  end,
+vim.diagnostic.config({
+  virtual_text = true,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
 })
 
+setup_lsp()
+vim.defer_fn(trigger_lsp_deps_check, 200)

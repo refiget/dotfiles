@@ -14,6 +14,11 @@ keymap("n", "<leader><CR>", ":nohlsearch<CR>", opts)
 keymap("n", "J", "5j", opts)
 keymap("n", "K", "5k", opts)
 
+-- Insert-mode undo breakpoints for finer-grained undo
+for _, key in ipairs({ ",", ".", "!", "?", ";", ":" }) do
+  keymap("i", key, key .. "<C-g>u", opts)
+end
+
 -- Splits
 keymap("n", "s", "<nop>")
 
