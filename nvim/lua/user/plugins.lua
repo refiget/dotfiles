@@ -496,8 +496,15 @@ local function setup_lsp_enhancements()
   end)
 end
 
--- 设置 LSP
-trigger_lsp_deps_check()
-setup_lsp()
-setup_lsp_enhancements()
+-- 当插件加载完成后设置 LSP
+local aug = vim.api.nvim_create_augroup("UserLspSetup", { clear = true })
+vim.api.nvim_create_autocmd("User", {
+  group = aug,
+  pattern = "LazyDone",
+  callback = function()
+    trigger_lsp_deps_check()
+    setup_lsp()
+    setup_lsp_enhancements()
+  end,
+})
 
