@@ -3,9 +3,10 @@ local fn = vim.fn
 local opt = vim.opt
 
 opt.undolevels = 10000
+opt.undoreload = 10000
+opt.undouno = "split"
 opt.breakindent = true
 opt.linebreak = true
-opt.undoreload = 10000
 opt.swapfile = false
 opt.laststatus = 2
 opt.exrc = true

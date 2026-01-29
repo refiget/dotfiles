@@ -29,7 +29,7 @@ vim.keymap.set("i", "<Tab>", function()
     return cmp.mapping.confirm({ select = true })
   end
   -- 否则返回Tab
-  return "\<Tab>"
+  return "\t"
 end, { silent = true, noremap = true, expr = true })
 
 vim.keymap.set("i", "<S-Tab>", function()
@@ -44,7 +44,7 @@ vim.keymap.set("i", "<S-Tab>", function()
     return ""
   end
   -- 否则返回C-h
-  return "\<C-h>"
+  return "\b"
 end, { silent = true, noremap = true, expr = true })
 
 vim.keymap.set("i", "<C-Space>", function()

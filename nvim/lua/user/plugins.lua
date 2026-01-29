@@ -28,7 +28,7 @@ local function check_lsp_deps()
   -- 检查 LSP 服务器是否安装
   local lsp_servers = {
     { "pyright", "npm install -g pyright", "Python" },
-    { "lua-language-server", "brew install lua-language-server" or "npm install -g lua-language-server", "Lua" },
+    { "lua-language-server", "brew install lua-language-server (macOS) or npm install -g lua-language-server (Linux)", "Lua" },
     { "jsonls", "npm install -g vscode-langservers-extracted", "JSON" },
     { "yamlls", "npm install -g yaml-language-server", "YAML" },
     { "tsserver", "npm install -g typescript typescript-language-server", "TypeScript/JavaScript" },
@@ -496,15 +496,8 @@ local function setup_lsp_enhancements()
   end)
 end
 
--- 当插件加载完成后设置 LSP
-local aug = vim.api.nvim_create_augroup("UserLspSetup", { clear = true })
-vim.api.nvim_create_autocmd("User", {
-  group = aug,
-  pattern = "LazyDone",
-  callback = function()
-    trigger_lsp_deps_check()
-    setup_lsp()
-    setup_lsp_enhancements()
-  end,
-})
+-- 设置 LSP
+trigger_lsp_deps_check()
+setup_lsp()
+setup_lsp_enhancements()
 
