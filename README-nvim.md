@@ -89,8 +89,10 @@ The configuration uses a Python virtual environment for Neovim. The following st
    
    # Install required packages
    pip install --upgrade pip
-   pip install pynvim
+   pip install pynvim debugpy black flake8
    ```
+
+`debugpy` is required for Python debugging (nvim-dap), and `black`/`flake8` are used by none-ls when available.
 
 ### Python Host Detection
 
@@ -116,6 +118,18 @@ The configuration uses `lazy.nvim` for plugin management. Here's a list of insta
 - `hrsh7th/cmp-cmdline` - Command line completion source
 - `L3MON4D3/LuaSnip` - Snippet engine
 - `saadparwaiz1/cmp_luasnip` - Snippet completion source
+- `nvim-tree/nvim-tree.lua` - File explorer
+- `mfussenegger/nvim-dap` - Debug adapter protocol client
+- `mfussenegger/nvim-dap-python` - Python DAP integration
+- `rcarriga/nvim-dap-ui` - Debug UI panels
+- `nvim-neotest/nvim-nio` - Async helpers for DAP UI
+
+### LSP and Diagnostics
+
+- `glepnir/lspsaga.nvim` - LSP UI (rename, hover, finder)
+- `folke/trouble.nvim` - Diagnostics list UI
+- `nvimtools/none-ls.nvim` - Formatter/diagnostic integration
+- `nvimtools/none-ls-extras.nvim` - Extra sources (e.g. flake8)
 
 ### Syntax and Highlighting
 
@@ -147,68 +161,63 @@ The configuration uses `lazy.nvim` for plugin management. Here's a list of insta
 - `lukas-reineke/indent-blankline.nvim` - Indentation guides
 - `Vimjas/vim-python-pep8-indent` - Python indentation
 
-### Markdown
+## Key Mappings (Differences from Default)
 
-- `iamcco/markdown-preview.nvim` - Markdown preview in browser
+Leader key is `<Space>`.
 
-## Key Mappings
+### Basic Overrides
 
-### Basic Mappings
+- `;` → `:` (enter command-line)
+- `Q` → `:q`
+- `Y` (normal/visual) → yank to system clipboard
+- `J`/`K` → move 5 lines (overrides join/help)
+- `s` → disabled (no default action)
+- `r` → run current Python file
+- `x`/`X` → delete to black hole register (no yank)
+- `c`/`C` → change without yanking (black hole register)
 
-- `;` - Enter command mode
-- `Q` - Quit current window
-- `Y` - Copy line to system clipboard
-- `<leader><CR>` - Clear search highlight
+### Insert Mode
 
-### Navigation
+- `, . ! ? ; :` → insert undo breakpoints (`<C-g>u`)
 
-- `J` - Move down 5 lines
-- `K` - Move up 5 lines
-- `<leader>l` - Move to right window
-- `<leader>k` - Move to upper window
-- `<leader>j` - Move to lower window
-- `<leader>h` - Move to left window
+### Window and Tabs
 
-### File Explorer
+- `<leader>h/j/k/l` → move between splits
+- `gt` / `gT` → next/previous tab with wraparound
 
-- `<leader>e` - Open file explorer (Telescope)
+### Search / UI
 
-### Markdown
+- `<leader><CR>` → clear search highlight
+- `<leader>sw` → toggle wrap
+- `<leader>e` → toggle nvim-tree (file explorer)
+- `<leader>w` → Telescope search in `~/Projects` + `~/dotfiles` (opens in new tab)
 
-- `<leader>mp` - Start Markdown preview
-- `<leader>mP` - Stop Markdown preview
+### LSP (Lspsaga + Trouble)
 
-### Tabs
+- `<leader>f` → format (LSP)
+- `cr` → rename
+- `gd` → definition
+- `gi` → implementation
+- `gr` → references
+- `K` → hover
+- `<leader>ca` → code action
+- `<leader>cd` → line diagnostics
+- `<leader>xx` → Trouble list
 
-- `gt` - Next tab (with wrap)
-- `gT` - Previous tab (with wrap)
+### Debugging (nvim-dap)
 
-### LSP
-
-- `<leader>f` - Format document
-- `cr` - Rename symbol
-- `gd` - Go to definition
-- `gi` - Go to implementation
-- `gr` - Go to references
-- `K` - Show hover information
-
-### Python
-
-- `r` - Run Python file
+- `F5` → continue
+- `F9` → toggle breakpoint
+- `F10` → step over
+- `F11` → step into
+- `F12` → step out
+- `<leader>dB` → conditional breakpoint
+- `<leader>dr` → REPL toggle
+- `<leader>du` → DAP UI toggle
 
 ### Terminal
 
-- `<C-N>` - Enter normal mode in terminal
-
-### Delete Behavior
-
-- `d`/`D` - Normal delete (writes to default register)
-- `x`/`X` - Delete character without affecting registers (writes to black hole register)
-- `c`/`C` - Change text without affecting registers (writes to black hole register)
-
-### Projects and Dotfiles Search
-
-- `<leader>w` - Search files in Projects + dotfiles (opens in new tab)
+- `<C-N>` → exit terminal mode
 
 ## Installation
 
@@ -232,11 +241,18 @@ The configuration uses `lazy.nvim` for plugin management. Here's a list of insta
 
    The `lazy.nvim` plugin manager will automatically install all required plugins on first run.
 
-5. **Install LSP servers**:
+5. **Install LSP servers (examples)**:
    ```bash
    # Install pyright for Python
    npm install -g pyright
    ```
+   Optional servers/tools:
+   - `lua-language-server`
+   - `vscode-langservers-extracted` (JSON)
+   - `yaml-language-server`
+   - `typescript` + `typescript-language-server`
+   - `bash-language-server`
+   - `black`, `flake8`, `stylua`
 
 6. **Optional: Install im-select for macOS IME switching**:
    ```bash
@@ -251,4 +267,5 @@ The configuration uses `lazy.nvim` for plugin management. Here's a list of insta
 - **Clipboard integration** - Works with system clipboard and tmux
 - **macOS IME switching** - Automatically switches IME between insert and normal modes
 - **Tmux integration** - Synchronizes mode between Neovim and tmux
-- **Snippets** - Predefined snippets for Python and Markdown
+- **Snippets** - Custom snippets for Python and Markdown (LuaSnip)
+- **Debugging** - nvim-dap with DAP UI panels (Python via debugpy)
