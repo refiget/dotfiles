@@ -47,3 +47,41 @@ local function python_host_bin()
 end
 
 prepend_path(python_host_bin())
+
+local function npm_global_bin()
+  if fn.executable("npm") ~= 1 then
+    return nil
+  end
+  local ok, out = pcall(fn.systemlist, { "npm", "bin", "-g" })
+  if not ok or not out or not out[1] or out[1] == "" then
+    return nil
+  end
+  return out[1]
+end
+
+prepend_path(npm_global_bin())
+
+local function pnpm_global_bin()
+  if fn.executable("pnpm") ~= 1 then
+    return nil
+  end
+  local ok, out = pcall(fn.systemlist, { "pnpm", "bin", "-g" })
+  if not ok or not out or not out[1] or out[1] == "" then
+    return nil
+  end
+  return out[1]
+end
+
+local function yarn_global_bin()
+  if fn.executable("yarn") ~= 1 then
+    return nil
+  end
+  local ok, out = pcall(fn.systemlist, { "yarn", "global", "bin" })
+  if not ok or not out or not out[1] or out[1] == "" then
+    return nil
+  end
+  return out[1]
+end
+
+prepend_path(pnpm_global_bin())
+prepend_path(yarn_global_bin())
