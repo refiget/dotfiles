@@ -27,12 +27,12 @@ local function check_lsp_deps()
 
   -- 检查 LSP 服务器是否安装
   local lsp_servers = {
-    { "pyright", "npm install -g pyright", "Python" },
+    { "pyright-langserver", "npm install -g pyright", "Python" },
     { "lua-language-server", "brew install lua-language-server (macOS) or npm install -g lua-language-server (Linux)", "Lua" },
-    { "jsonls", "npm install -g vscode-langservers-extracted", "JSON" },
-    { "yamlls", "npm install -g yaml-language-server", "YAML" },
-    { "tsserver", "npm install -g typescript typescript-language-server", "TypeScript/JavaScript" },
-    { "bashls", "npm install -g bash-language-server", "Shell" }
+    { "vscode-json-language-server", "npm install -g vscode-langservers-extracted", "JSON" },
+    { "yaml-language-server", "npm install -g yaml-language-server", "YAML" },
+    { "typescript-language-server", "npm install -g typescript typescript-language-server", "TypeScript/JavaScript" },
+    { "bash-language-server", "npm install -g bash-language-server", "Shell" }
   }
   local tools = {
     { "black", "pip install black", "Python formatter" },
@@ -107,8 +107,9 @@ local plugins = {
     end,
   },
   {
-    "jose-elias-alvarez/null-ls.nvim",
+    "nvimtools/none-ls.nvim",
     event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "nvimtools/none-ls-extras.nvim" },
     config = function()
       local ok, null_ls = pcall(require, "null-ls")
       if not ok then
@@ -118,14 +119,19 @@ local plugins = {
       local function has_exec(bin)
         return vim.fn.executable(bin) == 1
       end
-      if has_exec("black") then
+      if has_exec("black") and null_ls.builtins.formatting.black then
         table.insert(sources, null_ls.builtins.formatting.black)
       end
-      if has_exec("stylua") then
+      if has_exec("stylua") and null_ls.builtins.formatting.stylua then
         table.insert(sources, null_ls.builtins.formatting.stylua)
       end
       if has_exec("flake8") then
-        table.insert(sources, null_ls.builtins.diagnostics.flake8)
+        local ok_flake8, flake8 = pcall(require, "none-ls.diagnostics.flake8")
+        if ok_flake8 then
+          table.insert(sources, flake8)
+        elseif null_ls.builtins.diagnostics.flake8 then
+          table.insert(sources, null_ls.builtins.diagnostics.flake8)
+        end
       end
       null_ls.setup({
         sources = sources,
@@ -494,18 +500,19 @@ local function setup_lsp()
     },
     jsonls = {},
     yamlls = {},
-    tsserver = {},
+    ts_ls = {},
     bashls = {},
   }
 
-  if type(vim.lsp.config) == "function" then
+  local ok_new = pcall(function()
     for name, cfg in pairs(servers) do
       cfg.capabilities = capabilities
       vim.lsp.config(name, cfg)
     end
-    pcall(vim.api.nvim_create_augroup, "nvim.lsp.enable", { clear = false })
     vim.lsp.enable(vim.tbl_keys(servers))
-  else
+  end)
+
+  if not ok_new then
     local lspconfig = require("lspconfig")
     for name, cfg in pairs(servers) do
       cfg.capabilities = capabilities

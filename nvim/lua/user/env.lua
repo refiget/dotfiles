@@ -24,3 +24,26 @@ local function detect_python_host()
 end
 
 vim.g.python3_host_prog = detect_python_host()
+
+local function prepend_path(dir)
+  if not dir or dir == "" then
+    return
+  end
+  if fn.isdirectory(dir) == 0 then
+    return
+  end
+  local path = vim.env.PATH or ""
+  if not path:find(dir, 1, true) then
+    vim.env.PATH = dir .. ":" .. path
+  end
+end
+
+local function python_host_bin()
+  local host = vim.g.python3_host_prog
+  if host and fn.executable(host) == 1 then
+    return fn.fnamemodify(host, ":h")
+  end
+  return nil
+end
+
+prepend_path(python_host_bin())
