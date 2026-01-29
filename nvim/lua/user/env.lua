@@ -38,6 +38,39 @@ local function prepend_path(dir)
   end
 end
 
+local function latest_dir_by_mtime(dirs)
+  local latest = nil
+  local latest_time = -1
+  for _, dir in ipairs(dirs) do
+    local t = fn.getftime(dir)
+    if t > latest_time then
+      latest = dir
+      latest_time = t
+    end
+  end
+  return latest
+end
+
+local function latest_nvm_bin()
+  local base = fn.expand("~/.nvm/versions/node")
+  if fn.isdirectory(base) == 0 then
+    return nil
+  end
+  local dirs = fn.glob(base .. "/v*", 1, 1)
+  if not dirs or #dirs == 0 then
+    return nil
+  end
+  local latest = latest_dir_by_mtime(dirs)
+  if not latest then
+    return nil
+  end
+  local bin = latest .. "/bin"
+  if fn.isdirectory(bin) == 1 then
+    return bin
+  end
+  return nil
+end
+
 local function python_host_bin()
   local host = vim.g.python3_host_prog
   if host and fn.executable(host) == 1 then
@@ -47,6 +80,25 @@ local function python_host_bin()
 end
 
 prepend_path(python_host_bin())
+prepend_path(fn.stdpath("data") .. "/mason/bin")
+
+for _, dir in ipairs({
+  "~/.npm-global/bin",
+  "~/.npm/bin",
+  "~/.yarn/bin",
+  "~/Library/Yarn/bin",
+  "~/Library/pnpm",
+  "~/.local/share/pnpm",
+  "~/.volta/bin",
+  "~/.asdf/shims",
+  "~/.local/share/mise/shims",
+  "~/.mise/shims",
+  "~/.local/share/fnm",
+  "~/.fnm",
+}) do
+  prepend_path(fn.expand(dir))
+end
+prepend_path(latest_nvm_bin())
 
 local function npm_global_bin()
   if fn.executable("npm") ~= 1 then

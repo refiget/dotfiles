@@ -219,6 +219,30 @@ Leader key is `<Space>`.
 
 - `<C-N>` → exit terminal mode
 
+## Debugging Quickstart (Python)
+
+Prerequisites:
+- Install `debugpy` in the Neovim Python host:
+  ```bash
+  ~/venvs/nvim/bin/pip install debugpy
+  ```
+
+Example:
+```python
+def add(a, b):
+    c = a + b
+    return c
+
+print(add(1, 2))
+```
+
+Steps:
+1. Open the file in Neovim.
+2. Move the cursor to `c = a + b` and press `F9` to set a breakpoint.
+3. Press `F5`, choose `file` from the list, and the DAP UI should open.
+4. Use `F10` (step over), `F11` (step into), `F12` (step out).
+5. Use `<leader>dr` to toggle the REPL and `<leader>du` to toggle the DAP UI.
+
 ## Installation
 
 1. **Clone the dotfiles repository**:
