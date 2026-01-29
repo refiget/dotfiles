@@ -419,7 +419,6 @@ local plugins = {
   },
 
   -- LuaSnip
-  { "rafamadriz/friendly-snippets", lazy = false },
 }
 
 require("lazy").setup(plugins, {

@@ -8,6 +8,7 @@ opt.breakindent = true
 opt.linebreak = true
 opt.swapfile = false
 opt.laststatus = 2
+opt.showtabline = 0
 opt.exrc = true
 opt.secure = true
 opt.number = true

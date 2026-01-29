@@ -16,6 +16,5 @@ ls.config.set_config({
 local snippet_dir = vim.fn.expand("~/dotfiles/nvim/lua/snippets")
 dofile(snippet_dir .. "/python.lua")
 dofile(snippet_dir .. "/markdown.lua")
-require("luasnip.loaders.from_vscode").lazy_load()
 
 -- 补全/跳转按键由 cmp.lua 统一管理，避免重复映射
