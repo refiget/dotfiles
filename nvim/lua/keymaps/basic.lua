@@ -1,6 +1,6 @@
 vim.g.mapleader = " "
 local keymap = vim.keymap.set
-local opts = { silent = true }
+local opts = { silent = true, noremap = true }
 
 keymap("n", ";", ":", { desc = "Command mode" })
 keymap("n", "Q", ":q<CR>", opts)
