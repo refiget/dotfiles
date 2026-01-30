@@ -13,13 +13,13 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-  require("user.plugins.lsp"),
-  require("user.plugins.completion"),
-  require("user.plugins.debugging"),
-  require("user.plugins.appearance"),
-  require("user.plugins.file_explorer"),
+  require("plugins.lsp"),
+  require("plugins.completion"),
+  require("plugins.debugging"),
+  require("plugins.appearance"),
+  require("plugins.file_explorer"),
   require("user.plugins.editing_helpers"),
-  require("user.plugins.telescope"),
+  require("plugins.telescope"),
 }
 
 require("lazy").setup(plugins, {
