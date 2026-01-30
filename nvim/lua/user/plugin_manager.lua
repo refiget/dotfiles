@@ -22,7 +22,6 @@ local plugins = {
   require("plugins.telescope"),
   require("plugins.markdown"),
   require("plugins.treesitter"),
-  require("plugins.jupyter"),
 }
 
 require("lazy").setup(plugins, {
