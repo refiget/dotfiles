@@ -1,12 +1,22 @@
 return {
   {
-    "benlubas/molten-nvim",
-    version = "^1.0.0",
-    build = ":UpdateRemotePlugins",
+    "GCBallesteros/NotebookNavigator.nvim",
+    keys = {
+      {"]h", function() require("notebook-navigator").move_cell "d" end},
+      {"[h", function() require("notebook-navigator").move_cell "u" end},
+      {"<leader>X", "<cmd>lua require('notebook-navigator').run_cell()<cr>"},
+      {"<leader>x", "<cmd>lua require('notebook-navigator').run_and_move()<cr>"},
+    },
     event = "VeryLazy",
     config = function()
-      vim.g.molten_image_provider = "image.nvim"
-      vim.g.molten_output_win_max_height = 12
+      local ok, nn = pcall(require, "notebook-navigator")
+      if not ok then
+        return
+      end
+      nn.setup({
+        cell_markers = { python = "# %%" },
+        repl_provider = "molten",
+      })
     end,
   },
   {
@@ -19,6 +29,9 @@ return {
       end
       image.setup({
         backend = "kitty",
+        max_width = 100,
+        max_height = 12,
+        window_overlap_clear_enabled = true,
         integrations = {
           markdown = {
             enabled = true,
@@ -28,11 +41,8 @@ return {
             filetypes = { "markdown", "vimwiki" },
           },
         },
-        max_width = nil,
-        max_height = nil,
         max_width_window_percentage = nil,
         max_height_window_percentage = 50,
-        window_overlap_clear_enabled = false,
         window_overlap_clear_ft_ignore = { "cmp_menu", "cmp_docs", "noice", "notify" },
         editor_only_render_when_focused = false,
         tmux_show_only_in_active_window = false,
@@ -41,16 +51,41 @@ return {
     end,
   },
   {
+    "benlubas/molten-nvim",
+    version = "^1.0.0",
+    dependencies = { "3rd/image.nvim" },
+    build = ":UpdateRemotePlugins",
+    event = "VeryLazy",
+    init = function()
+      vim.g.molten_image_provider = "image.nvim"
+      vim.g.molten_output_win_max_height = 20
+    end,
+  },
+  {
     "GCBallesteros/jupytext.nvim",
+    lazy = false,
+    config = true,
+  },
+  {
+    "quarto-dev/quarto-nvim",
+    dependencies = { "jmbuhr/otter.nvim", "nvim-treesitter/nvim-treesitter", "hrsh7th/nvim-cmp", "neovim/nvim-lspconfig" },
     event = "VeryLazy",
     config = function()
-      local ok, jupytext = pcall(require, "jupytext")
+      local ok, quarto = pcall(require, "quarto")
       if not ok then
         return
       end
-      jupytext.setup({
-        style = "markdown",
-        output_extension = "md",
+      quarto.setup({
+        lspFeatures = {
+          enabled = true,
+          languages = { "python", "r", "julia", "bash", "rust" },
+          diagnostics = { enabled = true, triggers = { "BufWritePost" } },
+          completion = { enabled = true },
+        },
+        codeRunner = {
+          enabled = true,
+          default_method = "molten",
+        },
       })
     end,
   },
