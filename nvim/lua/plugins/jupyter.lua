@@ -64,7 +64,16 @@ return {
   {
     "GCBallesteros/jupytext.nvim",
     lazy = false,
-    config = true,
+    config = function()
+      local ok, jupytext = pcall(require, "jupytext")
+      if not ok then
+        return
+      end
+      jupytext.setup({
+        style = "markdown",
+        output_extension = "md",
+      })
+    end,
   },
   {
     "quarto-dev/quarto-nvim",
