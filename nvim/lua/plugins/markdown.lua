@@ -7,6 +7,11 @@ return {
       vim.g.spelunker_check_type = 2
       vim.g.spelunker_highlight_type = 2
       vim.g.spelunker_enable_word_check = 1
+      -- Ignore code blocks and inline code
+      vim.g.spelunker_ignore_patterns = {
+        [[`[^`]+`]],  -- Inline code
+        [[```.*```]], -- Code blocks
+      }
     end,
   },
 
@@ -31,5 +36,17 @@ return {
     dependencies = {
       "godlygeek/tabular",
     },
+    config = function()
+      -- Markdown writing conventions
+      vim.g.vim_markdown_auto_insert_bullets = 1
+      vim.g.vim_markdown_conceal = 1
+      vim.g.vim_markdown_conceal_code_blocks = 0
+      vim.g.vim_markdown_folding = 1
+      vim.g.vim_markdown_heading_anchors = 1
+      vim.g.vim_markdown_toc_autofit = 1
+      vim.g.vim_markdown_frontmatter = 1
+      vim.g.vim_markdown_strikethrough = 1
+      vim.g.vim_markdown_url_inline = 1
+    end,
   },
 }
