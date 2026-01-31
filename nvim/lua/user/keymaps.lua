@@ -1,8 +1,0 @@
-require("user.keymaps.basic")
-require("user.keymaps.navigation")
-require("user.keymaps.lsp")
-require("user.keymaps.debugging")
-require("user.keymaps.run")
-require("user.keymaps.delete")
-require("user.keymaps.telescope")
-require("user.keymaps.misc")

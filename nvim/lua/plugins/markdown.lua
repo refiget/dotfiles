@@ -25,7 +25,7 @@ return {
       "hrsh7th/cmp-nvim-lua",
     },
     config = function()
-      require("plugin_config.cmp")
+      require("plugins.config.cmp")
     end,
   },
 
