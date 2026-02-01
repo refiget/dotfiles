@@ -14,7 +14,7 @@ return {
       vim.g.molten_image_provider = "image.nvim"
 
       -- output behavior (pick what you like)
-      vim.g.molten_output_win_max_height = 20
+      vim.g.molten_output_win_max_height = 30
       vim.g.molten_auto_open_output = true
       vim.g.molten_virt_text_output = false
 
@@ -59,6 +59,37 @@ return {
           -- buffer-local example: run line under cursor quickly
           vim.keymap.set("n", "<localleader>l", ":MoltenEvaluateLine<CR>",
             { buffer = true, silent = true, desc = "Molten: eval line" })
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "MoltenInitPost",
+        callback = function()
+          vim.cmd([[
+python3 << 'PY'
+try:
+    import molten.moltenbuffer as mb
+except Exception:
+    mb = None
+
+if mb is not None and not getattr(mb.MoltenKernel.update_interface, "_show_done_patch", False):
+    _orig_update_interface = mb.MoltenKernel.update_interface
+
+    def _patched_update_interface(self):
+        _orig_update_interface(self)
+        if self.options.virt_text_output:
+            return
+        if self.selected_cell is None:
+            return
+        if not self.should_show_floating_win:
+            return
+        if self.selected_cell in self.outputs:
+            self.outputs[self.selected_cell].show_floating_win(self.selected_cell.end)
+
+    _patched_update_interface._show_done_patch = True
+    mb.MoltenKernel.update_interface = _patched_update_interface
+PY
+          ]])
         end,
       })
     end,
