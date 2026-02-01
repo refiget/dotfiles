@@ -1,7 +1,7 @@
 return {
   {
     "benlubas/molten-nvim",
-    ft = { "python", "markdown", "quarto" },
+    ft = { "python" },
     dependencies = {
       "3rd/image.nvim",
     },
@@ -16,7 +16,6 @@ return {
       -- output behavior (pick what you like)
       vim.g.molten_output_win_max_height = 20
       vim.g.molten_auto_open_output = true
-      vim.g.molten_auto_close_output = true
       vim.g.molten_virt_text_output = false
 
       -- Optional: reduce lag / make UI snappier
@@ -26,48 +25,6 @@ return {
     config = function()
       local keymap = vim.keymap.set
       local opts = { silent = true }
-
-      local function molten_api_available()
-        return vim.fn.exists("*MoltenEvaluateRange") == 1
-      end
-
-      local function find_cell_bounds()
-        if vim.bo.filetype ~= "python" then
-          return nil, nil, "Only python buffers are supported for # %% cells"
-        end
-
-        local row = vim.api.nvim_win_get_cursor(0)[1]
-        local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-
-        local start_marker = nil
-        for i = row, 1, -1 do
-          if lines[i] and lines[i]:match("^%s*#%s*%%") then
-            start_marker = i
-            break
-          end
-        end
-
-        if not start_marker then
-          return nil, nil, "No # %% cell marker found above the cursor"
-        end
-
-        local next_marker = nil
-        for i = start_marker + 1, #lines do
-          if lines[i] and lines[i]:match("^%s*#%s*%%") then
-            next_marker = i
-            break
-          end
-        end
-
-        local start_line = start_marker + 1
-        local end_line = next_marker and (next_marker - 1) or #lines
-
-        if start_line > end_line then
-          return nil, nil, "Empty # %% cell"
-        end
-
-        return start_line, end_line, nil
-      end
 
       -- 1) Init kernel (auto venv/conda)
       keymap("n", "<localleader>r", function()
@@ -87,21 +44,6 @@ return {
         vim.tbl_extend("force", opts, { desc = "Molten: eval selection" }))
       keymap("n", "<localleader>E", ":MoltenEvaluateBuffer<CR>",
         vim.tbl_extend("force", opts, { desc = "Molten: eval buffer" }))
-      keymap("n", "<localleader>c", function()
-        if not molten_api_available() then
-          vim.notify("Molten API not available. Run :UpdateRemotePlugins and restart Neovim.",
-            vim.log.levels.ERROR)
-          return
-        end
-
-        local start_line, end_line, err = find_cell_bounds()
-        if not start_line then
-          vim.notify(err, vim.log.levels.WARN)
-          return
-        end
-
-        vim.fn.MoltenEvaluateRange(start_line, end_line)
-      end, vim.tbl_extend("force", opts, { desc = "Molten: eval # %% cell" }))
 
       -- 3) Output helpers
       keymap("n", "<localleader>o", ":MoltenShowOutput<CR>",

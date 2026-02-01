@@ -23,6 +23,7 @@ local plugins = {
   require("plugins.markdown"),
   require("plugins.treesitter"),
 	require("plugins.molten"),
+	require("plugins.notebook_navigator"),
 	require("plugins.image"),
 }
 
