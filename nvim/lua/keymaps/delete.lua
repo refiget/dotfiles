@@ -4,8 +4,8 @@ local opts = { silent = true }
 keymap({ "n", "x" }, "d", "d", opts)
 keymap({ "n", "x" }, "D", "D", opts)
 
-keymap("n", "x", '"_x', opts)
-keymap("n", "X", '"_X', opts)
+keymap("n", "x", '"+x', opts)
+keymap("n", "X", '"+X', opts)
 
 keymap("n", "c", '"_c', opts)
 keymap("n", "C", '"_C', opts)

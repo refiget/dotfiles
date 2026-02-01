@@ -29,6 +29,14 @@ return {
           enable = true,
           ignore = false,
         },
+        filters = {
+          dotfiles = true,
+        },
+        actions = {
+          open_file = {
+            quit_on_open = false,
+          },
+        },
         view = {
           width = 30,
           side = "left",
@@ -75,7 +83,8 @@ return {
             end
             
             vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
-            vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
+            vim.keymap.set("n", "l", api.node.open.vertical, opts("Open in Vertical Split"))
+            vim.keymap.set("n", "<CR>", api.node.open.vertical, opts("Open in Vertical Split"))
             vim.keymap.set("n", "q", api.tree.close, opts("Close"))
           end,
         })

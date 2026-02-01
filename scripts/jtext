@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+  echo "Usage: jtext <file.ipynb|file.py>"
+  exit 1
+fi
+
+file="$1"
+
+if [ ! -f "$file" ]; then
+  echo "File not found: $file"
+  exit 1
+fi
+
+if ! command -v jupytext >/dev/null 2>&1; then
+  echo "jupytext not found. Install with: pip install jupytext"
+  exit 1
+fi
+
+ext="${file##*.}"
+base="${file%.*}"
+
+case "$ext" in
+  ipynb)
+    jupytext --set-formats ipynb,py:percent "$file"
+    jupytext --sync "$file"
+    echo "Synced: ${base}.py"
+    ;;
+  py)
+    jupytext --set-formats ipynb,py:percent "$file"
+    jupytext --sync "$file"
+    echo "Synced: ${base}.ipynb"
+    ;;
+  *)
+    echo "Unsupported file: $file"
+    echo "Use .ipynb or .py"
+    exit 1
+    ;;
+esac

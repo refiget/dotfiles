@@ -1,6 +1,5 @@
 -- ===================== clipboard.lua =====================
--- 默认使用系统剪贴板提供者（pbcopy/xclip 等），不覆写 clipboard 提供者，
--- y 走默认寄存器，Y 由按键映射复制到 + 寄存器。
+-- 保持默认寄存器逻辑；剪贴板由 provider 提供（SSH 场景优先 OSC52）。
 vim.opt.clipboard = ""
 
 -- 纯 Lua base64，避免额外依赖
@@ -51,48 +50,34 @@ local function osc52_paste()
   return vim.fn.split(vim.fn.getreg('"'), "\n")
 end
 
-local function first_exec(paths)
-  for _, p in ipairs(paths) do
-    local expanded = vim.fn.expand(p)
-    if vim.fn.executable(expanded) == 1 then
-      return expanded
-    end
-  end
-end
-
-local copy = first_exec({ "~/.config/tmux/scripts/copy_to_clipboard.sh", "~/dotfiles/tmux/scripts/copy_to_clipboard.sh" })
-local paste = first_exec({ "~/.config/tmux/scripts/paste_from_clipboard.sh", "~/dotfiles/tmux/scripts/paste_from_clipboard.sh" })
-
 local has_builtin_osc52 = vim.ui and vim.ui.clipboard and vim.ui.clipboard.osc52
 
-if copy and paste then
-  -- 优先：tmux 脚本（支持 pbcopy/xclip/PowerShell + OSC52，且同步 tmux buffer）
-  vim.g.clipboard = {
-    name = "tmux-osc52",
-    copy = { ["+"] = copy, ["*"] = copy },
-    paste = { ["+"] = paste, ["*"] = paste },
-    cache_enabled = 0,
-  }
-elseif has_builtin_osc52 then
-  -- 其次：Neovim 内置 OSC52（0.10+）
-  vim.g.clipboard = {
-    name = "osc52",
-    copy = {
-      ["+"] = vim.ui.clipboard.osc52.copy("+"),
-      ["*"] = vim.ui.clipboard.osc52.copy("*"),
-    },
-    paste = {
-      ["+"] = vim.ui.clipboard.osc52.paste("+"),
-      ["*"] = vim.ui.clipboard.osc52.paste("*"),
-    },
-    cache_enabled = 0,
-  }
-else
-  -- 无 tmux 脚本时，退回纯 OSC52（终端需支持，适合 SSH/本地）
-  vim.g.clipboard = {
-    name = "osc52",
-    copy = { ["+"] = osc52_copy, ["*"] = osc52_copy },
-    paste = { ["+"] = osc52_paste, ["*"] = osc52_paste },
-    cache_enabled = 0,
-  }
+local function in_ssh()
+  return vim.env.SSH_CONNECTION ~= nil or vim.env.SSH_TTY ~= nil
+end
+
+if in_ssh() then
+  if has_builtin_osc52 then
+    -- SSH: 用内置 OSC52（0.10+）
+    vim.g.clipboard = {
+      name = "osc52",
+      copy = {
+        ["+"] = vim.ui.clipboard.osc52.copy("+"),
+        ["*"] = vim.ui.clipboard.osc52.copy("*"),
+      },
+      paste = {
+        ["+"] = vim.ui.clipboard.osc52.paste("+"),
+        ["*"] = vim.ui.clipboard.osc52.paste("*"),
+      },
+      cache_enabled = 0,
+    }
+  else
+    -- SSH: 退回纯 OSC52（终端需支持）
+    vim.g.clipboard = {
+      name = "osc52",
+      copy = { ["+"] = osc52_copy, ["*"] = osc52_copy },
+      paste = { ["+"] = osc52_paste, ["*"] = osc52_paste },
+      cache_enabled = 0,
+    }
+  end
 end

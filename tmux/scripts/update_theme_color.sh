@@ -18,6 +18,25 @@ else
   fi
 fi
 
+is_valid_color() {
+  local value="${1:-}"
+  [[ -z "$value" ]] && return 1
+  if [[ "$value" == "default" ]]; then
+    return 0
+  fi
+  if [[ "$value" =~ ^colour[0-9]{1,3}$ ]]; then
+    return 0
+  fi
+  if [[ "$value" =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+    return 0
+  fi
+  return 1
+}
+
+if ! is_valid_color "$base_theme"; then
+  base_theme="$default_base"
+fi
+
 # Mode-aware theme for active border / top labels
 insert_theme="#bd93f9"
 tmux_mode="normal"
@@ -29,7 +48,7 @@ fi
 if [[ "$tmux_mode" == "insert" ]]; then
   theme="$insert_theme"   # insert -> purple
 else
-  theme="$default_base"   # normal -> green
+  theme="$base_theme"     # normal -> base (env or default)
 fi
 
 # Cache as a user option and apply to border style

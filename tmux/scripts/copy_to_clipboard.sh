@@ -7,7 +7,15 @@ set -euo pipefail
 #   - SSH 会话：优先 OSC52 回传到本地；如需写入远端剪贴板，设置 TMUX_CLIPBOARD_PREFER_REMOTE=1。
 #   - 强制 OSC52：TMUX_CLIPBOARD_FORCE_OSC52=1。
 
-content=$(cat | tr -d '\r')
+content=$(tr -d '\r')
+
+have() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+is_writable_tty() {
+  [[ -n "${1:-}" && "$1" != "not a tty" && -w "$1" ]]
+}
 
 is_ssh_session() {
   [[ -n "${SSH_CONNECTION:-}" || -n "${SSH_TTY:-}" ]]
@@ -16,34 +24,34 @@ is_ssh_session() {
 resolve_tty() {
   local cand
 
-  if [[ -n "${TTY:-}" && -w "${TTY:-}" ]]; then
+  if is_writable_tty "${TTY:-}"; then
     printf '%s' "$TTY"
     return
   fi
 
   cand=$(tty 2>/dev/null || true)
-  if [[ -n "$cand" && "$cand" != "not a tty" && -w "$cand" ]]; then
+  if is_writable_tty "$cand"; then
     printf '%s' "$cand"
     return
   fi
 
-  if command -v tmux >/dev/null 2>&1; then
+  if have tmux; then
     if [[ -n "${TMUX_PANE:-}" ]]; then
       cand=$(tmux display-message -p -t "${TMUX_PANE}" '#{pane_tty}' 2>/dev/null || true)
-      if [[ -n "$cand" && -w "$cand" ]]; then
+      if is_writable_tty "$cand"; then
         printf '%s' "$cand"
         return
       fi
     fi
 
     cand=$(tmux display-message -p '#{client_tty}' 2>/dev/null || true)
-    if [[ -n "$cand" && -w "$cand" ]]; then
+    if is_writable_tty "$cand"; then
       printf '%s' "$cand"
       return
     fi
 
     cand=$(tmux list-clients -F '#{client_tty}' 2>/dev/null | head -n 1 || true)
-    if [[ -n "$cand" && -w "$cand" ]]; then
+    if is_writable_tty "$cand"; then
       printf '%s' "$cand"
       return
     fi
@@ -52,7 +60,7 @@ resolve_tty() {
 
 # Keep tmux buffer in sync (and trigger set-clipboard if enabled)
 copy_via_tmux() {
-  if command -v tmux >/dev/null 2>&1 && [[ -n "${TMUX:-}" ]]; then
+  if have tmux && [[ -n "${TMUX:-}" ]]; then
     if tmux set-buffer -w -- "$content" 2>/dev/null || tmux set-buffer -- "$content"; then
       return 0
     fi
@@ -62,27 +70,27 @@ copy_via_tmux() {
 
 # Platform clip helpers (local sessions)
 copy_via_host() {
-  if command -v pbcopy >/dev/null 2>&1; then
+  if have pbcopy; then
     if printf '%s' "$content" | pbcopy; then
       return 0
     fi
   fi
-  if command -v wl-copy >/dev/null 2>&1; then
+  if have wl-copy; then
     if printf '%s' "$content" | wl-copy --type text 2>/dev/null || printf '%s' "$content" | wl-copy 2>/dev/null; then
       return 0
     fi
   fi
-  if command -v xclip >/dev/null 2>&1; then
+  if have xclip; then
     if printf '%s' "$content" | xclip -selection clipboard 2>/dev/null; then
       return 0
     fi
   fi
-  if command -v xsel >/dev/null 2>&1; then
+  if have xsel; then
     if printf '%s' "$content" | xsel --clipboard --input 2>/dev/null; then
       return 0
     fi
   fi
-  if command -v powershell.exe >/dev/null 2>&1; then
+  if have powershell.exe; then
     if powershell.exe -NoProfile -Command Set-Clipboard -Value @"
 ${content}
 "@; then

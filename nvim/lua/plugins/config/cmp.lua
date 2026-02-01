@@ -4,6 +4,9 @@ local cmp = require("cmp")
 local luasnip = require("luasnip")
 
 cmp.setup({
+  performance = {
+    max_view_entries = 5,
+  },
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
@@ -41,6 +44,14 @@ cmp.setup({
     { name = "buffer" },
     { name = "path" },
   })
+})
+
+cmp.setup.filetype({ "markdown", "text" }, {
+  sources = cmp.config.sources({
+    { name = "spell" },
+    { name = "buffer" },
+    { name = "path" },
+  }),
 })
 
 -- 配置命令行补全

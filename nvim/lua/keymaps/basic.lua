@@ -11,6 +11,8 @@ keymap("n", "<leader><CR>", ":nohlsearch<CR>", opts)
 
 keymap("n", "J", "5j", opts)
 keymap("n", "K", "5k", opts)
+keymap("x", "J", "5j", opts)
+keymap("x", "K", "5k", opts)
 
 for _, key in ipairs({ ",", ".", "!", "?", ";", ":" }) do
   keymap("i", key, key .. "<C-g>u", opts)
