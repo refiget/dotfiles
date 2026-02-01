@@ -1,8 +1,7 @@
 -- ===================== tmux.lua =====================
--- 同步 Neovim 插入/普通模式到 tmux 颜色模式
 local M = {}
 
-local function set_tmux_mode(mode)
+local function set_tmux_mode(mode)  -- Decide the action how to run
   if not vim.env.TMUX then
     return
   end
@@ -13,7 +12,7 @@ local function set_tmux_mode(mode)
   vim.fn.jobstart({ "bash", "-lc", cmd }, { detach = true })
 end
 
-function M.setup_mode_sync()
+function M.setup_mode_sync()  -- Decide the action when to run
   local group = vim.api.nvim_create_augroup("TmuxModeSync", { clear = true })
   vim.api.nvim_create_autocmd("InsertEnter", {
     group = group,

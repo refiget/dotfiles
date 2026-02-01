@@ -1,4 +1,4 @@
-vim.keymap.set("n", "<leader>w", function()
+vim.keymap.set("n", "<leader>q", function()
   local ok, builtin = pcall(require, "telescope.builtin")
   if not ok then
     vim.notify("Telescope 未安装或加载失败", vim.log.levels.WARN, { title = "Telescope" })

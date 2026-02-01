@@ -1,6 +1,6 @@
-local fn = vim.fn
-local lazypath = fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+local fn = vim.fn  -- Accessed Nvim functions
+local lazypath = fn.stdpath("data") .. "/lazy/lazy.nvim"  -- `stdpath("data")` is the path where stores data of nvim.
+if not vim.loop.fs_stat(lazypath) then  -- Check the existence of lazy.nvim and clone the repository by shell command.
   fn.system({
     "git",
     "clone",
@@ -10,7 +10,7 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   })
 end
-vim.opt.rtp:prepend(lazypath)
+vim.opt.rtp:prepend(lazypath)  -- Ensure lazy.nvim is loaded early.
 
 local plugins = {
   require("plugins.lsp"),
@@ -22,13 +22,14 @@ local plugins = {
   require("plugins.telescope"),
   require("plugins.markdown"),
   require("plugins.treesitter"),
-  require("plugins.repl"),
+	require("plugins.molten"),
+	require("plugins.image"),
 }
 
-require("lazy").setup(plugins, {
-  defaults = { lazy = true },
-  ui = { border = "rounded" },
+require("lazy").setup(plugins, {  -- Initialize lazy.nivm with plugins
+  defaults = { lazy = true },   -- Makes all plugins lazy-loaded
+  ui = { border = "rounded" },  -- UI of lazy.nvim
   install = {
-    missing = true,
+    missing = true,  -- Auto Install missing plugins
   },
 })
