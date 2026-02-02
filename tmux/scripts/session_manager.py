@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import os
 import re
 import subprocess
 import sys
-from typing import List, Dict
+import time
+from typing import List, Dict, Optional, Tuple
 
 
 def run_tmux(args: List[str], check: bool = True, capture: bool = False) -> str:
@@ -19,6 +21,51 @@ def run_tmux(args: List[str], check: bool = True, capture: bool = False) -> str:
     return ""
 
 
+DEFAULT_LABEL = "new"
+NAME_SEP = "_"
+
+
+def sanitize_label(label: str) -> str:
+    label = label.strip()
+    if not label:
+        return DEFAULT_LABEL
+    return label.replace(":", NAME_SEP)
+
+
+def cleanup_label(index: int, label: str) -> str:
+    label = sanitize_label(label)
+    # Remove repeated leading "<index><sep>" prefixes caused by earlier bugs.
+    while True:
+        match = re.match(rf"^{index}[:_-](.*)$", label)
+        if not match:
+            break
+        label = match.group(1)
+        if not label:
+            return DEFAULT_LABEL
+    return label or DEFAULT_LABEL
+
+
+def parse_session_name(name: str) -> Tuple[Optional[int], str]:
+    match = re.match(r"^(\d+)([:_-])(.*)$", name)
+    if match:
+        index = int(match.group(1))
+        label = match.group(3)
+        if index <= 0:
+            return None, sanitize_label(label)
+        return index, cleanup_label(index, label)
+    if name.isdigit():
+        index = int(name)
+        if index <= 0:
+            return None, DEFAULT_LABEL
+        return index, DEFAULT_LABEL
+    return None, sanitize_label(name)
+
+
+def build_session_name(index: int, label: str) -> str:
+    safe_label = sanitize_label(label)
+    return f"{index}{NAME_SEP}{safe_label}"
+
+
 def list_sessions() -> List[Dict[str, object]]:
     output = run_tmux([
         "list-sessions",
@@ -32,8 +79,7 @@ def list_sessions() -> List[Dict[str, object]]:
     for line in output.splitlines():
         session_id, name, created_str = line.split("\t")
         created = int(created_str)
-        index = None
-        label = name
+        index, label = parse_session_name(name)
         sessions.append({
             "id": session_id,
             "name": name,
@@ -41,16 +87,58 @@ def list_sessions() -> List[Dict[str, object]]:
             "index": index,
             "label": label,
         })
-
-    # Always order by creation time to ensure numbering starts at 1 and increments
-    sessions.sort(key=lambda entry: entry["created"])
     return sessions
 
 
-def apply_order(ordered_sessions: List[Dict[str, object]]) -> None:
-    for position, session in enumerate(ordered_sessions, start=1):
-        new_name = str(position)
-        run_tmux(["rename-session", "-t", session["id"], new_name], check=False)
+def normalize_sessions() -> List[Dict[str, object]]:
+    sessions = list_sessions()
+    indexed = []
+    unindexed = []
+
+    for session in sessions:
+        label = session.get("label") or DEFAULT_LABEL
+        session["label"] = label
+        index = session["index"]
+        if index is not None and index > 0:
+            indexed.append(session)
+        else:
+            session["index"] = None
+            unindexed.append(session)
+
+    indexed.sort(key=lambda entry: entry["index"])
+    unindexed.sort(key=lambda entry: entry["created"])
+
+    ordered = indexed + unindexed
+    for position, session in enumerate(ordered, start=1):
+        session["index"] = position
+
+    return ordered
+
+
+def rename_session(session: Dict[str, object], new_name: str) -> None:
+    run_tmux(["rename-session", "-t", session["id"], new_name], check=False)
+    session["name"] = new_name
+
+
+def apply_names(sessions: List[Dict[str, object]]) -> None:
+    targets = {}
+    for session in sessions:
+        targets[session["id"]] = build_session_name(int(session["index"]), str(session["label"]))
+
+    temp_prefix = f"__ren__{os.getpid()}_{int(time.time() * 1000)}_"
+    temp_counter = 0
+
+    for session in sessions:
+        target = targets[session["id"]]
+        if session["name"] != target:
+            temp_name = f"{temp_prefix}{temp_counter}"
+            temp_counter += 1
+            rename_session(session, temp_name)
+
+    for session in sessions:
+        target = targets[session["id"]]
+        if session["name"] != target:
+            rename_session(session, target)
 
 
 def current_session_id() -> str:
@@ -68,10 +156,12 @@ def command_switch(index_str: str) -> None:
         return
     if index < 1:
         return
-    sessions = list_sessions()
-    if index > len(sessions):
+    sessions = normalize_sessions()
+    apply_names(sessions)
+    target = next((session for session in sessions if session["index"] == index), None)
+    if not target:
         return
-    run_tmux(["switch-client", "-t", sessions[index - 1]["id"]], check=False)
+    run_tmux(["switch-client", "-t", target["id"]], check=False)
 
 
 def command_rename(label: str) -> None:
@@ -79,13 +169,20 @@ def command_rename(label: str) -> None:
     current_id = current_session_id()
     if not current_id:
         return
-    run_tmux(["rename-session", "-t", current_id, label], check=False)
-    apply_order(list_sessions())
+    label = label.strip()
+    if not label:
+        label = DEFAULT_LABEL
+    sessions = normalize_sessions()
+    current = next((session for session in sessions if session["id"] == current_id), None)
+    if not current:
+        return
+    current["label"] = label
+    apply_names(sessions)
 
 
 def command_move(direction: str) -> None:
     direction = direction.lower()
-    sessions = list_sessions()
+    sessions = normalize_sessions()
     current_id = current_session_id()
     indices = {session["id"]: idx for idx, session in enumerate(sessions)}
     if current_id not in indices:
@@ -97,13 +194,15 @@ def command_move(direction: str) -> None:
         sessions[pos], sessions[pos + 1] = sessions[pos + 1], sessions[pos]
     else:
         return
-    apply_order(sessions)
+    for position, session in enumerate(sessions, start=1):
+        session["index"] = position
+    apply_names(sessions)
 
 
 def command_ensure() -> None:
-    sessions = list_sessions()
+    sessions = normalize_sessions()
     if sessions:
-        apply_order(sessions)
+        apply_names(sessions)
 
 
 def command_created() -> None:
@@ -118,10 +217,12 @@ def command_move_window_to_session(index_str: str) -> None:
         return
     if index < 1:
         return
-    sessions = list_sessions()
-    if index > len(sessions):
+    sessions = normalize_sessions()
+    apply_names(sessions)
+    target = next((session for session in sessions if session["index"] == index), None)
+    if not target:
         return
-    target_session_id = sessions[index - 1]["id"]
+    target_session_id = target["id"]
     run_tmux(["move-window", "-s", current_window_id(), "-t", f"{target_session_id}:"], check=False)
     run_tmux(["switch-client", "-t", target_session_id], check=False)
 

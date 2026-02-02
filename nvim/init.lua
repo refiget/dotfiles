@@ -1,5 +1,7 @@
 -- ===================== init.lua =====================
 -- 只负责加载各模块，逻辑分散到 lua 下的各目录
+vim.g.mapleader = " "
+vim.g.maplocalleader = ","
 require("config")  -- Load the `init.lua` under `config`
 require("config.lazy")
 require("keymaps")
@@ -12,4 +14,3 @@ local commit = {
 	- Use `.example_func()` when `require`.
 	]]
 }
-

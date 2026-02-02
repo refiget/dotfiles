@@ -69,7 +69,7 @@ normalize_session_id() {
 
 trim_label() {
   local value="$1"
-  if [[ "$value" =~ ^[0-9]+-(.*)$ ]]; then
+  if [[ "$value" =~ ^[0-9]+[:_-](.*)$ ]]; then
     printf '%s' "${BASH_REMATCH[1]}"
   else
     printf '%s' "$value"
@@ -78,7 +78,7 @@ trim_label() {
 
 extract_index() {
   local value="$1"
-  if [[ "$value" =~ ^([0-9]+)-.*$ ]]; then
+  if [[ "$value" =~ ^([0-9]+)[:_-].*$ ]]; then
     printf '%s' "${BASH_REMATCH[1]}"
   else
     printf ''
@@ -93,7 +93,6 @@ fi
 rendered=""
 prev_bg=""
 current_session_id_norm=$(normalize_session_id "$current_session_id")
-current_session_trimmed=$(trim_label "$current_session_name")
 while IFS= read -r entry; do
   [[ -z "$entry" ]] && continue
   session_id="${entry%%::*}"
@@ -105,25 +104,29 @@ while IFS= read -r entry; do
   segment_fg="$inactive_fg"
   trimmed_name=$(trim_label "$name")
   is_current=0
-  if [[ "$session_id" == "$current_session_id" || "$session_id_norm" == "$current_session_id_norm" || "$trimmed_name" == "$current_session_trimmed" ]]; then
+  if [[ "$session_id" == "$current_session_id" || "$session_id_norm" == "$current_session_id_norm" ]]; then
     is_current=1
     segment_bg="$active_bg"
     segment_fg="$active_fg"
   fi
 
+  idx=$(extract_index "$name")
   if (( is_narrow == 1 )); then
-    if (( is_current == 1 )); then
-      label="$trimmed_name"  # active: show TITLE (trim N-)
-    else
-      idx=$(extract_index "$name")
-      if [[ -n "$idx" ]]; then
-        label="$idx"
+    if [[ -n "$idx" ]]; then
+      if (( is_current == 1 )); then
+        label="${idx}:${trimmed_name}"
       else
-        label="$trimmed_name"
+        label="$idx"
       fi
+    else
+      label="$trimmed_name"
     fi
   else
-    label="$trimmed_name"      # wide: current behavior (TITLE everywhere)
+    if [[ -n "$idx" ]]; then
+      label="${idx}:${trimmed_name}"
+    else
+      label="$trimmed_name"
+    fi
   fi
   if (( ${#label} > max_width )); then
     label="${label:0:max_width-1}…"

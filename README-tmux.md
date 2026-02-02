@@ -56,24 +56,88 @@ The configuration updates the following environment variables:
 
 ## Key Mappings
 
-### Basic Mappings
+### Notation
 
-- `r` (prefix + r) - Reload tmux configuration
+- **Prefix key**: macOS = `C-s`, non-macOS = `C-b`
+- `C` = Ctrl, `M` = Alt/Option
+- Uppercase letter implies Shift (e.g., `M-S`)
 
-### Navigation
+### Global (no prefix)
 
-- Enhanced pane navigation with keyboard shortcuts
-- Mouse support for pane and window selection
+| Key | Action |
+|-----|--------|
+| `M-S` | New session (script) |
+| `M-O` | Break pane into a new window |
+| `M-s` | Toggle scratchpad (script) |
+| `M-o` | New window (cwd of current pane) |
+| `M-Q` | Kill pane |
+| `M-1`..`M-9` | Select window 1..9 |
+| `M-!`..`M-(` | Join pane to window 1..9 |
+| `M-f` | Toggle zoom (resize-pane -Z) |
+| `M-h/j/k/l` | Select pane left/down/up/right |
+| `M-H/J/K/L` | Resize pane left/down/up/right (by 3) |
+| `M-v` | Enter copy mode |
+| `C-S-v` | Paste from system clipboard |
+| `M-V` | Paste from system clipboard |
+| `C-1`..`C-9` | Switch session by index (1..9) |
 
-### Clipboard
+### Prefix required
 
-- Integrated clipboard support with system clipboard
-- Copy mode enhancements
+| Key | Action |
+|-----|--------|
+| `r` | Reload tmux configuration |
+| `C-c` | New session |
+| `.` | Rename session (prompt) |
+| `,` | Rename window (prompt) |
+| `C-p` | Previous window (repeatable) |
+| `C-n` | Next window (repeatable) |
+| `h` | Split pane left (same cwd) |
+| `l` | Split pane right (same cwd) |
+| `k` | Split pane above (same cwd) |
+| `j` | Split pane below (same cwd) |
+| `>` | Swap pane down |
+| `<` | Swap pane up |
+| `|` | Swap pane |
+| `Space` | Toggle pane orientation (script) |
+| `W` | Choose-tree (zoomed) |
+| `S` | Choose-tree → move pane vertical |
+| `V` | Choose-tree → move pane horizontal |
+| `1`..`9` | Move current window to session 1..9 |
+| `0` | Move current window to session 10 |
+| `b` | Choose buffer |
+| `p` | Paste buffer |
+| `B` | View buffer in `less` |
+| `C-g` | Toggle synchronize-panes + border color |
 
-### Session Management
+### Copy mode (vi)
 
-- Session switching utilities
-- Session creation and management scripts
+| Key | Action |
+|-----|--------|
+| `v` | Begin selection |
+| `C-v` | Rectangle selection toggle |
+| `h/j/k/l` | Move cursor |
+| `K/J` | Move 5 lines up/down |
+| `0` | Start of line |
+| `$` | End of line |
+| `e` | Next word end |
+| `y` | Copy selection and exit |
+| `Y` | Copy to system clipboard and exit |
+| `n` | Search again |
+| `N` | Search reverse |
+| `C-u` | Scroll up 5 |
+| `C-e` | Scroll down 5 |
+| `C-S-v` | Cancel copy-mode, paste from clipboard |
+| `M-V` | Cancel copy-mode, paste from clipboard |
+
+### Non-macOS overrides
+
+When **not** on macOS, these bindings replace some of the global Alt/Option keys:
+
+| Key | Action |
+|-----|--------|
+| `v` (prefix) | Copy mode + begin selection |
+| `V` (prefix) | Copy mode + rectangle selection |
+| `P` (prefix) | Paste from system clipboard |
 
 ## Features
 

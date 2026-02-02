@@ -3,7 +3,6 @@
 This setup provides a Jupyter-like workflow inside Neovim using:
 - Molten (Jupyter kernel + outputs)
 - NotebookNavigator (cell navigation and run helpers)
-- image.nvim (inline images in output windows)
 - Jupytext (optional: convert between .ipynb and .py)
 
 Localleader is `,` (comma).
@@ -20,14 +19,6 @@ If you want to convert notebooks to scripts and back:
 ```bash
 pip install jupytext
 ```
-
-### Images in output (optional)
-This config uses image.nvim with the `kitty` backend and `magick_cli` processor.
-You need:
-- Kitty terminal
-- ImageMagick
-
-If you are not using Kitty, change the backend in `dotfiles/nvim/lua/plugins/image.lua`.
 
 ### Remote plugin setup (Molten)
 After installing/updating Molten:
