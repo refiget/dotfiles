@@ -1,11 +1,9 @@
 -- ===================== init.lua =====================
 -- 只负责加载各模块，逻辑分散到 lua 下的各目录
 require("config")  -- Load the `init.lua` under `config`
-require("plugin_manager")
+require("config.lazy")
 require("keymaps")
 require("snippets")
-require("config.tmux").setup_mode_sync() -- the suffix `.lua` can be omitted.
-require("config.ime").setup()  -- Call a function when oppenning nvim
 
 local commit = {
 	[[ the usage of `local M`
@@ -14,6 +12,4 @@ local commit = {
 	- Use `.example_func()` when `require`.
 	]]
 }
-
-
 

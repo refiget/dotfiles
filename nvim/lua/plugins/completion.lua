@@ -1,10 +1,19 @@
 return {
-  { "hrsh7th/nvim-cmp", lazy = false },
-  { "hrsh7th/cmp-nvim-lsp", lazy = false },
-  { "hrsh7th/cmp-buffer", lazy = false },
-  { "hrsh7th/cmp-path", lazy = false },
-  { "hrsh7th/cmp-cmdline", lazy = false },
-  { "f3fora/cmp-spell", lazy = false },
-  { "L3MON4D3/LuaSnip", lazy = false },
-  { "saadparwaiz1/cmp_luasnip", lazy = false },
+  {
+    "hrsh7th/nvim-cmp",
+    lazy = false,
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "hrsh7th/cmp-cmdline",
+      "hrsh7th/cmp-nvim-lua",
+      "f3fora/cmp-spell",
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
+    },
+    config = function()
+      require("config.cmp")
+    end,
+  },
 }

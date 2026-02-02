@@ -2,17 +2,15 @@ return {
   {
     "GCBallesteros/NotebookNavigator.nvim",
     ft = { "python" },
-    dependencies = {
-      "benlubas/molten-nvim",
-    },
     config = function()
       local nn = require("notebook-navigator")
-      local function molten_ready()
-        return vim.fn.exists(":MoltenEvaluateOperator") == 2
-      end
+      local utils = require("notebook-navigator.utils")
+      local jtext_ok, jtext = pcall(require, "keymaps.jtext")
+
+      utils.available_repls = { "no_repl" }
 
       nn.setup({
-        repl_provider = "molten",
+        repl_provider = "no_repl",
         cell_markers = { python = "# %%" },
         activate_hydra_keys = nil,
         syntax_highlight = false,
@@ -23,18 +21,6 @@ return {
         group = group,
         pattern = "python",
         callback = function()
-          local utils = require("notebook-navigator.utils")
-          local get_repl = require("notebook-navigator.repls")
-
-          local function guard(fn)
-            if not molten_ready() then
-              vim.notify("Molten commands not available. Run :UpdateRemotePlugins and restart Neovim.",
-                vim.log.levels.WARN)
-              return
-            end
-            fn()
-          end
-
           local function collect_cells(marker)
             local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
             local cells = {}
@@ -58,25 +44,6 @@ return {
             return cells
           end
 
-          local function get_marker_line(start_line)
-            if start_line <= 1 then
-              return nil
-            end
-            return vim.api.nvim_buf_get_lines(0, start_line - 2, start_line - 1, false)[1]
-          end
-
-          local function is_markdown_marker(line)
-            if not line then
-              return false
-            end
-            local lower = line:lower()
-            return lower:find("%[markdown%]") or lower:find("%[md%]")
-          end
-
-          local function is_markdown_cell(start_line)
-            return is_markdown_marker(get_marker_line(start_line))
-          end
-
           local function current_cell(marker)
             local cells = collect_cells(marker)
             if #cells == 0 then
@@ -97,134 +64,22 @@ return {
             return cells[#cells]
           end
 
-          local function init_kernel()
-            local venv = os.getenv("VIRTUAL_ENV") or os.getenv("CONDA_PREFIX")
-            if venv then
-              local name = venv:match("([^/]+)$")
-              vim.cmd("MoltenInit " .. name)
-            else
-              vim.cmd("MoltenInit python3")
+          local function get_marker_line(start_line)
+            if start_line <= 1 then
+              return nil
             end
+            return vim.api.nvim_buf_get_lines(0, start_line - 2, start_line - 1, false)[1]
           end
 
-          local function run_all_cells()
-            local marker = utils.get_cell_marker(0, nn.config.cell_markers)
-            local cells = collect_cells(marker)
-            if #cells == 0 then
-              return
+          local function is_markdown_marker(line)
+            if not line then
+              return false
             end
-
-            local function run_cells(last_index)
-              local last = last_index or #cells
-              for i = 1, last do
-                local cell = cells[i]
-                if not is_markdown_cell(cell[1]) then
-                  pcall(vim.fn.MoltenEvaluateRange, cell[1], cell[2])
-                end
-              end
-            end
-
-            local ok, kernels = pcall(vim.fn.MoltenRunningKernels, true)
-            local has_kernel = ok and type(kernels) == "table" and #kernels > 0
-
-            vim.api.nvim_create_autocmd("User", {
-              pattern = "MoltenKernelReady",
-              once = true,
-              callback = function()
-                run_cells()
-              end,
-            })
-
-            if has_kernel then
-              pcall(vim.cmd, "MoltenRestart!")
-            else
-              init_kernel()
-            end
+            local lower = line:lower()
+            return lower:find("%[markdown%]") or lower:find("%[md%]")
           end
 
-          local function run_to_current_cell()
-            local marker = utils.get_cell_marker(0, nn.config.cell_markers)
-            local cells = collect_cells(marker)
-            if #cells == 0 then
-              return
-            end
-
-            local curline = vim.api.nvim_win_get_cursor(0)[1]
-            local target = nil
-            for i, cell in ipairs(cells) do
-              if curline >= cell[1] and curline <= cell[2] then
-                target = i
-                break
-              end
-              if curline < cell[1] then
-                target = i
-                break
-              end
-            end
-            if not target then
-              target = #cells
-            end
-
-            while target > 0 and is_markdown_cell(cells[target][1]) do
-              target = target - 1
-            end
-            if target == 0 then
-              return
-            end
-
-            local function run_cells()
-              for i = 1, target do
-                local cell = cells[i]
-                if not is_markdown_cell(cell[1]) then
-                  pcall(vim.fn.MoltenEvaluateRange, cell[1], cell[2])
-                end
-              end
-            end
-
-            local ok, kernels = pcall(vim.fn.MoltenRunningKernels, true)
-            local has_kernel = ok and type(kernels) == "table" and #kernels > 0
-
-            vim.api.nvim_create_autocmd("User", {
-              pattern = "MoltenKernelReady",
-              once = true,
-              callback = function()
-                run_cells()
-              end,
-            })
-
-            if has_kernel then
-              pcall(vim.cmd, "MoltenRestart!")
-            else
-              init_kernel()
-            end
-          end
-
-          local function run_cell_if_code()
-            local marker = utils.get_cell_marker(0, nn.config.cell_markers)
-            local cell = current_cell(marker)
-            if not cell then
-              return
-            end
-            if is_markdown_cell(cell[1]) then
-              return
-            end
-            nn.run_cell()
-          end
-
-          local function run_and_move_if_code()
-            local marker = utils.get_cell_marker(0, nn.config.cell_markers)
-            local cell = current_cell(marker)
-            if not cell then
-              return
-            end
-            if is_markdown_cell(cell[1]) then
-              nn.move_cell("d")
-              return
-            end
-            nn.run_and_move()
-          end
-
-          local function mark_markdown_cell()
+          local function toggle_markdown_cell()
             local marker = utils.get_cell_marker(0, nn.config.cell_markers)
             local cell = current_cell(marker)
             if not cell then
@@ -235,7 +90,31 @@ return {
             local end_line = cell[2]
 
             local marker_line = get_marker_line(start_line)
-            if marker_line and marker_line:match("^%s*" .. vim.pesc(marker)) then
+            local has_marker = marker_line and marker_line:match("^%s*" .. vim.pesc(marker))
+            local is_markdown = is_markdown_marker(marker_line)
+
+            if is_markdown then
+              -- convert markdown -> code
+              if has_marker then
+                vim.api.nvim_buf_set_lines(0, start_line - 2, start_line - 1, false, { marker })
+              end
+              local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+              for i, line in ipairs(lines) do
+                if line:match("^%s*#%s") then
+                  lines[i] = line:gsub("^%s*#%s?", "", 1)
+                elseif line:match("^%s*#") then
+                  lines[i] = line:gsub("^%s*#", "", 1)
+                end
+              end
+              vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
+              if jtext_ok then
+                jtext.sync_current_py({ notify = false })
+              end
+              return
+            end
+
+            -- convert code -> markdown
+            if has_marker then
               vim.api.nvim_buf_set_lines(0, start_line - 2, start_line - 1, false, { marker .. " [markdown]" })
             else
               vim.api.nvim_buf_set_lines(0, start_line - 1, start_line - 1, false, { marker .. " [markdown]" })
@@ -247,58 +126,62 @@ return {
             for i, line in ipairs(lines) do
               if line == "" then
                 lines[i] = "#"
-              elseif line:match("^%s*#") then
-                lines[i] = line
               else
                 lines[i] = "# " .. line
               end
             end
             vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
+            if jtext_ok then
+              jtext.sync_current_py({ notify = false })
+            end
           end
 
-          vim.keymap.set("n", "<localleader>r", function()
-            guard(run_cell_if_code)
-          end, { buffer = true, silent = true, desc = "Notebook: run cell" })
+          local function move_n(dir, count)
+            for _ = 1, count do
+              nn.move_cell(dir)
+            end
+            if jtext_ok then
+              jtext.sync_current_py({ notify = false })
+            end
+          end
 
-          vim.keymap.set("n", "<localleader>R", function()
-            guard(run_all_cells)
-          end, { buffer = true, silent = true, desc = "Notebook: run all cells" })
+          vim.keymap.set("n", "<localleader>j", function()
+            nn.move_cell("d")
+            if jtext_ok then
+              jtext.sync_current_py({ notify = false })
+            end
+          end, { buffer = true, silent = true, desc = "Notebook: next cell" })
 
-          vim.keymap.set("n", "<localleader>c", function()
-            guard(run_and_move_if_code)
-          end, { buffer = true, silent = true, desc = "Notebook: run cell and move" })
+          vim.keymap.set("n", "<localleader>k", function()
+            nn.move_cell("u")
+            if jtext_ok then
+              jtext.sync_current_py({ notify = false })
+            end
+          end, { buffer = true, silent = true, desc = "Notebook: previous cell" })
 
-          vim.keymap.set("n", "<localleader>j", nn.add_cell_below,
-            { buffer = true, silent = true, desc = "Notebook: add cell below" })
-          vim.keymap.set("n", "<localleader>k", nn.add_cell_above,
-            { buffer = true, silent = true, desc = "Notebook: add cell above" })
+          vim.keymap.set("n", "<localleader>J", function()
+            move_n("d", 5)
+          end, { buffer = true, silent = true, desc = "Notebook: next 5 cells" })
 
-          vim.keymap.set("n", "<localleader>m", function()
-            guard(mark_markdown_cell)
-          end, { buffer = true, silent = true, desc = "Notebook: mark cell as markdown" })
+          vim.keymap.set("n", "<localleader>K", function()
+            move_n("u", 5)
+          end, { buffer = true, silent = true, desc = "Notebook: previous 5 cells" })
 
-          vim.keymap.set("n", "<localleader>z", function()
-            guard(function()
-              pcall(vim.cmd, "MoltenDelete")
-            end)
-          end, { buffer = true, silent = true, desc = "Notebook: clear current cell output" })
-
-          vim.keymap.set("n", "<localleader>Z", function()
-            guard(function()
-              pcall(vim.cmd, "MoltenDelete!")
-            end)
-          end, { buffer = true, silent = true, desc = "Notebook: clear all outputs" })
-
-          vim.keymap.set("n", "<localleader>u", function()
-            guard(run_to_current_cell)
-          end, { buffer = true, silent = true, desc = "Notebook: clear + run to current cell" })
+          vim.keymap.set("n", "<localleader>m", toggle_markdown_cell,
+            { buffer = true, silent = true, desc = "Notebook: toggle markdown" })
 
           vim.keymap.set("n", "<localleader>[", function()
-            nn.move_cell("u")
-          end, { buffer = true, silent = true, desc = "Notebook: previous cell" })
+            nn.add_cell_above()
+            if jtext_ok then
+              jtext.sync_current_py({ notify = false })
+            end
+          end, { buffer = true, silent = true, desc = "Notebook: add cell above" })
           vim.keymap.set("n", "<localleader>]", function()
-            nn.move_cell("d")
-          end, { buffer = true, silent = true, desc = "Notebook: next cell" })
+            nn.add_cell_below()
+            if jtext_ok then
+              jtext.sync_current_py({ notify = false })
+            end
+          end, { buffer = true, silent = true, desc = "Notebook: add cell below" })
         end,
       })
     end,

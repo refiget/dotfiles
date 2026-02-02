@@ -114,3 +114,12 @@ vim.diagnostic.config({
 
 setup_lsp()
 vim.defer_fn(check_lsp_deps, 200)
+
+vim.keymap.set(
+  "n",
+  "<leader>f",
+  function()
+    vim.lsp.buf.format({ async = true })
+  end,
+  { silent = true, noremap = true, desc = "Format document with LSP" }
+)
