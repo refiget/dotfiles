@@ -34,6 +34,7 @@ done
 
 mkdir -p "$CONFIG_DIR"
 mkdir -p "$BACKUP_DIR"
+mkdir -p "$CONFIG_DIR/yabai"
 
 # ==========================================
 # 核心函数: 兼容 Bash 3.2 (macOS) 和 Bash 5+ (Linux)
@@ -94,6 +95,7 @@ link_file "$DOTFILES_DIR/.ignore"     "$HOME/.ignore"
 link_file "$DOTFILES_DIR/nvim"        "$CONFIG_DIR/nvim"
 link_file "$DOTFILES_DIR/tmux"        "$CONFIG_DIR/tmux"
 link_file "$DOTFILES_DIR/yazi"        "$CONFIG_DIR/yazi"
+link_file "$DOTFILES_DIR/yabai/yabairc" "$CONFIG_DIR/yabai/yabairc"
 link_file "$DOTFILES_DIR/scripts"     "$HOME/scripts"
 
 # --- LazyGit（只修改这里）-----------------------------------
