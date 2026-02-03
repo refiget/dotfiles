@@ -12,6 +12,9 @@ vim.api.nvim_create_autocmd("ModeChanged", {
     if vim.bo.filetype ~= "markdown" then
       return
     end
+    if vim.g.markdown_autosave_enabled == false then
+      return
+    end
     if not vim.bo.modified then
       return
     end
