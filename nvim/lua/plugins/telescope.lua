@@ -1,3 +1,19 @@
+-- Telescope search paths (edit only the list below)
+-- ```json
+-- {
+--   "telescope_search_paths": [
+--     "~/Projects",
+--     "~/dotfiles"
+--   ]
+-- }
+-- ```
+local TELESCOPE_SEARCH_PATHS = {
+  "~/Projects",
+  "~/dotfiles",
+	"~/ml",
+}
+
+vim.g.telescope_search_paths = TELESCOPE_SEARCH_PATHS
 return {
   {
     "nvim-telescope/telescope.nvim",
@@ -13,11 +29,26 @@ return {
             return
           end
 
-          local projects = vim.fn.expand("~/Projects")
-          local dotfiles = vim.fn.expand("~/dotfiles")
+          -- Optional: set vim.g.telescope_search_paths as a comma-separated string or a list.
+          local function get_search_dirs()
+            local custom = vim.g.telescope_search_paths
+            if type(custom) == "string" then
+              custom = vim.split(custom, ",", { plain = true, trimempty = true })
+            end
+            if type(custom) ~= "table" or #custom == 0 then
+              return { vim.fn.expand("~/Projects"), vim.fn.expand("~/dotfiles") }
+            end
+            local dirs = {}
+            for _, p in ipairs(custom) do
+              if type(p) == "string" and p ~= "" then
+                table.insert(dirs, vim.fn.expand(p))
+              end
+            end
+            return #dirs > 0 and dirs or { vim.fn.expand("~/Projects"), vim.fn.expand("~/dotfiles") }
+          end
 
           builtin.find_files({
-            search_dirs = { projects, dotfiles },
+            search_dirs = get_search_dirs(),
             hidden = true,
             attach_mappings = function(prompt_bufnr, map)
               local actions = require("telescope.actions")
@@ -56,6 +87,62 @@ return {
       if not ok then
         return
       end
+
+      local function normalize_paths(paths)
+        local result = {}
+        local seen = {}
+        for _, p in ipairs(paths) do
+          if type(p) == "string" and p ~= "" then
+            local expanded = vim.fn.expand(p)
+            if not seen[expanded] then
+              seen[expanded] = true
+              table.insert(result, expanded)
+            end
+          end
+        end
+        return result
+      end
+
+      local function ensure_paths()
+        local current = vim.g.telescope_search_paths
+        if type(current) == "string" then
+          current = vim.split(current, ",", { plain = true, trimempty = true })
+        end
+        if type(current) ~= "table" then
+          current = {}
+        end
+        vim.g.telescope_search_paths = current
+      end
+
+      vim.api.nvim_create_user_command("TelescopeAddPath", function(opts)
+        ensure_paths()
+        local input = opts.args
+        if input == "" then
+          input = vim.fn.input("Add search path(s), comma-separated: ")
+        end
+        if input == "" then
+          return
+        end
+        local paths = vim.split(input, ",", { plain = true, trimempty = true })
+        for i, p in ipairs(paths) do
+          paths[i] = vim.fn.trim(p)
+        end
+        vim.g.telescope_search_paths = normalize_paths(vim.list_extend(vim.g.telescope_search_paths, paths))
+      end, { nargs = "*", desc = "Telescope: add search path(s)" })
+
+      vim.api.nvim_create_user_command("TelescopeListPaths", function()
+        ensure_paths()
+        if #vim.g.telescope_search_paths == 0 then
+          vim.notify("Telescope search paths: (empty)", vim.log.levels.INFO)
+          return
+        end
+        vim.notify("Telescope search paths:\n" .. table.concat(vim.g.telescope_search_paths, "\n"), vim.log.levels.INFO)
+      end, { nargs = 0, desc = "Telescope: list search paths" })
+
+      vim.api.nvim_create_user_command("TelescopeClearPaths", function()
+        vim.g.telescope_search_paths = {}
+      end, { nargs = 0, desc = "Telescope: clear search paths" })
+
       telescope.setup({
         defaults = {
           mappings = {

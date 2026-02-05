@@ -11,6 +11,11 @@ end
 function M.sync_current_py(opts)
   opts = opts or {}
   local notify = opts.notify == true
+  local force = opts.force == true
+
+  if not force and not vim.bo.modified then
+    return
+  end
 
   vim.cmd("w")
   local file = vim.api.nvim_buf_get_name(0)

@@ -21,6 +21,16 @@ return {
         group = group,
         pattern = "python",
         callback = function()
+          local buf = vim.api.nvim_get_current_buf()
+          local function sync_silent()
+            if vim.b.notebook_sync_enabled ~= true then
+              return
+            end
+            if jtext_ok then
+              jtext.sync_current_py({ notify = false })
+            end
+          end
+
           local function collect_cells(marker)
             local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
             local cells = {}
@@ -107,9 +117,7 @@ return {
                 end
               end
               vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
-              if jtext_ok then
-                jtext.sync_current_py({ notify = false })
-              end
+              sync_silent()
               return
             end
 
@@ -131,32 +139,31 @@ return {
               end
             end
             vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
-            if jtext_ok then
-              jtext.sync_current_py({ notify = false })
-            end
+            sync_silent()
           end
 
           local function move_n(dir, count)
             for _ = 1, count do
               nn.move_cell(dir)
             end
+            sync_silent()
+          end
+
+          local function open_notebook_mode()
+            vim.b.notebook_sync_enabled = true
             if jtext_ok then
-              jtext.sync_current_py({ notify = false })
+              jtext.sync_current_py({ notify = false, force = true })
             end
           end
 
           vim.keymap.set("n", "<localleader>j", function()
             nn.move_cell("d")
-            if jtext_ok then
-              jtext.sync_current_py({ notify = false })
-            end
+            sync_silent()
           end, { buffer = true, silent = true, desc = "Notebook: next cell" })
 
           vim.keymap.set("n", "<localleader>k", function()
             nn.move_cell("u")
-            if jtext_ok then
-              jtext.sync_current_py({ notify = false })
-            end
+            sync_silent()
           end, { buffer = true, silent = true, desc = "Notebook: previous cell" })
 
           vim.keymap.set("n", "<localleader>J", function()
@@ -172,16 +179,24 @@ return {
 
           vim.keymap.set("n", "<localleader>[", function()
             nn.add_cell_above()
-            if jtext_ok then
-              jtext.sync_current_py({ notify = false })
-            end
+            sync_silent()
           end, { buffer = true, silent = true, desc = "Notebook: add cell above" })
           vim.keymap.set("n", "<localleader>]", function()
             nn.add_cell_below()
-            if jtext_ok then
-              jtext.sync_current_py({ notify = false })
-            end
+            sync_silent()
           end, { buffer = true, silent = true, desc = "Notebook: add cell below" })
+
+          vim.keymap.set("n", "<localleader>ip", open_notebook_mode,
+            { buffer = true, silent = true, desc = "Notebook: open notebook mode" })
+
+          vim.api.nvim_create_autocmd("ModeChanged", {
+            group = group,
+            buffer = buf,
+            callback = function()
+              sync_silent()
+            end,
+            desc = "Notebook: auto sync on mode change",
+          })
         end,
       })
     end,
