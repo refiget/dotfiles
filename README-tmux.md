@@ -91,6 +91,8 @@ The configuration updates the following environment variables:
 | `,` | Rename window (prompt) |
 | `C-p` | Previous window (repeatable) |
 | `C-n` | Next window (repeatable) |
+| `[` | Move window left (swap, wrap) |
+| `]` | Move window right (swap, wrap) |
 | `h` | Split pane left (same cwd) |
 | `l` | Split pane right (same cwd) |
 | `k` | Split pane above (same cwd) |

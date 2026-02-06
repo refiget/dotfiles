@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+direction="${1:-}"
+if [[ "$direction" != "left" && "$direction" != "right" ]]; then
+  exit 0
+fi
+
+read -r current_id current_index count <<<"$(tmux display-message -p "#{window_id} #{window_index} #{session_windows}")"
+if [[ -z "${current_id:-}" || -z "${current_index:-}" || -z "${count:-}" ]]; then
+  exit 0
+fi
+
+scratchpad_name="${TMUX_SCRATCHPAD_NAME:-scratchpad}"
+current_name=$(tmux display-message -p "#{window_name}" 2>/dev/null || true)
+if [[ "$current_name" == "$scratchpad_name" ]]; then
+  exit 0
+fi
+
+target="$current_index"
+if [[ "$direction" == "left" ]]; then
+  target=$((current_index - 1))
+else
+  target=$((current_index + 1))
+fi
+
+if (( target < 1 )); then
+  target="$count"
+elif (( target > count )); then
+  target=1
+fi
+
+tmux swap-window -t ":${target}"
+tmux select-window -t "${current_id}"
