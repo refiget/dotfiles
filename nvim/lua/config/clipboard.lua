@@ -1,5 +1,5 @@
 -- ===================== clipboard.lua =====================
--- 保持默认寄存器逻辑；剪贴板由 provider 提供（SSH 场景优先 OSC52）。
+-- 保持默认寄存器逻辑；剪贴板由 provider 提供。
 vim.opt.clipboard = ""
 
 -- 纯 Lua base64，避免额外依赖
@@ -52,11 +52,9 @@ end
 
 local has_builtin_osc52 = vim.ui and vim.ui.clipboard and vim.ui.clipboard.osc52
 
-local function in_ssh()
-  return vim.env.SSH_CONNECTION ~= nil or vim.env.SSH_TTY ~= nil
-end
-
-if in_ssh() then
+-- 可选：强制使用 OSC52（需要终端支持）
+-- 用法：NVIM_CLIPBOARD_OSC52=1 nvim
+if vim.env.NVIM_CLIPBOARD_OSC52 == "1" then
   if has_builtin_osc52 then
     -- SSH: 用内置 OSC52（0.10+）
     vim.g.clipboard = {

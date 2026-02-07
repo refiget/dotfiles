@@ -3,8 +3,7 @@ set -euo pipefail
 
 # Routes tmux/vim copy to the right clipboard backend.
 # Defaults:
-#   - Local（非 SSH）：优先系统剪贴板，失败时 OSC52。
-#   - SSH 会话：优先 OSC52 回传到本地；如需写入远端剪贴板，设置 TMUX_CLIPBOARD_PREFER_REMOTE=1。
+#   - 默认优先系统剪贴板，失败时 OSC52。
 #   - 强制 OSC52：TMUX_CLIPBOARD_FORCE_OSC52=1。
 
 content=$(tr -d '\r')
@@ -17,9 +16,6 @@ is_writable_tty() {
   [[ -n "${1:-}" && "$1" != "not a tty" && -w "$1" ]]
 }
 
-is_ssh_session() {
-  [[ -n "${SSH_CONNECTION:-}" || -n "${SSH_TTY:-}" ]]
-}
 
 resolve_tty() {
   local cand
@@ -127,13 +123,10 @@ copy_via_osc52() {
 
 copy_via_tmux || true
 
-prefer_remote=${TMUX_CLIPBOARD_PREFER_REMOTE:-0}
 force_osc52=${TMUX_CLIPBOARD_FORCE_OSC52:-0}
 
 prefer_osc52=0
 if [[ "$force_osc52" == "1" ]]; then
-  prefer_osc52=1
-elif is_ssh_session && [[ "$prefer_remote" != "1" ]]; then
   prefer_osc52=1
 fi
 

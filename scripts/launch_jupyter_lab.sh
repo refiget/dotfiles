@@ -7,4 +7,11 @@ VENV_ACTIVATE="$HOME/venvs/jupyter/bin/activate"
 
 source "$VENV_ACTIVATE"
 cd "$JUPYTER_NOTEBOOK_DIR"
+
+# Force a new browser window when JUPYTER_BROWSER_APP is set (macOS).
+# Example: export JUPYTER_BROWSER_APP="Google Chrome"
+if [[ -n "${JUPYTER_BROWSER_APP:-}" ]]; then
+  export JUPYTER_BROWSER="open -n -a \"${JUPYTER_BROWSER_APP}\" --args --new-window"
+fi
+
 exec jupyter lab "$@"

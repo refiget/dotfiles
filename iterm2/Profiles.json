@@ -265,10 +265,6 @@
   },
   "Custom Command" : "No",
   "Jobs to Ignore" : [
-    "rlogin",
-    "ssh",
-    "slogin",
-    "telnet"
   ],
   "Use Non-ASCII Font" : true,
   "Custom Directory" : "No",

@@ -165,7 +165,7 @@ The configuration includes several utility scripts:
 - `check_and_run_on_activate.sh` - Run commands on session activation
 - `copy_to_clipboard.sh` - Copy to system clipboard
 - `layout_builder.sh` - Build custom layouts
-- `move_session.sh` - Move sessions between servers
+- `move_session.sh` - Move sessions (via session_manager)
 - `move_window_to_session.sh` - Move windows between sessions
 - `new_session.sh` - Create new sessions
 - `pane_starship_title.sh` - Set pane titles with starship

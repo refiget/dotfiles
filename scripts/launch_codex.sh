@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-cd "$HOME/scripts"
+cd "$HOME/chat"
 exec codex "$@"
