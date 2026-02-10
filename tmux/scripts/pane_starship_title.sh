@@ -7,6 +7,12 @@ width="${2:-80}"
 pane_path="${3:-$PWD}"
 pane_cmd="${4:-}"
 
+# Provide a compact command label for the starship-tmux config.
+# Examples: "nvim", "python", "ssh".
+TMUX_PANE_CMD="${pane_cmd%% *}"
+TMUX_PANE_CMD="${TMUX_PANE_CMD##*/}"
+export TMUX_PANE_CMD
+
 # Best-effort: inherit venv/conda from the pane's process env
 if [[ -n "$pid" ]]; then
   ps_line=$(ps e -p "$pid" -o command= 2>/dev/null || true)

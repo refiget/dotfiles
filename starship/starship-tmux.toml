@@ -1,0 +1,45 @@
+# Starship config for tmux pane top border title (pane-border-status top)
+# Goal: IDE-like, compact, stable width.
+
+add_newline = false
+command_timeout = 80
+
+# Keep it single-line and predictable:
+#   <dir> · <git-branch><git-dirty> · <cmd>
+format = "$directory$git_branch$git_status$custom$character"
+
+[directory]
+truncate_to_repo = true
+truncation_length = 2
+style = "bold"
+format = " $path "
+
+[git_branch]
+symbol = " "
+style = "bold"
+format = " · [$symbol$branch]($style)"
+
+[git_status]
+style = "bold"
+# Prefer a single dot for "dirty" rather than multiple glyphs.
+format = "[$all_status$ahead_behind]($style)"
+modified = "•"
+staged = "•"
+untracked = "•"
+renamed = "•"
+deleted = "•"
+conflicted = "!"
+ahead = "↑"
+behind = "↓"
+diverged = "↕"
+
+[custom.cmd]
+# Provided by ~/.config/tmux/scripts/pane_starship_title.sh (exported as TMUX_PANE_CMD)
+when = "test -n \"$TMUX_PANE_CMD\""
+command = "echo $TMUX_PANE_CMD"
+style = "dimmed"
+format = " · [$output]($style)"
+
+[character]
+success_symbol = ""
+error_symbol = ""
