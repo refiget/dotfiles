@@ -56,11 +56,37 @@ if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
   fi
 fi
 
+# Pomodoro / timer breathing dot
+# State is driven by @pomo_until_epoch (unix seconds). We intentionally keep this
+# independent from mode colors; it's a subtle neutral animation.
+now_epoch=$(date +%s)
+pomo_until=$(tmux show -gqv '@pomo_until_epoch' 2>/dev/null || true)
+pomo_dot=""
+if [[ -n "${pomo_until:-}" && "${pomo_until}" =~ ^[0-9]+$ ]]; then
+  if (( now_epoch < pomo_until )); then
+    # Running: breathe via grey ramp (6-step)
+    phase=$(( now_epoch % 6 ))
+    dot_fg="colour240"
+    case "$phase" in
+      0) dot_fg="colour238";;
+      1) dot_fg="colour240";;
+      2) dot_fg="colour242";;
+      3) dot_fg="colour244";;
+      4) dot_fg="colour242";;
+      5) dot_fg="colour240";;
+    esac
+    pomo_dot=$(printf '#[fg=%s]•#[default] ' "$dot_fg")
+  elif (( now_epoch < pomo_until + 60 )); then
+    # Done (grace): calm orange dot
+    pomo_dot=$(printf '#[fg=#ffb86c]•#[default] ')
+  fi
+fi
+
 now=$(date +"$time_fmt")
 # Pad to a stable width to keep centred tabs visually stable.
 # "HH:MM · MM-DD" is 13 chars.
 now_padded=$(printf '%-13s' "$now")
-time_text=" ${now_padded}"
+time_text=" ${pomo_dot}${now_padded}"
 
 # Build a connector into the time segment using host colors
 host_connector_bg="$status_bg"
