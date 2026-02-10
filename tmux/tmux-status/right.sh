@@ -54,9 +54,29 @@ if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
   fi
 fi
 
+# Input method (macOS): show EN/CN as a boxed pill
+im_segment=""
+if command -v im-select >/dev/null 2>&1; then
+  src=$(im-select -n 2>/dev/null || true)
+  if [[ -n "${src:-}" ]]; then
+    label="CN"
+    case "$src" in
+      com.apple.keylayout.*)
+        label="EN"
+        ;;
+    esac
+    im_segment=$(printf '#[fg=#ffb86c,bg=#2e3440,bold] %s #[default]' "$label")
+  fi
+fi
+
 now=$(date +"$time_fmt")
 # Use a light separator to match the overall bar language
-time_text=" · ${now}"
+# Order: (optional) rainbarf -> IM -> time
+if [[ -n "$im_segment" ]]; then
+  time_text=" ${im_segment} · ${now}"
+else
+  time_text=" · ${now}"
+fi
 
 # Build a connector into the time segment using host colors
 host_connector_bg="$status_bg"
