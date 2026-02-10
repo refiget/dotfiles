@@ -23,10 +23,9 @@ status_bg=$(tmux show -gqv status-bg)
 segment_bg="$status_bg"
 segment_fg=$(tmux show -gqv '@status_fg')
 [[ -z "$segment_fg" ]] && segment_fg="#ffb86c"  # 橙色前景
-# Time segment: match the current mode accent (purple/green) via @theme_color
+# Time segment: keep static, calm color (mode accent is reserved for the session pill)
 host_bg="$status_bg"
-host_fg=$(tmux show -gqv '@theme_color')
-[[ -z "$host_fg" ]] && host_fg="#ffb86c"
+host_fg="#c5c8c6"
 # Time format (C): HH:MM · MM-DD
 # Keep this short and consistent to reduce visual jitter.
 time_fmt="${TMUX_TIME_FMT:-%H:%M · %m-%d}"
