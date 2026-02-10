@@ -56,7 +56,9 @@ fi
 
 now=$(date +"$time_fmt")
 # Use a light separator to match the overall bar language
-time_text=" · ${now}"
+# Pad to a stable width to keep centred tabs visually stable.
+now_padded=$(printf '%-16s' "$now")
+time_text=" · ${now_padded}"
 
 # Build a connector into the time segment using host colors
 host_connector_bg="$status_bg"
