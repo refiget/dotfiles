@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Args: <pane_pid> <pane_width> <pane_path> <pane_cmd>
+# Args: <pane_pid> <pane_width> <pane_path> <pane_cmd> [active|inactive]
 pid="${1:-}"
 width="${2:-80}"
 pane_path="${3:-$PWD}"
 pane_cmd="${4:-}"
+pane_state="${5:-}"
 
 # Provide a compact command label for the starship-tmux config.
 # Examples: "nvim", "python", "ssh".
@@ -33,7 +34,14 @@ strip_wrappers() {
 
 run_starship() {
   local cfg
-  cfg="${STARSHIP_TMUX_CONFIG:-$HOME/.config/starship-tmux.toml}"
+
+  # Choose a calmer config for inactive panes (no git segment).
+  if [[ "$pane_state" == "inactive" ]]; then
+    cfg="${STARSHIP_TMUX_INACTIVE_CONFIG:-$HOME/.config/starship-tmux-inactive.toml}"
+  else
+    cfg="${STARSHIP_TMUX_CONFIG:-$HOME/.config/starship-tmux.toml}"
+  fi
+
   STARSHIP_LOG=error STARSHIP_CONFIG="$cfg" \
     starship prompt --terminal-width "$width" | strip_wrappers | tr -d '\n'
 }
