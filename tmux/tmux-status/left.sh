@@ -134,8 +134,7 @@ if [[ "$label" =~ ^([0-9]+):(.*)$ ]]; then
 fi
 
 # Stable width: truncate name_part relative to idx length.
-# Reserve 1 char for the mode mark and 1 space after it.
-reserve=$(( ${#idx_part} + 2 ))
+reserve=$(( ${#idx_part} + 1 ))
 avail=$(( max_width - reserve ))
 if (( avail < 4 )); then
   avail=4
@@ -144,20 +143,16 @@ if (( ${#name_part} > avail )); then
   name_part="${name_part:0:avail-1}…"
 fi
 
-mode_mark="·"
-if [[ "$tmux_mode" == "insert" ]]; then
-  mode_mark="▸"
-fi
+mode_mark=""
 
 if [[ -n "$idx_part" ]]; then
-  printf '#[fg=%s,bg=%s]  %s #[fg=colour236,bg=%s]%s#[fg=%s,bg=%s]%s  #[default]' \
+  printf '#[fg=%s,bg=%s]  #[fg=colour236,bg=%s]%s#[fg=%s,bg=%s]%s  #[default]' \
     "$active_fg" "$active_bg" \
-    "$mode_mark" \
     "$active_bg" "$idx_part" \
     "$active_fg" "$active_bg" \
     "$name_part"
 else
-  printf '#[fg=%s,bg=%s]  %s %s  #[default]' \
+  printf '#[fg=%s,bg=%s]  %s  #[default]' \
     "$active_fg" "$active_bg" \
-    "$mode_mark" "$name_part"
+    "$name_part"
 fi
