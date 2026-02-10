@@ -40,8 +40,11 @@ inactive_bg="#373b41"
 inactive_fg="#c5c8c6"
 active_bg="$default_active_bg"
 active_fg="#1d1f21"
-separator=""          # remove powerline arrows, keep solid blocks
-left_cap="█"
+
+# Session pill styling (keep it clean; avoid powerline arrows)
+# Use thin edge glyphs to make the pill feel intentional.
+pill_left="▏"
+pill_right="▕"
 max_width=18
 
 # width-based label policy: when narrow (<80 cols by default),
@@ -121,4 +124,7 @@ if [[ -z "$label" ]]; then
   exit 0
 fi
 
-printf '#[fg=%s,bg=%s] %s #[fg=%s,bg=%s]' "$active_fg" "$active_bg" "$label" "$inactive_fg" "$status_bg"
+# Render as a compact pill, then reset to default.
+printf '#[fg=%s,bg=%s]%s %s %s#[default]' \
+  "$active_fg" "$active_bg" \
+  "$pill_left" "$label" "$pill_right"
