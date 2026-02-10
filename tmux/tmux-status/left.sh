@@ -26,49 +26,17 @@ if [[ "$mode_line" == TMUX_MODE=* ]]; then
   tmux_mode="${mode_line#TMUX_MODE=}"
 fi
 
-theme_color=$(tmux show -gqv '@theme_color')
-[[ -z "$theme_color" ]] && theme_color="#bd93f9"
-default_active_bg="$theme_color"
-insert_active_bg="$theme_color"
-# override color on non-Darwin (cloud): use Hatsune blue for active segment
-sysname=$(uname 2>/dev/null || echo unknown)
-if [[ "$sysname" != "Darwin" ]]; then
-  default_active_bg="#1793d1"
-  insert_active_bg="#1793d1"
-fi
-inactive_bg="#373b41"
-inactive_fg="#c5c8c6"
-active_bg="$default_active_bg"
+# Session pill should be STATIC (no mode color switching).
+# Use a neutral background that matches the tab strip / overall UI.
+# Allow override via tmux option @session_bg.
+active_bg=$(tmux show -gqv '@session_bg')
+[[ -z "$active_bg" ]] && active_bg="colour235"
 
-# Contrast: adapt text color to the active_bg so it stays readable on BOTH
-# the light green and the darker purple mode colors.
-# - light bg -> dark text
-# - dark bg  -> light text
-is_light_bg() {
-  local c="$1"
-  # Only handle #RRGGBB; fall back to "dark" otherwise.
-  if [[ "$c" =~ ^#([0-9A-Fa-f]{6})$ ]]; then
-    local hex="${BASH_REMATCH[1]}"
-    local r=$((16#${hex:0:2}))
-    local g=$((16#${hex:2:2}))
-    local b=$((16#${hex:4:2}))
-    # Perceived luminance (approx): 0..255
-    local y=$(( (r*299 + g*587 + b*114) / 1000 ))
-    (( y > 160 )) && return 0
-  fi
-  return 1
-}
-
-if is_light_bg "$active_bg"; then
-  active_fg="#1d1f21"
-  idx_fg="colour238"
-else
-  active_fg="colour255"
-  idx_fg="colour250"
-fi
+# Neutral, consistent typography
+active_fg="colour252"
+idx_fg="colour240"
 
 # Session pill styling (keep it clean; avoid powerline arrows)
-# v3+: no edge glyphs; rely on background + padding for a calmer UI.
 left_pad=" "
 right_pad=" "
 max_width=16
