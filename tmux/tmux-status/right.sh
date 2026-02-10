@@ -64,21 +64,23 @@ pomo_until=$(tmux show -gqv '@pomo_until_epoch' 2>/dev/null || true)
 pomo_dot=""
 if [[ -n "${pomo_until:-}" && "${pomo_until}" =~ ^[0-9]+$ ]]; then
   if (( now_epoch < pomo_until )); then
-    # Running: breathe via grey ramp (6-step)
+    # Running: stronger "breathing" using a larger dot and a higher-contrast ramp.
+    # (tmux status refresh is seconds-granularity; we compensate with more visible steps.)
     phase=$(( now_epoch % 6 ))
     dot_fg="colour240"
+    dot_attr=""
     case "$phase" in
-      0) dot_fg="colour238";;
-      1) dot_fg="colour240";;
+      0) dot_fg="colour236";;
+      1) dot_fg="colour239";;
       2) dot_fg="colour242";;
-      3) dot_fg="colour244";;
+      3) dot_fg="colour247"; dot_attr=",bold";;
       4) dot_fg="colour242";;
-      5) dot_fg="colour240";;
+      5) dot_fg="colour239";;
     esac
-    pomo_dot=$(printf '#[fg=%s]•#[default] ' "$dot_fg")
+    pomo_dot=$(printf '#[fg=%s%s]●#[default] ' "$dot_fg" "$dot_attr")
   elif (( now_epoch < pomo_until + 60 )); then
     # Done (grace): calm orange dot
-    pomo_dot=$(printf '#[fg=#ffb86c]•#[default] ')
+    pomo_dot=$(printf '#[fg=#ffb86c,bold]●#[default] ')
   fi
 fi
 
