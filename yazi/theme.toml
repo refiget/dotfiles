@@ -1,2 +1,6 @@
 [flavor]
+# Yazi 26+ supports separate dark/light flavors.
+# Keep `use` for backward compatibility.
 use = "Dracula Pro"
+dark = "Dracula Pro"
+light = "Dracula Pro"
