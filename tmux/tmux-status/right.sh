@@ -55,25 +55,64 @@ if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
 fi
 
 # Input method (macOS): show EN/CN as a boxed pill
-# Prefer im-select if available; otherwise fall back to reading HIToolbox.
+# Prefer im-select if available; otherwise read HIToolbox and infer from history.
 im_segment=""
-src=""
+label=""
 
 if command -v im-select >/dev/null 2>&1; then
   src=$(im-select -n 2>/dev/null || true)
+  if [[ -n "${src:-}" ]]; then
+    case "$src" in
+      com.apple.keylayout.*)
+        label="EN"
+        ;;
+      *)
+        label="CN"
+        ;;
+    esac
+  fi
 else
-  # Fallback (no extra deps): this key typically reflects the active input source ID
-  src=$(defaults read com.apple.HIToolbox AppleCurrentKeyboardLayoutInputSourceID 2>/dev/null || true)
+  label=$(python3 - <<'PY'
+import plistlib, os, sys
+p=os.path.expanduser('~/Library/Preferences/com.apple.HIToolbox.plist')
+try:
+    with open(p,'rb') as f:
+        d=plistlib.load(f)
+except Exception:
+    sys.exit(0)
+
+# Prefer most-recent entry in AppleInputSourceHistory
+hist = d.get('AppleInputSourceHistory') or []
+cur = hist[0] if hist else None
+cur_id = d.get('AppleCurrentKeyboardLayoutInputSourceID') or ''
+
+def decide_from_entry(e):
+    if not isinstance(e, dict):
+        return ''
+    kind = (e.get('InputSourceKind') or '')
+    bundle = (e.get('Bundle ID') or '')
+    mode = (e.get('Input Mode') or '')
+    name = (e.get('KeyboardLayout Name') or '')
+    if kind == 'Keyboard Layout':
+        return 'EN'
+    if 'SCIM' in bundle or 'Pinyin' in cur_id or 'Shuangpin' in mode:
+        return 'CN'
+    return ''
+
+label = decide_from_entry(cur)
+if not label:
+    # fallback to current ID heuristics
+    if cur_id.startswith('com.apple.keylayout.') and 'Pinyin' not in cur_id:
+        label = 'EN'
+    else:
+        label = 'CN'
+
+sys.stdout.write(label)
+PY
+)
 fi
 
-if [[ -n "${src:-}" ]]; then
-  label="CN"
-  case "$src" in
-    com.apple.keylayout.*)
-      label="EN"
-      ;;
-  esac
-
+if [[ -n "${label:-}" ]]; then
   im_segment=$(printf '#[fg=#ffb86c,bg=#2e3440,bold] %s #[default]' "$label")
 fi
 
