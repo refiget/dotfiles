@@ -31,7 +31,9 @@ separator=""
 right_cap=""
 rainbarf_bg="#2e3440"
 rainbarf_segment=""
-rainbarf_toggle="${TMUX_RAINBARF:-1}"
+
+# UI choice: default OFF to keep the right side stable (no width jitter)
+rainbarf_toggle="${TMUX_RAINBARF:-0}"
 
 case "$rainbarf_toggle" in
   0|false|FALSE|off|OFF|no|NO)
@@ -53,7 +55,8 @@ if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
 fi
 
 now=$(date +"$time_fmt")
-time_text=" ${now}"
+# Use a light separator to match the overall bar language
+time_text=" · ${now}"
 
 # Build a connector into the time segment using host colors
 host_connector_bg="$status_bg"

@@ -90,9 +90,9 @@ if [[ -z "$sessions" ]]; then
   exit 0
 fi
 
-rendered=""
-prev_bg=""
+# UI choice: show ONLY the current session to reduce noise.
 current_session_id_norm=$(normalize_session_id "$current_session_id")
+label=""
 while IFS= read -r entry; do
   [[ -z "$entry" ]] && continue
   session_id="${entry%%::*}"
@@ -100,39 +100,25 @@ while IFS= read -r entry; do
   [[ -z "$session_id" ]] && continue
 
   session_id_norm=$(normalize_session_id "$session_id")
-  segment_bg="$inactive_bg"
-  segment_fg="$inactive_fg"
-  trimmed_name=$(trim_label "$name")
-  is_current=0
   if [[ "$session_id" == "$current_session_id" || "$session_id_norm" == "$current_session_id_norm" ]]; then
-    is_current=1
-    segment_bg="$active_bg"
-    segment_fg="$active_fg"
-  fi
+    trimmed_name=$(trim_label "$name")
+    idx=$(extract_index "$name")
 
-  idx=$(extract_index "$name")
-  if (( is_narrow == 1 )); then
-    if [[ -n "$idx" ]]; then
-      if (( is_current == 1 )); then
-        label="${idx}:${trimmed_name}"
-      else
-        label="$idx"
-      fi
-    else
-      label="$trimmed_name"
-    fi
-  else
     if [[ -n "$idx" ]]; then
       label="${idx}:${trimmed_name}"
     else
       label="$trimmed_name"
     fi
-  fi
-  if (( ${#label} > max_width )); then
-    label="${label:0:max_width-1}…"
-  fi
 
-  rendered+="#[fg=${segment_fg},bg=${segment_bg}] ${label} "
+    if (( ${#label} > max_width )); then
+      label="${label:0:max_width-1}…"
+    fi
+    break
+  fi
 done <<< "$sessions"
 
-printf '%s#[fg=%s,bg=%s]' "$rendered" "$inactive_fg" "$status_bg"
+if [[ -z "$label" ]]; then
+  exit 0
+fi
+
+printf '#[fg=%s,bg=%s] %s #[fg=%s,bg=%s]' "$active_fg" "$active_bg" "$label" "$inactive_fg" "$status_bg"
