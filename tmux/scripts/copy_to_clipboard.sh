@@ -5,8 +5,13 @@ set -euo pipefail
 # Defaults:
 #   - 默认优先系统剪贴板，失败时 OSC52。
 #   - 强制 OSC52：TMUX_CLIPBOARD_FORCE_OSC52=1。
+#
+# Note: We strip trailing newlines so a later paste won't accidentally "press Enter".
 
 content=$(tr -d '\r')
+while [[ "$content" == *$'\n' ]]; do
+  content="${content%$'\n'}"
+done
 
 have() {
   command -v "$1" >/dev/null 2>&1

@@ -11,11 +11,7 @@ if [[ -z "${current_id:-}" || -z "${current_index:-}" || -z "${count:-}" ]]; the
   exit 0
 fi
 
-scratchpad_name="${TMUX_SCRATCHPAD_NAME:-scratchpad}"
-current_name=$(tmux display-message -p "#{window_name}" 2>/dev/null || true)
-if [[ "$current_name" == "$scratchpad_name" ]]; then
-  exit 0
-fi
+# (scratchpad removed)
 
 target="$current_index"
 if [[ "$direction" == "left" ]]; then
