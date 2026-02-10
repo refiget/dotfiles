@@ -39,10 +39,15 @@ fi
 inactive_bg="#373b41"
 inactive_fg="#c5c8c6"
 active_bg="$default_active_bg"
-active_fg="#1d1f21"
+
+# Contrast: keep pill text bright and consistent across purple/green backgrounds
+active_fg="colour255"
+idx_fg="colour250"
 
 # Session pill styling (keep it clean; avoid powerline arrows)
-# v3: no edge glyphs; rely on background + padding for a calmer UI.
+# v3+: no edge glyphs; rely on background + padding for a calmer UI.
+left_pad=" "
+right_pad=" "
 max_width=16
 
 # width-based label policy: when narrow (<80 cols by default),
@@ -125,7 +130,6 @@ fi
 
 # Render as a compact pill with consistent padding.
 # If the label is "<idx>:<name>", we show idx a bit dimmer for hierarchy.
-# Mode shape: add a tiny mark (no text) that differs by vi mode.
 idx_part=""
 name_part="$label"
 if [[ "$label" =~ ^([0-9]+):(.*)$ ]]; then
@@ -133,26 +137,41 @@ if [[ "$label" =~ ^([0-9]+):(.*)$ ]]; then
   name_part="${BASH_REMATCH[2]}"
 fi
 
+# Narrow-screen policy: show less to keep the bar calm.
+# - If we have an index, show only the index on narrow screens.
+# - Otherwise show a shorter name.
+if (( is_narrow == 1 )); then
+  max_width=12
+  if [[ -n "$idx_part" ]]; then
+    name_part=""
+  fi
+fi
+
 # Stable width: truncate name_part relative to idx length.
-reserve=$(( ${#idx_part} + 1 ))
+reserve=$(( ${#idx_part} + ${#left_pad} + ${#right_pad} ))
 avail=$(( max_width - reserve ))
 if (( avail < 4 )); then
   avail=4
 fi
-if (( ${#name_part} > avail )); then
+if [[ -n "$name_part" ]] && (( ${#name_part} > avail )); then
   name_part="${name_part:0:avail-1}…"
 fi
 
-mode_mark=""
-
-if [[ -n "$idx_part" ]]; then
-  printf '#[fg=%s,bg=%s]  #[fg=colour236,bg=%s]%s#[fg=%s,bg=%s]%s  #[default]' \
+if [[ -n "$idx_part" && -n "$name_part" ]]; then
+  printf '#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]%s%s#[default]' \
     "$active_fg" "$active_bg" \
-    "$active_bg" "$idx_part" \
+    "$left_pad" \
+    "$idx_fg" "$active_bg" "$idx_part" \
+    "$active_fg" "$active_bg" "$name_part" \
+    "$right_pad"
+elif [[ -n "$idx_part" ]]; then
+  printf '#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]%s%s#[default]' \
     "$active_fg" "$active_bg" \
-    "$name_part"
+    "$left_pad" \
+    "$idx_fg" "$active_bg" "$idx_part" \
+    "$right_pad"
 else
-  printf '#[fg=%s,bg=%s]  %s  #[default]' \
+  printf '#[fg=%s,bg=%s]%s%s%s#[default]' \
     "$active_fg" "$active_bg" \
-    "$name_part"
+    "$left_pad" "$name_part" "$right_pad"
 fi
