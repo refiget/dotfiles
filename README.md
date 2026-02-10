@@ -32,7 +32,7 @@ A feature-rich Neovim configuration with:
 - **Syntax Highlighting**: Improved syntax highlighting with Treesitter
 - **Navigation**: Fuzzy file finding with Telescope
 - **Appearance**: Custom theme and status line
-- **Python Integration**: Virtual environment support and Python-specific features
+- **Python Integration**: Project-local virtualenv auto-detection (`./.venv`, `./venv`, `./.env`) for Pyright + Python-specific features
 
 For detailed information, see [README-nvim.md](README-nvim.md).
 
@@ -41,11 +41,14 @@ For detailed information, see [README-nvim.md](README-nvim.md).
 A comprehensive tmux configuration with:
 
 - **Session Management**: Enhanced session creation and switching
-- **Clipboard Integration**: Seamless integration with system clipboard
+- **Clipboard Integration**: Seamless integration with system clipboard (copy/paste scripts strip trailing newlines to avoid accidental Enter)
+- **Copy Mode**: Vi-style copy-mode bindings (manual `q/Q` to exit copy-mode)
 - **Pane Navigation**: Easy navigation between panes
 - **Theme Support**: Dynamic theming that integrates with Neovim
 - **Mouse Support**: Full mouse support for easier interaction
 - **Scripting**: Utility scripts for common tasks
+
+Note: A previous scratchpad window feature has been removed; no scratchpad keybindings are configured.
 
 For detailed information, see [README-tmux.md](README-tmux.md).
 
@@ -72,6 +75,9 @@ For detailed information, see [README-zsh.md](README-zsh.md).
 - **zsh**: Version 5.0 or later
 - **Python 3**: For Neovim Python integration
 - **Node.js**: For LSP servers and certain plugins
+
+Optional but recommended:
+- **black / flake8**: Python formatter/linter used by the Neovim checks (install in your project venv or globally)
 
 ### Installation Steps
 
@@ -104,8 +110,11 @@ For detailed information, see [README-zsh.md](README-zsh.md).
 
 5. **Install LSP servers**:
    ```bash
-   # Install pyright for Python
+   # Python LSP (Pyright)
    npm install -g pyright
+   
+   # Optional Python tools (install in project venv recommended)
+   # python -m pip install -U black flake8
    ```
 
 6. **Open Neovim to install plugins**:
