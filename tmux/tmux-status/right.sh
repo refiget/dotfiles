@@ -27,7 +27,9 @@ segment_fg=$(tmux show -gqv '@status_fg')
 host_bg="$status_bg"
 host_fg=$(tmux show -gqv '@theme_color')
 [[ -z "$host_fg" ]] && host_fg="#ffb86c"
-time_fmt="${TMUX_TIME_FMT:-%H:%M %a %m-%d}"
+# Time format (C): HH:MM · MM-DD
+# Keep this short and consistent to reduce visual jitter.
+time_fmt="${TMUX_TIME_FMT:-%H:%M · %m-%d}"
 separator=""
 right_cap=""
 rainbarf_bg="#2e3440"
@@ -56,17 +58,18 @@ if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
 fi
 
 now=$(date +"$time_fmt")
-# Use a light separator to match the overall bar language
 # Pad to a stable width to keep centred tabs visually stable.
-now_padded=$(printf '%-16s' "$now")
-time_text=" · ${now_padded}"
+# "HH:MM · MM-DD" is 13 chars.
+now_padded=$(printf '%-13s' "$now")
+time_text=" ${now_padded}"
 
 # Build a connector into the time segment using host colors
 host_connector_bg="$status_bg"
 if [[ -n "$rainbarf_segment" ]]; then
   host_connector_bg="$rainbarf_bg"
 fi
-host_prefix=$(printf '#[fg=%s,bg=%s,bold]%s#[fg=%s,bg=%s]' \
+# UI: avoid bold for time; keep it as a calm anchor on the right.
+host_prefix=$(printf '#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]' \
   "$host_fg" "$host_bg" "$time_text" \
   "$host_bg" "$status_bg")
 
