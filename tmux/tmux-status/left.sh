@@ -42,10 +42,8 @@ active_bg="$default_active_bg"
 active_fg="#1d1f21"
 
 # Session pill styling (keep it clean; avoid powerline arrows)
-# Use thin edge glyphs to make the pill feel intentional.
-pill_left="▏"
-pill_right="▕"
-max_width=18
+# v3: no edge glyphs; rely on background + padding for a calmer UI.
+max_width=16
 
 # width-based label policy: when narrow (<80 cols by default),
 # show title for active session and only the numeric index for inactive ones.
@@ -127,6 +125,7 @@ fi
 
 # Render as a compact pill with consistent padding.
 # If the label is "<idx>:<name>", we show idx a bit dimmer for hierarchy.
+# Mode shape: add a tiny mark (no text) that differs by vi mode.
 idx_part=""
 name_part="$label"
 if [[ "$label" =~ ^([0-9]+):(.*)$ ]]; then
@@ -134,15 +133,31 @@ if [[ "$label" =~ ^([0-9]+):(.*)$ ]]; then
   name_part="${BASH_REMATCH[2]}"
 fi
 
+# Stable width: truncate name_part relative to idx length.
+# Reserve 1 char for the mode mark and 1 space after it.
+reserve=$(( ${#idx_part} + 2 ))
+avail=$(( max_width - reserve ))
+if (( avail < 4 )); then
+  avail=4
+fi
+if (( ${#name_part} > avail )); then
+  name_part="${name_part:0:avail-1}…"
+fi
+
+mode_mark="·"
+if [[ "$tmux_mode" == "insert" ]]; then
+  mode_mark="▸"
+fi
+
 if [[ -n "$idx_part" ]]; then
-  printf '#[fg=%s,bg=%s]%s #[fg=colour236,bg=%s]%s#[fg=%s,bg=%s]%s %s#[default]' \
+  printf '#[fg=%s,bg=%s]  %s #[fg=colour236,bg=%s]%s#[fg=%s,bg=%s]%s  #[default]' \
     "$active_fg" "$active_bg" \
-    "$pill_left" \
+    "$mode_mark" \
     "$active_bg" "$idx_part" \
     "$active_fg" "$active_bg" \
-    "$name_part" "$pill_right"
+    "$name_part"
 else
-  printf '#[fg=%s,bg=%s]%s %s %s#[default]' \
+  printf '#[fg=%s,bg=%s]  %s %s  #[default]' \
     "$active_fg" "$active_bg" \
-    "$pill_left" "$name_part" "$pill_right"
+    "$mode_mark" "$name_part"
 fi
