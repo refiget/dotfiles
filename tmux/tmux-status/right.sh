@@ -23,9 +23,10 @@ status_bg=$(tmux show -gqv status-bg)
 segment_bg="$status_bg"
 segment_fg=$(tmux show -gqv '@status_fg')
 [[ -z "$segment_fg" ]] && segment_fg="#ffb86c"  # 橙色前景
-# 固定时间段为橙色，背景透明
+# Time segment: match the current mode accent (purple/green) via @theme_color
 host_bg="$status_bg"
-host_fg="#ffb86c"
+host_fg=$(tmux show -gqv '@theme_color')
+[[ -z "$host_fg" ]] && host_fg="#ffb86c"
 time_fmt="${TMUX_TIME_FMT:-%H:%M %a %m-%d}"
 separator=""
 right_cap=""
