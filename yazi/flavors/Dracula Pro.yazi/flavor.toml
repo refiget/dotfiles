@@ -42,8 +42,7 @@ permissions_s = { fg = "#bd93f9" }
 
 [filetype]
 rules = [
-  # Directories: macOS Finder-like blue (System Blue)
-  { name = "*/", fg = "#0A84FF", bold = true, prefix = " " },
+  { name = "*/", fg = "#bd93f9", bold = true, prefix = " " },
   { name = "*.py", fg = "#50fa7b", italic = true, prefix = "󰌠 " },
   { name = "*.js", fg = "#f1fa8c", italic = true, prefix = "󰌞 " },
   { name = "*.lua", fg = "#50fa7b", italic = true, prefix = "󰆍 " },
