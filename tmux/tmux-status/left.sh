@@ -108,6 +108,7 @@ while IFS= read -r entry; do
     idx=$(extract_index "$name")
 
     if [[ -n "$idx" ]]; then
+      # Deemphasize the index by separating it; styling is handled in printf below.
       label="${idx}:${trimmed_name}"
     else
       label="$trimmed_name"
@@ -124,7 +125,24 @@ if [[ -z "$label" ]]; then
   exit 0
 fi
 
-# Render as a compact pill, then reset to default.
-printf '#[fg=%s,bg=%s]%s %s %s#[default]' \
-  "$active_fg" "$active_bg" \
-  "$pill_left" "$label" "$pill_right"
+# Render as a compact pill with consistent padding.
+# If the label is "<idx>:<name>", we show idx a bit dimmer for hierarchy.
+idx_part=""
+name_part="$label"
+if [[ "$label" =~ ^([0-9]+):(.*)$ ]]; then
+  idx_part="${BASH_REMATCH[1]}:"
+  name_part="${BASH_REMATCH[2]}"
+fi
+
+if [[ -n "$idx_part" ]]; then
+  printf '#[fg=%s,bg=%s]%s #[fg=colour236,bg=%s]%s#[fg=%s,bg=%s]%s %s#[default]' \
+    "$active_fg" "$active_bg" \
+    "$pill_left" \
+    "$active_bg" "$idx_part" \
+    "$active_fg" "$active_bg" \
+    "$name_part" "$pill_right"
+else
+  printf '#[fg=%s,bg=%s]%s %s %s#[default]' \
+    "$active_fg" "$active_bg" \
+    "$pill_left" "$name_part" "$pill_right"
+fi
