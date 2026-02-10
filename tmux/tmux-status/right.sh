@@ -55,26 +55,18 @@ if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
 fi
 
 # Input method (macOS): show EN/CN as a boxed pill
-# Prefer im-select if available; otherwise fall back to reading HIToolbox.
 im_segment=""
-src=""
-
 if command -v im-select >/dev/null 2>&1; then
   src=$(im-select -n 2>/dev/null || true)
-else
-  # Fallback (no extra deps): this key typically reflects the active input source ID
-  src=$(defaults read com.apple.HIToolbox AppleCurrentKeyboardLayoutInputSourceID 2>/dev/null || true)
-fi
-
-if [[ -n "${src:-}" ]]; then
-  label="CN"
-  case "$src" in
-    com.apple.keylayout.*)
-      label="EN"
-      ;;
-  esac
-
-  im_segment=$(printf '#[fg=#ffb86c,bg=#2e3440,bold] %s #[default]' "$label")
+  if [[ -n "${src:-}" ]]; then
+    label="CN"
+    case "$src" in
+      com.apple.keylayout.*)
+        label="EN"
+        ;;
+    esac
+    im_segment=$(printf '#[fg=#ffb86c,bg=#2e3440,bold] %s #[default]' "$label")
+  fi
 fi
 
 now=$(date +"$time_fmt")
