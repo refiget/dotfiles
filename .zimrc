@@ -22,7 +22,9 @@ zmodule git-info
 # -----------------
 # Prompt theme
 # -----------------
-zmodule magicmace
+# Two-line, minimal (matches tmux low-chrome aesthetics)
+# Pure prompt (external). Needs async + pure sourced.
+zmodule sindresorhus/pure --name prompt-pure --source async.zsh --source pure.zsh
 zmodule zsh-users/zsh-completions
 zmodule zsh-users/zsh-autosuggestions
 zmodule Aloxaf/fzf-tab

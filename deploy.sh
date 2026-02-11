@@ -95,6 +95,7 @@ link_file "$DOTFILES_DIR/.ignore"     "$HOME/.ignore"
 link_file "$DOTFILES_DIR/nvim"        "$CONFIG_DIR/nvim"
 link_file "$DOTFILES_DIR/tmux"        "$CONFIG_DIR/tmux"
 link_file "$DOTFILES_DIR/yazi"        "$CONFIG_DIR/yazi"
+link_file "$DOTFILES_DIR/fastfetch"   "$CONFIG_DIR/fastfetch"
 link_file "$DOTFILES_DIR/yabai/yabairc" "$CONFIG_DIR/yabai/yabairc"
 link_file "$DOTFILES_DIR/scripts"     "$HOME/scripts"
 

@@ -71,14 +71,8 @@ return {
       if has_exec("stylua") and null_ls.builtins.formatting.stylua then
         table.insert(sources, null_ls.builtins.formatting.stylua)
       end
-      if has_exec("flake8") then
-        local ok_flake8, flake8 = pcall(require, "none-ls.diagnostics.flake8")
-        if ok_flake8 then
-          table.insert(sources, flake8)
-        elseif null_ls.builtins.diagnostics.flake8 then
-          table.insert(sources, null_ls.builtins.diagnostics.flake8)
-        end
-      end
+      -- flake8 disabled: too noisy for formatting/style (e.g., blank-line complaints)
+      -- If you want it back, re-enable here or use ruff with a curated rule set.
       null_ls.setup({
         sources = sources,
       })

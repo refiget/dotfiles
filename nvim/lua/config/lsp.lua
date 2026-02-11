@@ -22,7 +22,7 @@ local function check_lsp_deps()
   }
   local tools = {
     { "black", "pip install black", "Python formatter" },
-    { "flake8", "pip install flake8", "Python linter" },
+    -- flake8 intentionally disabled (too noisy for style rules)
     { "stylua", "brew install stylua (macOS) or cargo install stylua", "Lua formatter" },
   }
 
@@ -225,22 +225,29 @@ local function setup_lsp()
   end
 end
 
+-- Diagnostics: keep the UI stable across mode changes.
+-- update_in_insert=true avoids the "only updates after leaving insert" feeling.
+-- Diagnostic signs (left gutter): use minimalist symbols instead of E/W/H/I
+local diag_signs = {
+  [vim.diagnostic.severity.ERROR] = "●",
+  [vim.diagnostic.severity.WARN] = "●",
+  [vim.diagnostic.severity.INFO] = "·",
+  [vim.diagnostic.severity.HINT] = "·",
+}
+
 vim.diagnostic.config({
-  virtual_text = true,
-  signs = true,
+  virtual_text = {
+    severity = { min = vim.diagnostic.severity.WARN },
+    spacing = 2,
+    prefix = "·",
+  },
+  signs = {
+    text = diag_signs,
+  },
   underline = true,
-  update_in_insert = false,
+  update_in_insert = true,
   severity_sort = true,
 })
 
 setup_lsp()
 vim.defer_fn(check_lsp_deps, 200)
-
-vim.keymap.set(
-  "n",
-  "<leader>f",
-  function()
-    vim.lsp.buf.format({ async = true })
-  end,
-  { silent = true, noremap = true, desc = "Format document with LSP" }
-)

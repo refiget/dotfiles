@@ -2,6 +2,9 @@
 local fn = vim.fn
 
 vim.env.PYTHONWARNINGS = "ignore::SyntaxWarning"
+
+-- Server/SSH compatibility
+vim.g.is_ssh = (vim.env.SSH_CONNECTION ~= nil and vim.env.SSH_CONNECTION ~= "")
 if fn.isdirectory(fn.getcwd()) == 0 then
   vim.cmd("cd ~")
 end
@@ -111,7 +114,10 @@ local function npm_global_bin()
   return out[1]
 end
 
-prepend_path(npm_global_bin())
+-- npm/pnpm/yarn global bins can be slow or unavailable on servers; skip over SSH.
+if not vim.g.is_ssh then
+  prepend_path(npm_global_bin())
+end
 
 local function pnpm_global_bin()
   if fn.executable("pnpm") ~= 1 then
@@ -135,8 +141,10 @@ local function yarn_global_bin()
   return out[1]
 end
 
-prepend_path(pnpm_global_bin())
-prepend_path(yarn_global_bin())
+if not vim.g.is_ssh then
+  prepend_path(pnpm_global_bin())
+  prepend_path(yarn_global_bin())
+end
 
 local function shell_command_path(bin)
   local shell = vim.env.SHELL or vim.o.shell or "sh"

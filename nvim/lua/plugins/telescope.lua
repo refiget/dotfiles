@@ -81,6 +81,42 @@ return {
         desc = "Telescope: find file in Projects + dotfiles (open in new tab)",
         mode = "n",
       },
+      {
+        "<leader>g",
+        function()
+          local ok, builtin = pcall(require, "telescope.builtin")
+          if not ok then
+            vim.notify("Telescope 未安装或加载失败", vim.log.levels.WARN, { title = "Telescope" })
+            return
+          end
+
+          local function get_search_dirs()
+            local custom = vim.g.telescope_search_paths
+            if type(custom) == "string" then
+              custom = vim.split(custom, ",", { plain = true, trimempty = true })
+            end
+            if type(custom) ~= "table" or #custom == 0 then
+              return { vim.fn.expand("~/Projects"), vim.fn.expand("~/dotfiles") }
+            end
+            local dirs = {}
+            for _, p in ipairs(custom) do
+              if type(p) == "string" and p ~= "" then
+                table.insert(dirs, vim.fn.expand(p))
+              end
+            end
+            return #dirs > 0 and dirs or { vim.fn.expand("~/Projects"), vim.fn.expand("~/dotfiles") }
+          end
+
+          builtin.live_grep({
+            search_dirs = get_search_dirs(),
+            additional_args = function()
+              return { "--hidden", "--glob", "!.git/*" }
+            end,
+          })
+        end,
+        desc = "Telescope: live grep in Projects + dotfiles",
+        mode = "n",
+      },
     },
     config = function()
       local ok, telescope = pcall(require, "telescope")

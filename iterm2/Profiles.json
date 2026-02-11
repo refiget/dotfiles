@@ -137,7 +137,7 @@
   },
   "Terminal Type" : "xterm-256color",
   "Cursor Boost (Dark)" : 0,
-  "Right Option Key Sends" : 2,
+  "Right Option Key Sends" : 0,
   "Background Color" : {
     "Red Component" : 0.043099999999999999,
     "Color Space" : "sRGB",

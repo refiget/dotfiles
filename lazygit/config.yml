@@ -2,27 +2,28 @@ gui:
   # Enable Vim-like keybindings (hjkl, etc.)
   useCtrlKeys: true
   nerdFontsVersion: 3   # optional: better icons
-  showCommandLog: true
+  showCommandLog: false
   theme:
+    # Catppuccin Mocha-ish, aligned with tmux/nvim (low-chrome, crisp text)
     activeBorderColor:
-      - "#83a598"   # deus blue
+      - "#b4befe"   # lavender (tmux normal accent)
       - bold
     inactiveBorderColor:
-      - "#665c54"
+      - "#313244"   # surface0 (quieter)
     optionsTextColor:
-      - "#8ec07c"
+      - "#89b4fa"   # blue
     selectedLineBgColor:
-      - "#35312f"
+      - "#181825"   # mantle (more subtle)
     selectedLineFgColor:
-      - "#ebdbb2"
+      - "#cdd6f4"   # text
     cherryPickedCommitTextStyle:
-      - "#d5508f"
+      - "#f5c2e7"   # pink
     markedBaseCommitTextStyle:
-      - "#fe8019"
+      - "#fab387"   # peach
     unstagedChangesColor:
-      - "#fb4934"
+      - "#eba0ac"   # maroon (less alarming)
     defaultFgColor:
-      - "#ebdbb2"
+      - "#cdd6f4"   # text
 
 keybinding:
   universal:

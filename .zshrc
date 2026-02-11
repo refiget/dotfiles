@@ -12,6 +12,14 @@ if [[ -d "$ZSH_CONF_DIR" ]]; then
   # 2) 非交互 shell 到此为止，避免加载 zim/fzf/tmux 等副作用模块
   [[ -o interactive ]] || return
 
+  # 2.5) Compile the *actual* loader file for faster startups (avoid assuming ~/.zshrc)
+  if [[ -n "$__zshrc_path" ]]; then
+    local zwc="${__zshrc_path}.zwc"
+    if [[ ! -f "$zwc" || "$__zshrc_path" -nt "$zwc" ]]; then
+      zcompile "$__zshrc_path" 2>/dev/null
+    fi
+  fi
+
   # 3) 再加载其余模块（跳过已加载的 01_env_path.conf）
   setopt local_options null_glob
   for conf_file in "$ZSH_CONF_DIR"/*.conf; do
@@ -22,5 +30,7 @@ else
   echo "警告：未找到 zsh 模块目录 $ZSH_CONF_DIR"
 fi
 
-# OpenClaw Completion（只在交互 shell）
-source "/Users/bob/.openclaw/completions/openclaw.zsh"
+# OpenClaw Completion（只在交互 shell，且文件存在）
+if [[ -o interactive && -f "/Users/bob/.openclaw/completions/openclaw.zsh" ]]; then
+  source "/Users/bob/.openclaw/completions/openclaw.zsh"
+fi

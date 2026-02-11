@@ -24,3 +24,6 @@ outcome.png
 coc/commands
 coc/list_history.dat
 coc/lists
+
+# Zsh compiled files
+*.zwc

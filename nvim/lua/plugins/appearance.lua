@@ -1,29 +1,48 @@
 return {
   {
-    "theniceboy/nvim-deus",
+    "catppuccin/nvim",
+    name = "catppuccin",
     lazy = false,
     priority = 1000,
     config = function()
       vim.opt.termguicolors = true
-      vim.cmd("silent! colorscheme deus")
-      vim.api.nvim_set_hl(0, "NonText", { fg = "grey10" })
+
+      local ok, catppuccin = pcall(require, "catppuccin")
+      if ok then
+        catppuccin.setup({
+          flavour = "mocha",
+          transparent_background = true,
+          term_colors = true,
+          dim_inactive = {
+            enabled = false,
+          },
+          integrations = {
+            gitsigns = true,
+            treesitter = true,
+            telescope = true,
+            trouble = true,
+            native_lsp = {
+              enabled = true,
+            },
+          },
+        })
+      end
+
+      vim.cmd("silent! colorscheme catppuccin-mocha")
+
+      -- Keep these plugin vars here (they're appearance-adjacent)
       vim.g.rainbow_active = 1
       vim.g.Illuminate_delay = 750
       vim.api.nvim_set_hl(0, "illuminatedWord", { undercurl = true })
-      vim.g.lightline = {
-        active = {
-          left = {
-            { "mode", "paste" },
-            { "readonly", "filename", "modified" },
-          },
-        },
-      }
-      vim.g.eleline_colorscheme = "deus"
+
+      -- lightline disabled: eleline is the single statusline implementation
+      vim.g.eleline_colorscheme = "catppuccin"
       vim.g.eleline_powerline_fonts = 0
     end,
   },
   {
     "petertriho/nvim-scrollbar",
+    cond = function() return not vim.g.is_ssh end,
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       local ok, scrollbar = pcall(require, "scrollbar")
@@ -42,6 +61,7 @@ return {
   { "RRethy/vim-illuminate", event = "BufReadPost" },
   {
     "NvChad/nvim-colorizer.lua",
+    cond = function() return not vim.g.is_ssh end,
     event = "VeryLazy",
     config = function()
       local ok, colorizer = pcall(require, "colorizer")
@@ -62,29 +82,7 @@ return {
     end,
   },
   { "kevinhwang91/nvim-hlslens", event = "CmdlineEnter" },
-  {
-    "akinsho/bufferline.nvim",
-    version = "*",
-    event = "VimEnter",
-    config = function()
-      local ok, bufferline = pcall(require, "bufferline")
-      if not ok then
-        return
-      end
-      bufferline.setup({
-        options = {
-          mode = "tabs",
-          numbers = "ordinal",
-          diagnostics = "nvim_lsp",
-          separator_style = "slant",
-          show_close_icon = false,
-          show_buffer_close_icons = false,
-          color_icons = true,
-          always_show_bufferline = true,
-        },
-      })
-    end,
-  },
+  -- bufferline disabled: tmux status already provides a tab strip (avoid duplicate UI)
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },

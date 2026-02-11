@@ -4,7 +4,8 @@ set -euo pipefail
 # Determine theme color from tmux environments with fallback
 # Prefer session env, then global env; if unset, default differs by OS:
 # 普通模式浅绿，插入模式紫色
-default_base="#b5e8a8"
+# Catppuccin Mocha: lavender-ish base (less grey)
+default_base="#b4befe"
 
 theme_line=$(tmux show-environment TMUX_THEME_COLOR 2>/dev/null || true)
 if [[ "$theme_line" == TMUX_THEME_COLOR=* ]]; then
@@ -37,8 +38,22 @@ if ! is_valid_color "$base_theme"; then
   base_theme="$default_base"
 fi
 
+# Theme preset (optional): allows per-scheme accents without splitting configs
+preset_line=$(tmux show-environment TMUX_THEME_PRESET 2>/dev/null || tmux show-environment -g TMUX_THEME_PRESET 2>/dev/null || true)
+TMUX_THEME_PRESET=""
+if [[ "$preset_line" == TMUX_THEME_PRESET=* ]]; then
+  TMUX_THEME_PRESET="${preset_line#TMUX_THEME_PRESET=}"
+fi
+
+if [[ "$TMUX_THEME_PRESET" == "catppuccin" ]]; then
+  default_base="#a6e3a1"   # green
+  insert_theme="#cba6f7"   # mauve
+else
+  # Insert accent: mauve
+insert_theme="#cba6f7"   # purple
+fi
+
 # Mode-aware theme for active border / top labels
-insert_theme="#bd93f9"
 tmux_mode="normal"
 mode_line=$(tmux show-environment TMUX_MODE 2>/dev/null || tmux show-environment -g TMUX_MODE 2>/dev/null || true)
 if [[ "$mode_line" == TMUX_MODE=* ]]; then
