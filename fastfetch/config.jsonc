@@ -32,7 +32,12 @@
     "font",
     "cursor",
     "terminal",
-    "terminalfont",
+    {
+      "type": "command",
+      "key": "Terminal Font",
+      "text": "printf '%s\n' 'Berkeley Mono v2'",
+      "splitLines": false
+    },
     "cpu",
     "gpu",
     "memory",
