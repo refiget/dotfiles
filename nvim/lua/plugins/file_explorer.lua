@@ -90,14 +90,26 @@ return {
         })
       end
       
-      local purple = "#a77fd9"
+      -- Align nvim-tree palette with Yazi (folder icons are blue in your Yazi theme)
+      local yazi_folder_blue = "#00ABF1" -- match Yazi directory icon color
+      local dracula_fg = "#f8f8f2"
       local hl = vim.api.nvim_set_hl
-      hl(0, "NvimTreeFolderIcon", { fg = purple })
-      hl(0, "NvimTreeFolderName", { fg = purple })
-      hl(0, "NvimTreeRootFolder", { fg = purple })
-      hl(0, "NvimTreeOpenedFolderName", { fg = purple })
-      hl(0, "NvimTreeEmptyFolderName", { fg = purple })
-      hl(0, "NvimTreeSymlink", { fg = purple })
+
+      local function apply_tree_hl()
+        hl(0, "NvimTreeFolderIcon", { fg = yazi_folder_blue })
+        hl(0, "NvimTreeFolderName", { fg = yazi_folder_blue })
+        hl(0, "NvimTreeRootFolder", { fg = yazi_folder_blue, bold = true })
+        hl(0, "NvimTreeOpenedFolderName", { fg = yazi_folder_blue, bold = true })
+        hl(0, "NvimTreeEmptyFolderName", { fg = yazi_folder_blue })
+        hl(0, "NvimTreeSymlink", { fg = yazi_folder_blue })
+        hl(0, "NvimTreeNormal", { fg = dracula_fg })
+        hl(0, "NvimTreeNormalNC", { fg = dracula_fg })
+      end
+
+      apply_tree_hl()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = apply_tree_hl,
+      })
     end,
   },
 }

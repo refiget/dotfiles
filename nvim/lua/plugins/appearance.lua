@@ -1,34 +1,25 @@
 return {
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    -- Keep Neovim theme aligned with Yazi (Dracula Pro flavor)
+    -- Yazi: ~/.config/yazi/theme.toml -> flavor "Dracula Pro"
+    "Mofiqul/dracula.nvim",
+    name = "dracula",
     lazy = false,
     priority = 1000,
     config = function()
       vim.opt.termguicolors = true
 
-      local ok, catppuccin = pcall(require, "catppuccin")
-      if ok then
-        catppuccin.setup({
-          flavour = "mocha",
-          transparent_background = true,
-          term_colors = true,
-          dim_inactive = {
-            enabled = false,
-          },
-          integrations = {
-            gitsigns = true,
-            treesitter = true,
-            telescope = true,
-            trouble = true,
-            native_lsp = {
-              enabled = true,
-            },
-          },
+      -- Best-effort setup; tolerate option differences across versions.
+      local ok, dracula = pcall(require, "dracula")
+      if ok and type(dracula.setup) == "function" then
+        pcall(dracula.setup, {
+          transparent_bg = false,
+          -- Keep the canonical Dracula background to match Yazi.
+          colors = { bg = "#282a36" },
         })
       end
 
-      vim.cmd("silent! colorscheme catppuccin-mocha")
+      vim.cmd("silent! colorscheme dracula")
 
       -- Keep these plugin vars here (they're appearance-adjacent)
       vim.g.rainbow_active = 1
@@ -36,8 +27,35 @@ return {
       vim.api.nvim_set_hl(0, "illuminatedWord", { undercurl = true })
 
       -- lightline disabled: eleline is the single statusline implementation
-      vim.g.eleline_colorscheme = "catppuccin"
+      vim.g.eleline_colorscheme = "dracula"
       vim.g.eleline_powerline_fonts = 0
+    end,
+  },
+
+  -- Optional alternate theme (not active by default)
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    lazy = true,
+    priority = 900,
+    config = function()
+      vim.opt.termguicolors = true
+      local ok, catppuccin = pcall(require, "catppuccin")
+      if ok then
+        catppuccin.setup({
+          flavour = "mocha",
+          transparent_background = true,
+          term_colors = true,
+          dim_inactive = { enabled = false },
+          integrations = {
+            gitsigns = true,
+            treesitter = true,
+            telescope = true,
+            trouble = true,
+            native_lsp = { enabled = true },
+          },
+        })
+      end
     end,
   },
   {

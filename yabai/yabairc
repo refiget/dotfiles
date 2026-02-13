@@ -6,7 +6,6 @@ sudo yabai --load-sa
 yabai -m config debug_output on
 
 # bsp or float (default: float)
-yabai -m config layout bsp
 
 # Global: edge-to-edge (no padding, no gaps)
 yabai -m config top_padding    0
@@ -14,6 +13,7 @@ yabai -m config bottom_padding 0
 yabai -m config left_padding   0
 yabai -m config right_padding  0
 yabai -m config window_gap     0
+yabai -m config window_border off
 
 # Per-space layouts/padding (Bob: space1/2 work, space3 comm/debug)
 # Space 1/2: work (tighter)
@@ -29,12 +29,23 @@ yabai -m config --space 3 layout float
 # example: show shadows only for floating windows
 yabai -m config window_shadow float
 
+# Focus / mouse behaviour
+# - focus follows mouse: hover window to focus
+# - mouse follows focus: when focus changes (e.g. via keyboard), move mouse to focused window
+
+yabai -m config mouse_follows_focus on
+
 # window opacity (default: off)
-# example: render all unfocused windows with 90% opacity
+# Policy:
+# - Space 3: no transparency
+# - Other spaces: unfocused windows 0.8, focused 1.0
+# (Applied dynamically via space_changed signal below)
 yabai -m config window_opacity on
 yabai -m config active_window_opacity 1.0
-yabai -m config normal_window_opacity 0.9
+yabai -m config normal_window_opacity 0.8
 
+# Optional: make opacity changes feel snappier
+# yabai -m config window_opacity_duration 0.0
 
 
 # Wallpaper auto-switch (focused app fullscreen-ish)
@@ -42,7 +53,16 @@ yabai -m config normal_window_opacity 0.9
 # Focus follows space change
 yabai -m signal --add label=focus_space_window event=space_changed action="/bin/sh -lc ~/.local/bin/yabai_focus_space_window.sh"
 
+# Per-space opacity (space3 disables transparency)
+yabai -m signal --add label=space_opacity event=space_changed action="/bin/sh -lc ~/.local/bin/yabai_space_opacity.sh"
+
 # Rules: exclude problematic utility windows from tiling
 yabai -m rule --add app="^iPhone Mirroring$" manage=off
 yabai -m rule --add app="^System Settings$" manage=off
 yabai -m rule --add app="^System Preferences$" manage=off
+
+# mpv: always float (don't let tiling/layout changes affect video windows)
+# Rule should work, but we also add a window_created signal as a belt-and-suspenders fallback.
+yabai -m rule --add app="^mpv$" manage=off layer=above
+
+yabai -m signal --add label=mpv_float event=window_created action="/bin/sh -lc '~/.local/bin/yabai_float_mpv.sh $YABAI_WINDOW_ID'"
