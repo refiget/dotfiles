@@ -9,7 +9,7 @@ pane_cmd="${4:-}"
 pane_state="${5:-}"
 
 # Provide a compact command label for the starship-tmux config.
-# Examples: "nvim", "python", "ssh".
+# Examples: "nvim", "python".
 TMUX_PANE_CMD="${pane_cmd%% *}"
 TMUX_PANE_CMD="${TMUX_PANE_CMD##*/}"
 export TMUX_PANE_CMD
