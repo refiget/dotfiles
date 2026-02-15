@@ -94,6 +94,7 @@ function M.winbar()
   --   diag_slot: " ●" or "  "
   --   mod_slot:  " ●" or "  "
   -- Always show the diagnostics slot (use a faint dot when clean) to avoid any perceived shifting.
+  local modified = vim.bo.modified
   local diag_slot = (diag_hl == "WinBarDiagNone") and " ·" or " ●"
   local mod_slot = modified and " ●" or "  "
 
