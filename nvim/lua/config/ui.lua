@@ -118,11 +118,13 @@ function M.apply_highlights()
   local accent = tmux_theme_color()
 
   -- Reduce boxiness: soften separators.
-  vim.api.nvim_set_hl(0, "WinSeparator", { fg = "grey20" })
-  vim.api.nvim_set_hl(0, "VertSplit", { fg = "grey20" })
+  -- Catppuccin Mocha-ish divider tone (surface0).
+  local divider = "#313244"
+  vim.api.nvim_set_hl(0, "WinSeparator", { fg = divider })
+  vim.api.nvim_set_hl(0, "VertSplit", { fg = divider })
 
   -- Floats: unify borders with separators (tmux-like, low contrast).
-  vim.api.nvim_set_hl(0, "FloatBorder", { fg = "grey20" })
+  vim.api.nvim_set_hl(0, "FloatBorder", { fg = divider })
   vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
   -- Plugin-specific borders: link to FloatBorder for consistency
   vim.api.nvim_set_hl(0, "TelescopeBorder", { link = "FloatBorder" })
