@@ -1,5 +1,6 @@
 # Zim Configuration
 # ============================================================
+# Keep this file declarative (zmodule lines only). Put checks/logic in zsh/conf.d.
 
 # -----------------
 # Base environment and utilities
@@ -9,31 +10,19 @@ zmodule input
 zmodule termtitle
 zmodule utility
 
-# 1. 加载 Zim 的核心补全设置 (您之前漏了这个!)
+# Completion
 zmodule completion
+zmodule zsh-users/zsh-completions
 
-# -----------------
-# Git helpers
-# (git-info is required for most prompt themes)
-# -----------------
+# Git helpers (git-info is required for most prompt themes)
 zmodule git
 zmodule git-info
 
-# -----------------
-# Prompt theme
-# -----------------
-# Two-line, minimal (matches tmux low-chrome aesthetics)
-# Pure prompt (external). Needs async + pure sourced.
-zmodule sindresorhus/pure --name prompt-pure --source async.zsh --source pure.zsh
-zmodule zsh-users/zsh-completions
+# UX (widgets/highlighting)
+zmodule zdharma-continuum/fast-syntax-highlighting
 zmodule zsh-users/zsh-autosuggestions
 zmodule Aloxaf/fzf-tab
-zmodule zdharma-continuum/fast-syntax-highlighting
-# 依赖自检（保守提示，不改主题/功能）
-if ! command -v fzf >/dev/null 2>&1; then
-  print "  未检测到 fzf，fzf-tab/相关功能不可用。Arch: pacman -S fzf；macOS: brew install fzf"
-fi
 
-if ! command -v git >/dev/null 2>&1; then
-  print "  未检测到 git，zim 模块更新/安装可能失败。"
-fi
+# Prompt theme (load last)
+# Pure prompt (external). Needs async + pure sourced.
+zmodule sindresorhus/pure --name prompt-pure --source async.zsh --source pure.zsh
