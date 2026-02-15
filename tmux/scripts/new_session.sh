@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-session_id=$(tmux new-session -d -P -F '#{session_id}' 2>/dev/null)
-
-if [ -z "$session_id" ]; then
+session_id=$(tmux new-session -d -P -F '#{session_id}' 2>/dev/null || true)
+if [[ -z "${session_id:-}" ]]; then
   exit 0
 fi
 

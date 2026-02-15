@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-index="$1"
-
+index="${1:-}"
 if [[ -z "$index" || ! "$index" =~ ^[0-9]+$ ]]; then
   exit 0
 fi

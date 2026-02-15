@@ -20,11 +20,7 @@ if [[ -z "$status_bg" ]]; then
   status_bg="default"
 fi
 
-tmux_mode="normal"
-mode_line=$(tmux show-environment TMUX_MODE 2>/dev/null || tmux show-environment -g TMUX_MODE 2>/dev/null || true)
-if [[ "$mode_line" == TMUX_MODE=* ]]; then
-  tmux_mode="${mode_line#TMUX_MODE=}"
-fi
+# TMUX_MODE is handled elsewhere (kept out of this left segment to keep it static).
 
 # Session pill should be STATIC (no mode color switching).
 # Use a neutral background that matches the tab strip / overall UI.

@@ -135,19 +135,10 @@ if [[ "$force_osc52" == "1" ]]; then
   prefer_osc52=1
 fi
 
-copied=0
 if [[ $prefer_osc52 -eq 1 ]]; then
-  if copy_via_osc52; then
-    copied=1
-  elif copy_via_host; then
-    copied=1
-  fi
+  copy_via_osc52 || copy_via_host || true
 else
-  if copy_via_host; then
-    copied=1
-  elif copy_via_osc52; then
-    copied=1
-  fi
+  copy_via_host || copy_via_osc52 || true
 fi
 
 exit 0

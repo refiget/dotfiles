@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-label="$1"
-
-if [ -z "$label" ]; then
+label="${1:-}"
+if [[ -z "$label" ]]; then
   exit 0
 fi
 

@@ -20,7 +20,6 @@ status_bg=$(tmux show -gqv status-bg)
 [[ -z "$status_bg" || "$status_bg" == "default" ]] && status_bg="default"
 
 # Keep segments on the terminal background to avoid color blocks on transparent themes
-segment_bg="$status_bg"
 segment_fg=$(tmux show -gqv '@status_fg')
 [[ -z "$segment_fg" ]] && segment_fg="#ffb86c"  # 橙色前景
 # Time segment: keep static, calm color (mode accent is reserved for the session pill)
@@ -90,11 +89,6 @@ now=$(date +"$time_fmt")
 now_padded=$(printf '%-13s' "$now")
 time_text=" ${pomo_dot}${now_padded}"
 
-# Build a connector into the time segment using host colors
-host_connector_bg="$status_bg"
-if [[ -n "$rainbarf_segment" ]]; then
-  host_connector_bg="$rainbarf_bg"
-fi
 # UI: avoid bold for time; keep it as a calm anchor on the right.
 host_prefix=$(printf '#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]' \
   "$host_fg" "$host_bg" "$time_text" \

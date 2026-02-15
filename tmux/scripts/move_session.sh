@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-direction="$1"
-
-if [ -z "$direction" ]; then
+direction="${1:-}"
+if [[ -z "$direction" ]]; then
   exit 0
 fi
 

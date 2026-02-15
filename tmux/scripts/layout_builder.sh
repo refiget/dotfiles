@@ -45,24 +45,20 @@ if [ "$top1" -le "$top2" ]; then
   top_id=$id1
   top_path=$path1
   bottom_id=$id2
-  bottom_path=$path2
 else
   top_id=$id2
   top_path=$path2
   bottom_id=$id1
-  bottom_path=$path1
 fi
 
 if [ "$left1" -le "$left2" ]; then
   left_id=$id1
   left_path=$path1
   right_id=$id2
-  right_path=$path2
 else
   left_id=$id2
   left_path=$path2
   right_id=$id1
-  right_path=$path1
 fi
 
 ensure_horizontal() {
