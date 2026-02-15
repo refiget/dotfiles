@@ -138,23 +138,28 @@ function M.apply_highlights()
   vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE" })
   vim.api.nvim_set_hl(0, "FoldColumn", { bg = "NONE" })
 
-  -- Winbar base
-  vim.api.nvim_set_hl(0, "WinBar", { fg = "grey85" })
-  vim.api.nvim_set_hl(0, "WinBarNC", { fg = "grey55" })
+  -- Winbar base (Catppuccin Mocha-ish palette)
+  local text = "#cdd6f4"      -- text
+  local subtext1 = "#bac2de"  -- subtext1
+  local subtext0 = "#a6adc8"  -- subtext0
+  local overlay0 = "#6c7086"  -- overlay0
+
+  vim.api.nvim_set_hl(0, "WinBar", { fg = text })
+  vim.api.nvim_set_hl(0, "WinBarNC", { fg = subtext0 })
 
   -- Right-side separator/meta should be subtle
-  vim.api.nvim_set_hl(0, "WinBarMeta", { fg = "grey40" })
+  vim.api.nvim_set_hl(0, "WinBarMeta", { fg = overlay0 })
 
   -- Winbar segments
-  vim.api.nvim_set_hl(0, "WinBarPath", { fg = "grey55" })
-  vim.api.nvim_set_hl(0, "WinBarPathNC", { fg = "grey35" })
-  -- Match tmux window title vibe: crisp white for active, grey for inactive
-  vim.api.nvim_set_hl(0, "WinBarFile", { fg = "grey95", bold = true })
-  vim.api.nvim_set_hl(0, "WinBarFileNC", { fg = "grey60", bold = true })
+  vim.api.nvim_set_hl(0, "WinBarPath", { fg = subtext0 })
+  vim.api.nvim_set_hl(0, "WinBarPathNC", { fg = overlay0 })
+  -- Match tmux window title vibe: crisp text for active, subtext for inactive
+  vim.api.nvim_set_hl(0, "WinBarFile", { fg = text, bold = true })
+  vim.api.nvim_set_hl(0, "WinBarFileNC", { fg = subtext1, bold = true })
 
   -- Fixed-width right indicators
   -- Prefer linking to Diagnostic groups so the colorscheme controls exact hues.
-  vim.api.nvim_set_hl(0, "WinBarDiagNone", { fg = "grey30" })
+  vim.api.nvim_set_hl(0, "WinBarDiagNone", { fg = overlay0 })
   vim.api.nvim_set_hl(0, "WinBarDiagWarn", { link = "DiagnosticWarn" })
   vim.api.nvim_set_hl(0, "WinBarDiagErr", { link = "DiagnosticError" })
   vim.api.nvim_set_hl(0, "WinBarMod", { fg = accent, bold = true })
@@ -166,8 +171,8 @@ function M.apply_highlights()
   vim.api.nvim_set_hl(0, "CursorLine", { bg = "NONE" })
 
   -- Whitespace/non-text: keep very quiet
-  vim.api.nvim_set_hl(0, "NonText", { fg = "grey10" })
-  vim.api.nvim_set_hl(0, "Whitespace", { fg = "grey10" })
+  vim.api.nvim_set_hl(0, "NonText", { fg = "#181825" })     -- mantle
+  vim.api.nvim_set_hl(0, "Whitespace", { fg = "#181825" })  -- mantle
 end
 
 function M.setup()
