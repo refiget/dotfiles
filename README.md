@@ -57,6 +57,8 @@ If you plan to publish this repo:
 ├── iterm2/
 ├── lazygit/
 ├── nvim/
+├── qutebrowser/
+├── sketchybar/
 ├── tmux/
 ├── yabai/
 ├── yazi/
@@ -80,6 +82,8 @@ This script creates symlinks into:
 - Neovim → **README-nvim.md**
 - tmux → **README-tmux.md**
 - zsh → **README-zsh.md**
+- qutebrowser → `~/.config/qutebrowser/` (symlinked)
+- sketchybar → `~/.config/sketchybar/` (symlinked)
 
 ## Quick reloads
 
