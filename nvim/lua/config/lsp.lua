@@ -9,12 +9,12 @@ local function check_lsp_deps()
 
   local host = vim.g.python3_host_prog or "python3"
   if fn.executable(host) ~= 1 then
-    table.insert(warns, "未检测到 python3 host (" .. host .. ")，请安装对应解释器（Arch: pacman -S python；macOS: brew install python）")
+    table.insert(warns, "未检测到 python3 host (" .. host .. ")，请安装对应解释器（macOS: brew install python）")
   end
 
   local lsp_servers = {
     { "pyright-langserver", "npm install -g pyright", "Python" },
-    { "lua-language-server", "brew install lua-language-server (macOS) or npm install -g lua-language-server (Linux)", "Lua" },
+    { "lua-language-server", "brew install lua-language-server", "Lua" },
     { "vscode-json-language-server", "npm install -g vscode-langservers-extracted", "JSON" },
     { "yaml-language-server", "npm install -g yaml-language-server", "YAML" },
     { "typescript-language-server", "npm install -g typescript typescript-language-server", "TypeScript/JavaScript" },
@@ -23,7 +23,7 @@ local function check_lsp_deps()
   local tools = {
     { "black", "pip install black", "Python formatter" },
     -- flake8 intentionally disabled (too noisy for style rules)
-    { "stylua", "brew install stylua (macOS) or cargo install stylua", "Lua formatter" },
+    { "stylua", "brew install stylua", "Lua formatter" },
   }
 
   for _, server in ipairs(lsp_servers) do

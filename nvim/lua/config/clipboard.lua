@@ -52,11 +52,6 @@ end
 
 local has_builtin_osc52 = vim.ui and vim.ui.clipboard and vim.ui.clipboard.osc52
 
--- Auto-enable OSC52 on SSH (server -> local clipboard) unless explicitly disabled.
-if (vim.env.SSH_CONNECTION and vim.env.SSH_CONNECTION ~= "") and vim.env.NVIM_CLIPBOARD_OSC52 == nil then
-  vim.env.NVIM_CLIPBOARD_OSC52 = "1"
-end
-
 -- Optional: force OSC52 (terminal must support it)
 -- Usage: NVIM_CLIPBOARD_OSC52=1 nvim
 if vim.env.NVIM_CLIPBOARD_OSC52 == "1" then

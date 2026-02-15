@@ -29,7 +29,7 @@ opt.listchars = { tab = "| ", trail = "·" }
 -- Hide the tildes (~) on empty lines (end-of-buffer filler)
 opt.fillchars:append({ eob = " " })
 opt.scrolloff = 4
--- Key sequence timeouts: keep terminal ESC/Meta sequences reliable (tmux/ssh friendly)
+-- Key sequence timeouts: keep terminal ESC/Meta sequences reliable (tmux friendly)
 opt.timeout = true
 opt.timeoutlen = 300
 opt.ttimeoutlen = 25

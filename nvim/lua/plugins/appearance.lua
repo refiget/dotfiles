@@ -60,7 +60,6 @@ return {
   },
   {
     "petertriho/nvim-scrollbar",
-    cond = function() return not vim.g.is_ssh end,
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       local ok, scrollbar = pcall(require, "scrollbar")
@@ -79,7 +78,6 @@ return {
   { "RRethy/vim-illuminate", event = "BufReadPost" },
   {
     "NvChad/nvim-colorizer.lua",
-    cond = function() return not vim.g.is_ssh end,
     event = "VeryLazy",
     config = function()
       local ok, colorizer = pcall(require, "colorizer")
