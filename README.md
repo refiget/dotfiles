@@ -1,14 +1,48 @@
-# Dotfiles
+# Dotfiles (macOS)
 
-Personal dotfiles for macOS/Linux with a focus on a clean, keyboard-first workflow.
+Keyboard-first, low-noise terminal workflow built around **tmux + Neovim + Yazi + Lazygit**.
+
+- **Terminal**: iTerm2 · Catppuccin Mocha · Berkeley Mono v2 (primary) · Maple Mono (Nerd Font)
+- **Shell**: zsh + zimfw
+- **WM**: yabai + borders (JankyBorders)
+
+## Screenshots (privacy note)
+
+The screenshots under `assets/` currently include **personal information** (e.g. username/host, local IP, locale, battery identifier, file paths, and git author email).
+
+If you plan to publish this repo:
+- replace screenshots with sanitized versions (crop/blur), or
+- move them out of the repo.
+
+### Terminal
+
+![](assets/Terminal.png)
+
+### Split (nvim + yazi + lazygit)
+
+![](assets/spllit.png)
+
+### Yazi + Lazygit
+
+<table>
+  <tr>
+    <td width="50%"><strong>Yazi</strong></td>
+    <td width="50%"><strong>Lazygit</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/yazi.png" alt="Yazi" /></td>
+    <td><img src="assets/lazigit.png" alt="Lazygit" /></td>
+  </tr>
+</table>
 
 ## What’s inside
 
-- **tmux**: modular config + refined status bar UI + robust copy/paste
-- **Neovim**: LSP-first setup with project venv auto-detection for Python
-- **zsh (zimfw)**: modular zsh config + helpers (venv registry, OpenClaw helpers)
-- **yabai**: macOS tiling window manager config
-- **yazi**: file manager config (theme experiments may be reverted if unstable)
+- **tmux**: modular config + calm status bar + hardened scripts (clipboard, session manager, fzf panes)
+- **Neovim**: lazy.nvim + LSP + formatting (conform/none-ls)
+- **zsh (zimfw)**: modular loader + prompt + completions
+- **yabai**: tiling config + focus border via `borders`
+- **yazi**: Dracula Pro flavor + small theme overrides
+- **lazygit**: config synced via deploy
 
 ## Repo layout
 
@@ -18,41 +52,28 @@ Personal dotfiles for macOS/Linux with a focus on a clean, keyboard-first workfl
 ├── README-nvim.md
 ├── README-tmux.md
 ├── README-zsh.md
+├── assets/
 ├── deploy.sh
+├── iterm2/
+├── lazygit/
 ├── nvim/
 ├── tmux/
-├── zsh/
 ├── yabai/
 ├── yazi/
-└── scripts/
+└── zsh/
 ```
 
-## Install
-
-1) Clone:
+## Deploy
 
 ```bash
 git clone <repo> ~/dotfiles
 cd ~/dotfiles
-```
-
-2) Deploy symlinks:
-
-```bash
 ./deploy.sh
 ```
 
-3) Restart your shell / apps.
-
-## Notes on philosophy (to avoid doc rot)
-
-- The detailed, authoritative source of truth is the config itself.
-- READMEs are intentionally **high-level**, and include only the parts that matter day-to-day.
-- For tmux bindings, prefer inspection:
-
-```bash
-tmux list-keys
-```
+This script creates symlinks into:
+- `~/.config/*`
+- `~/.zshrc`, `~/.zimrc`, `~/.tmux.conf`, etc.
 
 ## Component docs
 
@@ -60,8 +81,8 @@ tmux list-keys
 - tmux → **README-tmux.md**
 - zsh → **README-zsh.md**
 
-## Troubleshooting quick hits
+## Quick reloads
 
 - tmux: `tmux source-file ~/.tmux.conf`
-- nvim: `nvim --clean` to compare against baseline
-- zsh: `exec zsh` and check `zsh -x ~/.zshrc`
+- nvim: `nvim --headless "+quit"`
+- zsh: `exec zsh`
