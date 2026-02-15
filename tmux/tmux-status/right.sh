@@ -19,12 +19,19 @@ fi
 status_bg=$(tmux show -gqv status-bg)
 [[ -z "$status_bg" || "$status_bg" == "default" ]] && status_bg="default"
 
+# Palette (Catppuccin Mocha-ish)
+text="#cdd6f4"
+subtext0="#a6adc8"
+overlay0="#6c7086"
+peach="#fab387"
+
 # Keep segments on the terminal background to avoid color blocks on transparent themes
 segment_fg=$(tmux show -gqv '@status_fg')
-[[ -z "$segment_fg" ]] && segment_fg="#ffb86c"  # 橙色前景
+[[ -z "$segment_fg" ]] && segment_fg="$peach"
+
 # Time segment: keep static, calm color (mode accent is reserved for the session pill)
 host_bg="$status_bg"
-host_fg="#c5c8c6"
+host_fg="$subtext0"
 # Time format (C): HH:MM · MM-DD
 # Keep this short and consistent to reduce visual jitter.
 time_fmt="${TMUX_TIME_FMT:-%H:%M · %m-%d}"
@@ -66,20 +73,20 @@ if [[ -n "${pomo_until:-}" && "${pomo_until}" =~ ^[0-9]+$ ]]; then
     # Running: stronger "breathing" using a larger dot and a higher-contrast ramp.
     # (tmux status refresh is seconds-granularity; we compensate with more visible steps.)
     phase=$(( now_epoch % 6 ))
-    dot_fg="colour240"
+    dot_fg="$overlay0"
     dot_attr=""
     case "$phase" in
-      0) dot_fg="colour236";;
-      1) dot_fg="colour239";;
-      2) dot_fg="colour242";;
-      3) dot_fg="colour247"; dot_attr=",bold";;
-      4) dot_fg="colour242";;
-      5) dot_fg="colour239";;
+      0) dot_fg="#45475a";;  # surface1
+      1) dot_fg="#585b70";;  # surface2
+      2) dot_fg="$overlay0";;
+      3) dot_fg="$text"; dot_attr=",bold";;
+      4) dot_fg="$overlay0";;
+      5) dot_fg="#585b70";;
     esac
     pomo_dot=$(printf '#[fg=%s%s]●#[default] ' "$dot_fg" "$dot_attr")
   elif (( now_epoch < pomo_until + 60 )); then
     # Done (grace): calm orange dot
-    pomo_dot=$(printf '#[fg=#ffb86c,bold]●#[default] ')
+    pomo_dot=$(printf '#[fg=%s,bold]●#[default] ' "$peach")
   fi
 fi
 

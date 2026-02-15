@@ -26,11 +26,15 @@ fi
 # Use a neutral background that matches the tab strip / overall UI.
 # Allow override via tmux option @session_bg.
 active_bg=$(tmux show -gqv '@session_bg')
-[[ -z "$active_bg" ]] && active_bg="colour235"
+[[ -z "$active_bg" ]] && active_bg="#1e1e2e"  # base
+
+# Palette (Catppuccin Mocha-ish)
+text="#cdd6f4"
+overlay0="#6c7086"
 
 # Neutral, consistent typography
-active_fg="colour252"
-idx_fg="colour240"
+active_fg="$text"
+idx_fg="$overlay0"
 
 # Session pill styling (keep it clean; avoid powerline arrows)
 left_pad=" "
