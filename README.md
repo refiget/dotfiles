@@ -8,11 +8,7 @@ Keyboard-first, low-noise terminal workflow built around **tmux + Neovim + Yazi 
 
 ## Screenshots (privacy note)
 
-The screenshots under `assets/` currently include **personal information** (e.g. username/host, local IP, locale, battery identifier, file paths, and git author email).
-
-If you plan to publish this repo:
-- replace screenshots with sanitized versions (crop/blur), or
-- move them out of the repo.
+The screenshots under `assets/` are intended to be **sanitized** (no personal info), but you should still review them before publishing (user/host, IPs, file paths, email, etc. can easily slip in).
 
 ### Terminal
 
