@@ -1,14 +1,17 @@
 # Dotfiles (macOS)
 
-Keyboard-first, low-noise terminal workflow built around **tmux + Neovim + Yazi + Lazygit**.
+A keyboard-first macOS setup focused on a clean terminal workflow: **tmux + Neovim + Yazi + Lazygit**.
+
+## Highlights
 
 - **Terminal**: iTerm2 · Catppuccin Mocha · Berkeley Mono v2 (primary) · Maple Mono (Nerd Font)
 - **Shell**: zsh + zimfw
-- **WM**: yabai + borders (JankyBorders)
+- **Editor**: Neovim (lazy.nvim, LSP, formatting)
+- **File manager**: Yazi
+- **Git UI**: Lazygit
+- **Window manager**: yabai + borders (JankyBorders)
 
-## Screenshots (privacy note)
-
-The screenshots under `assets/` are intended to be **sanitized** (no personal info), but you should still review them before publishing (user/host, IPs, file paths, email, etc. can easily slip in).
+## Screenshots
 
 ### Terminal
 
@@ -31,16 +34,16 @@ The screenshots under `assets/` are intended to be **sanitized** (no personal in
   </tr>
 </table>
 
-## What’s inside
+## What’s included
 
-- **tmux**: modular config + calm status bar + hardened scripts (clipboard, session manager, fzf panes)
+- **tmux**: modular config + status bar + helper scripts (clipboard, session manager, fzf panes)
 - **Neovim**: lazy.nvim + LSP + formatting (conform/none-ls)
 - **zsh (zimfw)**: modular loader + prompt + completions
 - **yabai**: tiling config + focus border via `borders`
-- **yazi**: Dracula Pro flavor + small theme overrides
+- **yazi**: theme + small overrides
 - **lazygit**: config synced via deploy
 
-## Repo layout
+## Repository layout
 
 ```
 .
@@ -61,7 +64,7 @@ The screenshots under `assets/` are intended to be **sanitized** (no personal in
 └── zsh/
 ```
 
-## Deploy
+## Installation
 
 ```bash
 git clone <repo> ~/dotfiles
@@ -69,20 +72,20 @@ cd ~/dotfiles
 ./deploy.sh
 ```
 
-This script creates symlinks into:
-- `~/.config/*`
-- `~/.zshrc`, `~/.zimrc`, `~/.tmux.conf`, etc.
+`deploy.sh` creates symlinks into common locations (e.g. `~/.config/*`, `~/.zshrc`, `~/.tmux.conf`).
 
-## Component docs
+## Docs
 
 - Neovim → **README-nvim.md**
 - tmux → **README-tmux.md**
 - zsh → **README-zsh.md**
-- qutebrowser → `~/.config/qutebrowser/` (symlinked)
-- sketchybar → `~/.config/sketchybar/` (symlinked)
 
 ## Quick reloads
 
 - tmux: `tmux source-file ~/.tmux.conf`
-- nvim: `nvim --headless "+quit"`
 - zsh: `exec zsh`
+
+## Notes
+
+- This repo is macOS-first.
+- Some components (e.g. yabai scripting addition) may require extra system permissions.
