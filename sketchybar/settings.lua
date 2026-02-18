@@ -26,6 +26,7 @@ local function load_config()
         disable_right_widgets = true,
         notch_gap = 80,
         focus_index_gap = false,         -- if set (number), overrides notch_gap for index pill
+        focus_index_x_offset = 0,        -- extra fine-tune (pixels) for index pill only
         focus_apps_gap = false,          -- if set (number), overrides notch_gap+focus_apps_extra_gap for apps pill
         focus_apps_extra_gap = 0,
         space_preview_offset = 0,
