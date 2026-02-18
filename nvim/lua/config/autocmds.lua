@@ -73,11 +73,17 @@ vim.api.nvim_create_autocmd({ "FileType", "BufWinEnter" }, {
   end,
 })
 
--- Re-assert minimal chrome after plugins load (some statusline plugins override these)
+-- Re-assert minimal chrome late (some plugins/UI events may override these)
+local function reassert_minimal_chrome()
+  vim.opt.laststatus = 0
+  vim.opt.showtabline = 0
+end
+
 vim.api.nvim_create_autocmd("User", {
   pattern = "VeryLazy",
-  callback = function()
-    vim.opt.laststatus = 0
-    vim.opt.showtabline = 0
-  end,
+  callback = reassert_minimal_chrome,
+})
+
+vim.api.nvim_create_autocmd({ "VimEnter", "UIEnter", "WinEnter" }, {
+  callback = reassert_minimal_chrome,
 })

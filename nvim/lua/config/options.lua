@@ -46,6 +46,10 @@ opt.updatetime = 100
 opt.virtualedit = "block"
 opt.inccommand = "split"
 opt.showmode = false
+
+-- No built-in "ruler" stats at the bottom (we use winbar + tmux status)
+opt.ruler = false
+opt.showcmd = false
 -- NOTE: don't set lazyredraw permanently.
 -- Noice (and some UI plugins) rely on timely redraws.
 opt.lazyredraw = false
