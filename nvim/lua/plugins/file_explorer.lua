@@ -11,6 +11,7 @@ return {
         vim.notify("nvim-tree 加载失败", vim.log.levels.ERROR, { title = "插件加载" })
         return
       end
+
       nvim_tree.setup({
         auto_reload_on_write = true,
         disable_netrw = true,
@@ -65,7 +66,7 @@ return {
           },
         },
       })
-      
+
       local ok_api, api = pcall(require, "nvim-tree.api")
       if ok_api then
         vim.api.nvim_create_autocmd("BufEnter", {
@@ -81,7 +82,7 @@ return {
                 nowait = true,
               }
             end
-            
+
             vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
             vim.keymap.set("n", "l", api.node.open.vertical, opts("Open in Vertical Split"))
             vim.keymap.set("n", "<CR>", api.node.open.vertical, opts("Open in Vertical Split"))
@@ -89,10 +90,10 @@ return {
           end,
         })
       end
-      
+
       -- Align nvim-tree palette with Yazi (folder icons are blue in your Yazi theme)
+      -- Align nvim-tree palette with your Yazi folder color.
       local yazi_folder_blue = "#00ABF1" -- match Yazi directory icon color
-      local dracula_fg = "#f8f8f2"
       local hl = vim.api.nvim_set_hl
 
       local function apply_tree_hl()
@@ -102,8 +103,7 @@ return {
         hl(0, "NvimTreeOpenedFolderName", { fg = yazi_folder_blue, bold = true })
         hl(0, "NvimTreeEmptyFolderName", { fg = yazi_folder_blue })
         hl(0, "NvimTreeSymlink", { fg = yazi_folder_blue })
-        hl(0, "NvimTreeNormal", { fg = dracula_fg })
-        hl(0, "NvimTreeNormalNC", { fg = dracula_fg })
+        -- Let the active colorscheme control NvimTreeNormal/NC.
       end
 
       apply_tree_hl()
