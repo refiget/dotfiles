@@ -10,7 +10,7 @@ local space_preview_offset = settings.space_preview_offset or 0
 local notch_gap = settings.notch_gap or 80
 
 -- Always create a spacer so we can tune without changing code.
-sbar.add("item", "space.preview.spacer", {
+sbar.add("item", "preview.spacer", {
   position = "left",
   width = space_preview_offset,
   drawing = false,
