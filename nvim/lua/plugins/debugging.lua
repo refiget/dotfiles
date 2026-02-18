@@ -332,13 +332,53 @@ return {
         return false
       end
 
+      local function close_float_wins()
+        local wins = vim.g._dapui_float_wins
+        if type(wins) ~= "table" then
+          return
+        end
+        for _, win in ipairs(wins) do
+          if win and vim.api.nvim_win_is_valid(win) then
+            pcall(vim.api.nvim_win_close, win, true)
+          end
+        end
+        vim.g._dapui_float_wins = nil
+      end
+
       function _G.DAPUI_UX.toggle()
+        -- Default toggle now opens a floating "panel" (premium, non-invasive).
         vim.g._dapui_owner_buf = vim.api.nvim_get_current_buf()
         vim.g._dapui_owner_tab = vim.api.nvim_get_current_tabpage()
-        dapui.toggle()
+
+        if vim.g._dapui_float_wins then
+          close_float_wins()
+          return
+        end
+
+        -- Open a compact floating dashboard: scopes + stacks + console.
+        -- (No permanent splits; close with the same key.)
+        local cur = vim.api.nvim_get_current_win()
+        vim.g._dapui_float_wins = {}
+
+        local function open_float(element, enter)
+          dapui.float_element(element, { enter = enter or false })
+          local w = vim.api.nvim_get_current_win()
+          if w ~= cur then
+            table.insert(vim.g._dapui_float_wins, w)
+          end
+        end
+
+        -- Keep you in the code window.
+        open_float("scopes", false)
+        pcall(vim.api.nvim_set_current_win, cur)
+        open_float("stacks", false)
+        pcall(vim.api.nvim_set_current_win, cur)
+        open_float("console", false)
+        pcall(vim.api.nvim_set_current_win, cur)
       end
 
       function _G.DAPUI_UX.open_reset()
+        -- Classic split layout (fallback)
         vim.g._dapui_owner_buf = vim.api.nvim_get_current_buf()
         vim.g._dapui_owner_tab = vim.api.nvim_get_current_tabpage()
         dapui.open({ reset = true })
