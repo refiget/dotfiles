@@ -24,8 +24,9 @@ local item = sbar.add("item", "resident.pill", {
   background = { color = colors.bg1, corner_radius = 999, height = 26 },
 })
 
--- Some sketchybar versions don't reliably apply script/update_freq on add; set explicitly.
-item:set({
+-- Some sketchybar versions don't reliably apply script/update_freq via the Lua wrapper.
+-- Use the CLI-compatible setter.
+sbar.set(item.name, {
   updates = true,
   script = config_dir .. "/helpers/resident_status.sh",
   update_freq = 5,
