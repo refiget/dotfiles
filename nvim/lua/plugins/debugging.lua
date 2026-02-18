@@ -315,6 +315,56 @@ return {
       -- - When that buffer/tab is closed, auto-close DAP UI
       _G.DAPUI_UX = _G.DAPUI_UX or {}
 
+      function _G.DAPUI_UX.debug_current_file()
+        -- Start debugging the current Python file (same config as <localleader>df).
+        local dap = require("dap")
+        local fn = vim.fn
+
+        local function exists(path)
+          return path and path ~= "" and fn.filereadable(path) == 1
+        end
+
+        local function find_project_python()
+          local venv = vim.env.VIRTUAL_ENV
+          if venv and venv ~= "" then
+            local p = venv .. "/bin/python"
+            if exists(p) then
+              return p
+            end
+          end
+
+          local root = fn.getcwd()
+          for _, p in ipairs({
+            root .. "/.venv/bin/python",
+            root .. "/.venv/bin/python3",
+            root .. "/venv/bin/python",
+            root .. "/venv/bin/python3",
+          }) do
+            if exists(p) then
+              return p
+            end
+          end
+
+          local mason_py = fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
+          if exists(mason_py) then
+            return mason_py
+          end
+
+          return vim.g.python3_host_prog or "python3"
+        end
+
+        dap.run({
+          type = "python",
+          request = "launch",
+          name = "Launch current file",
+          program = fn.expand("%:p"),
+          cwd = fn.getcwd(),
+          pythonPath = find_project_python(),
+          justMyCode = true,
+          console = "integratedTerminal",
+        })
+      end
+
       local function owner_alive()
         local ob = vim.g._dapui_owner_buf
         local ot = vim.g._dapui_owner_tab
@@ -350,6 +400,13 @@ return {
         vim.g._dapui_owner_buf = vim.api.nvim_get_current_buf()
         vim.g._dapui_owner_tab = vim.api.nvim_get_current_tabpage()
 
+        -- If no active session, start debugging this file first.
+        pcall(function()
+          if require("dap").session() == nil then
+            _G.DAPUI_UX.debug_current_file()
+          end
+        end)
+
         if vim.g._dapui_float_wins then
           close_float_wins()
           return
@@ -360,20 +417,41 @@ return {
         local cur = vim.api.nvim_get_current_win()
         vim.g._dapui_float_wins = {}
 
-        local function open_float(element, enter)
-          dapui.float_element(element, { enter = enter or false })
+        local function open_float(element, cfg)
+          cfg = cfg or {}
+          dapui.float_element(element, { enter = cfg.enter or false })
+
           local w = vim.api.nvim_get_current_win()
           if w ~= cur then
             table.insert(vim.g._dapui_float_wins, w)
           end
+
+          -- Reposition to form a dashboard on the right side (no overlap).
+          local cols = vim.o.columns
+          local lines = vim.o.lines
+          local width = cfg.width or math.floor(cols * 0.36)
+          local height = cfg.height or math.floor(lines * 0.25)
+          local col = cfg.col or (cols - width - 2)
+          local row = cfg.row or 2
+
+          local okc, c = pcall(vim.api.nvim_win_get_config, w)
+          if okc and c and c.relative ~= '' then
+            c.relative = 'editor'
+            c.width = width
+            c.height = height
+            c.col = col
+            c.row = row
+            c.anchor = 'NW'
+            pcall(vim.api.nvim_win_set_config, w, c)
+          end
         end
 
         -- Keep you in the code window.
-        open_float("scopes", false)
+        open_float("scopes", { enter = false, row = 2, height = math.floor(vim.o.lines * 0.32) })
         pcall(vim.api.nvim_set_current_win, cur)
-        open_float("stacks", false)
+        open_float("stacks", { enter = false, row = math.floor(vim.o.lines * 0.34) + 2, height = math.floor(vim.o.lines * 0.18) })
         pcall(vim.api.nvim_set_current_win, cur)
-        open_float("console", false)
+        open_float("console", { enter = false, row = math.floor(vim.o.lines * 0.54) + 2, height = math.floor(vim.o.lines * 0.28) })
         pcall(vim.api.nvim_set_current_win, cur)
       end
 
