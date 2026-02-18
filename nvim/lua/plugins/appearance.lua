@@ -112,10 +112,15 @@ return {
       if not ok then
         return
       end
+      local bg = "#1e1e2e"
+      pcall(function()
+        bg = require("catppuccin.palettes").get_palette("mocha").mantle
+      end)
+
       notify.setup({
         stages = "fade",
         timeout = 2500,
-        background_colour = "#000000",
+        background_colour = bg,
         render = "minimal",
         max_width = function()
           return math.floor(vim.o.columns * 0.4)
