@@ -23,7 +23,7 @@ add_if_running() {
 
 add_if_running "Keyboard Maestro Engine" ":keyboard_maestro:"
 add_if_running "kindaVim" ":vim:"
-add_if_running "Karabiner-Menu|karabiner_console_user_server|Karabiner-Core-Service" ":keyboard_maestro:"
+# Karabiner-Elements intentionally hidden (too noisy)
 add_if_running "clash-verge|verge-mihomo|clash-verge-service" ":proton_vpn:"
 
 if [ "$count" -eq 0 ]; then
