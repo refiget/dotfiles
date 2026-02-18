@@ -276,7 +276,8 @@ vim.diagnostic.config({
     text = diag_signs,
   },
   underline = true,
-  update_in_insert = true,
+  -- Less jitter while typing; you still get inline diagnostics when you pause.
+  update_in_insert = false,
   severity_sort = true,
   float = {
     border = "rounded",

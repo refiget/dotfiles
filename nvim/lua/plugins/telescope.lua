@@ -181,6 +181,22 @@ return {
 
       telescope.setup({
         defaults = {
+          -- Premium centered layout, consistent with Noice/cmp popups
+          layout_strategy = "vertical",
+          layout_config = {
+            width = 0.62,
+            height = 0.62,
+            prompt_position = "top",
+            preview_cutoff = 120,
+          },
+          sorting_strategy = "ascending",
+          border = true,
+          borderchars = {
+            prompt = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+            results = { "─", "│", "─", "│", "├", "┤", "╯", "╰" },
+            preview = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+          },
+          winblend = 10,
           mappings = {
             i = {
               ["<C-j>"] = "move_selection_next",
