@@ -46,13 +46,18 @@ local function clean_dapui_chrome(bufnr)
   if not dapui_fts[ft] then
     return
   end
-  -- Clear winbar/statusline for *any* window showing this buffer.
+
+  -- For dapui_console, keep a thin separator line (winbar) instead of a chunky statusline.
+  local want_sepbar = (ft == "dapui_console")
+  local winbar_value = want_sepbar and "%{%v:lua.require('config.ui').sepbar()%}" or ""
+
+  -- Clear statusline for *any* window showing this buffer.
   for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
-    pcall(vim.api.nvim_win_set_option, win, "winbar", "")
     pcall(vim.api.nvim_win_set_option, win, "statusline", "")
+    pcall(vim.api.nvim_win_set_option, win, "winbar", winbar_value)
   end
-  pcall(vim.api.nvim_buf_set_option, bufnr, "winbar", "")
   pcall(vim.api.nvim_buf_set_option, bufnr, "statusline", "")
+  pcall(vim.api.nvim_buf_set_option, bufnr, "winbar", winbar_value)
 end
 
 vim.api.nvim_create_autocmd({ "FileType", "BufWinEnter" }, {

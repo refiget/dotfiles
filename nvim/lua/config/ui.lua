@@ -218,4 +218,13 @@ function M.setup()
   })
 end
 
+-- Thin separator winbar for special panels (e.g. dapui_console)
+function M.sepbar()
+  local w = vim.api.nvim_win_get_width(0)
+  if not w or w <= 2 then
+    return ""
+  end
+  return string.format("%%#WinSeparator#%s%%#WinBar#", string.rep("─", w - 1))
+end
+
 return M
