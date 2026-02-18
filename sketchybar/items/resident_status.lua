@@ -7,29 +7,22 @@ local app_icons = require("helpers.app_icons")
 -- These are intentionally minimal and only draw when the process is present.
 
 local resident = settings.resident_status or {
-  {
-    name = "Clash Verge",
-    -- Show a network/proxy indicator (SF Symbol) rather than an app-font icon.
-    glyph = icons.wifi.vpn,
-    glyph_font = "SF Pro:Regular:14.0",
-    -- The UI process is "clash-verge" (lowercase) on your machine; also track mihomo core.
-    pattern = "clash%-verge|verge%-mihomo|clash%-verge%-service",
-  },
-  {
-    name = "Keyboard Maestro",
-    pattern = "Keyboard Maestro Engine",
-  },
-  {
-    name = "kindaVim",
-    pattern = "kindaVim",
-  },
-  {
-    name = "Karabiner-Elements",
-    -- Use app-font keyboard icon (available in sketchybar-app-font)
-    glyph = ":keyboard_maestro:",
-    pattern = "Karabiner%-Menu|karabiner_console_user_server|Karabiner%-Core%-Service",
-  },
+  { name = "Clash Verge", pattern = "clash%-verge|verge%-mihomo|clash%-verge%-service" },
+  { name = "Keyboard Maestro", pattern = "Keyboard Maestro Engine" },
+  { name = "kindaVim", pattern = "kindaVim" },
+  { name = "Karabiner-Elements", pattern = "Karabiner%-Menu|karabiner_console_user_server|Karabiner%-Core%-Service" },
 }
+
+-- Enrich settings-provided entries with sensible defaults (glyphs/fonts)
+for _, app in ipairs(resident) do
+  if app.name == "Clash Verge" then
+    app.glyph = app.glyph or icons.wifi.vpn
+    app.glyph_font = app.glyph_font or "SF Pro:Regular:14.0"
+    app.pattern = app.pattern or "clash%-verge|verge%-mihomo|clash%-verge%-service"
+  elseif app.name == "Karabiner-Elements" then
+    app.glyph = app.glyph or ":keyboard_maestro:"
+  end
+end
 
 local items = {}
 
@@ -40,15 +33,6 @@ end
 for i, app in ipairs(resident) do
   local label_string = app.glyph or icon_for(app.name)
   local label_font = app.glyph_font or "sketchybar-app-font:Regular:16.0"
-
-  local pat = app.pattern
-  local script = app.script or (
-    "sh -c '" ..
-    "SK=\"$(command -v sketchybar 2>/dev/null || echo /opt/homebrew/bin/sketchybar)\"; " ..
-    "pgrep -f \"" .. pat .. "\" >/dev/null 2>&1 " ..
-    "&& $SK --set $NAME drawing=on " ..
-    "|| $SK --set $NAME drawing=off'"
-  )
 
   local item = sbar.add("item", "resident." .. i, {
     position = "right",
@@ -63,12 +47,15 @@ for i, app in ipairs(resident) do
       padding_right = 6,
     },
     click_script = app.click_script or ("open -a \"" .. app.name .. "\""),
-    script = script,
     update_freq = app.update_freq or 5,
   })
 
   item:subscribe({ "forced", "routine", "system_woke" }, function()
-    item:set({})
+    local pat = app.pattern
+    sbar.exec("pgrep -f \"" .. pat .. "\" >/dev/null 2>&1 && echo 1 || echo 0", function(out)
+      local rc = tostring(out):gsub("%s+", "")
+      item:set({ drawing = (rc == "1") })
+    end)
   end)
 
   table.insert(items, item.name)
