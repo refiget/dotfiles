@@ -1,7 +1,3 @@
-[flavor]
-use = "Dracula Pro"
-
-# Minimal overrides to remove capsule/pill separators
 [status]
 sep_left  = { open = "", close = "" }
 sep_right = { open = "", close = "" }
