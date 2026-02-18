@@ -47,6 +47,13 @@ local function check_lsp_deps()
 end
 
 local function setup_lsp()
+
+  local function on_attach(client, _bufnr)
+    -- Formatting is handled by conform.nvim (single entrypoint).
+    client.server_capabilities.documentFormattingProvider = false
+    client.server_capabilities.documentRangeFormattingProvider = false
+  end
+
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   local ok_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
   if ok_cmp then
@@ -132,6 +139,7 @@ local function setup_lsp()
 
   local servers = {
     pyright = {
+      on_attach = on_attach,
       -- Make pyright automatically use ./.venv or ./venv when present
       -- Note: Neovim's new vim.lsp.config path may not always apply on_new_config;
       -- we also set it again in on_init and notify the server.
@@ -188,6 +196,7 @@ local function setup_lsp()
       },
     },
     lua_ls = {
+      on_attach = on_attach,
       settings = {
         Lua = {
           diagnostics = {
