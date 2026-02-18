@@ -251,6 +251,7 @@ return {
             },
             win_options = {
               winblend = 10,
+              winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
             },
           },
           popupmenu = {
@@ -269,6 +270,7 @@ return {
             },
             win_options = {
               winblend = 10,
+              winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
             },
           },
         },
