@@ -1,6 +1,8 @@
 local colors = require("colors")
 local settings = require("settings")
 
+local config_dir = os.getenv("CONFIG_DIR") or "$CONFIG_DIR"
+
 -- Right-side pill that mimics the left space app glyph string.
 -- It runs a small helper script that prints sketchybar key=value lines:
 --   drawing=on/off
@@ -20,7 +22,8 @@ local item = sbar.add("item", "resident.pill", {
     y_offset = -1,
   },
   background = { color = colors.bg1, corner_radius = 999, height = 26 },
-  script = "$CONFIG_DIR/helpers/resident_status.sh",
+  updates = true,
+  script = config_dir .. "/helpers/resident_status.sh",
   update_freq = 5,
 })
 
