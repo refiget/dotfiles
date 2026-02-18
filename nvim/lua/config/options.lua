@@ -31,7 +31,7 @@ opt.fillchars:append({ eob = " " })
 opt.scrolloff = 4
 -- Key sequence timeouts: keep terminal ESC/Meta sequences reliable (tmux friendly)
 opt.timeout = true
-opt.timeoutlen = 300
+opt.timeoutlen = 1000
 opt.ttimeoutlen = 25
 opt.viewoptions = { "cursor", "folds", "slash", "unix" }
 opt.wrap = true
