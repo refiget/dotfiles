@@ -248,7 +248,8 @@ return {
         layouts = {
           {
             position = "right",
-            size = 42,
+            -- Slimmer right panel (less "cheap bar" feel on small screens)
+            size = 34,
             elements = {
               { id = "scopes", size = 0.7 },
               { id = "stacks", size = 0.3 },
@@ -256,7 +257,8 @@ return {
           },
           {
             position = "bottom",
-            size = 12,
+            -- Slimmer console; you can always open floats for details
+            size = 9,
             elements = {
               { id = "console", size = 1.0 },
             },
@@ -267,6 +269,8 @@ return {
           mappings = { close = { "q", "<Esc>" } },
         },
         windows = { indent = 1 },
+        -- Remove the chunky section separators; rely on the global WinSeparator styling.
+        indent_lines = false,
         render = {
           max_type_length = 30,
           max_value_lines = 50,
@@ -287,6 +291,9 @@ return {
         vim.api.nvim_set_hl(0, "DapUIFrameName", { link = "Title" })
         vim.api.nvim_set_hl(0, "DapUISource", { link = "Comment" })
         vim.api.nvim_set_hl(0, "DapUILineNumber", { link = "LineNr" })
+        -- Separators: keep them subtle (same as splits)
+        vim.api.nvim_set_hl(0, "DapUISeparator", { link = "WinSeparator" })
+        vim.api.nvim_set_hl(0, "DapUISeparatorActive", { link = "WinSeparator" })
       end
 
       apply_dapui_hl()
