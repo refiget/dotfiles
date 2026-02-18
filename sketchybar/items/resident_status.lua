@@ -44,9 +44,10 @@ for i, app in ipairs(resident) do
   local pat = app.pattern
   local script = app.script or (
     "sh -c '" ..
+    "SK=\"$(command -v sketchybar 2>/dev/null || echo /opt/homebrew/bin/sketchybar)\"; " ..
     "pgrep -f \"" .. pat .. "\" >/dev/null 2>&1 " ..
-    "&& sketchybar --set $NAME drawing=on " ..
-    "|| sketchybar --set $NAME drawing=off'"
+    "&& $SK --set $NAME drawing=on " ..
+    "|| $SK --set $NAME drawing=off'"
   )
 
   local item = sbar.add("item", "resident." .. i, {
