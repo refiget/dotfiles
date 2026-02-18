@@ -215,6 +215,13 @@ return {
       { "<localleader>dp", function() _G.DAPUI_UX.float("breakpoints") end, desc = "DAP UI: breakpoints (float)", mode = "n" },
       { "<localleader>dw", function() _G.DAPUI_UX.float("watches") end, desc = "DAP UI: watches (float)", mode = "n" },
       { "<localleader>ds", function() _G.DAPUI_UX.float("stacks") end, desc = "DAP UI: stacks (float)", mode = "n" },
+
+      -- Stable leader aliases (space leader is more reliable than localleader in some tmux/iTerm2 setups)
+      { "<leader>dp", function() _G.DAPUI_UX.float("breakpoints") end, desc = "DAP UI: breakpoints (float)", mode = "n" },
+      { "<leader>dw", function() _G.DAPUI_UX.float("watches") end, desc = "DAP UI: watches (float)", mode = "n" },
+      { "<leader>ds", function() _G.DAPUI_UX.float("stacks") end, desc = "DAP UI: stacks (float)", mode = "n" },
+      { "<leader>du", function() _G.DAPUI_UX.toggle() end, desc = "DAP UI toggle", mode = "n" },
+      { "<leader>dU", function() _G.DAPUI_UX.open_reset() end, desc = "DAP UI open (reset)", mode = "n" }
     },
     config = function()
       local ok_dap, dap = pcall(require, "dap")
