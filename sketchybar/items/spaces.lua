@@ -20,8 +20,11 @@ if space_preview_offset > 0 then
 end
 
 -- Notch focus pills: left shows index, right shows apps of the current space.
+-- Notch focus pills: align symmetrically around the center line.
+-- Use x_offset (not padding) so spacing is independent of pill widths.
 local focus_index = sbar.add("item", "space.focus.index", {
   position = "center",
+  x_offset = -notch_gap,
   icon = { drawing = false },
   label = {
     font = { family = settings.font.numbers, size = 13.0 },
@@ -31,11 +34,11 @@ local focus_index = sbar.add("item", "space.focus.index", {
     padding_right = 10,
   },
   background = { color = colors.bg1, corner_radius = 999, height = 26 },
-  padding_right = notch_gap,
 })
 
 local focus_apps = sbar.add("item", "space.focus.apps", {
   position = "center",
+  x_offset = notch_gap,
   icon = { drawing = false },
   label = {
     font = "sketchybar-app-font:Regular:16.0",
@@ -46,7 +49,6 @@ local focus_apps = sbar.add("item", "space.focus.apps", {
     y_offset = -1,
   },
   background = { color = colors.bg1, corner_radius = 999, height = 26 },
-  padding_left = notch_gap,
 })
 
 local current_space = 1
