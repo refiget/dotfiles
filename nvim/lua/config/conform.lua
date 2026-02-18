@@ -1,6 +1,6 @@
 -- ===================== conform.lua =====================
 -- Opinionated formatting: prefer dedicated formatters when available.
--- Falls back to LSP formatting when no external formatter is configured.
+-- Conform is the single formatting entrypoint (no LSP formatting fallback).
 
 local ok, conform = pcall(require, "conform")
 if not ok then
@@ -16,7 +16,7 @@ conform.setup({
     if ok_stat and stat and stat.size and stat.size > max then
       return
     end
-    return { timeout_ms = 1500, lsp_fallback = true }
+    return { timeout_ms = 2000, lsp_fallback = false }
   end,
   formatters_by_ft = {
     lua = { "stylua" },
@@ -35,7 +35,7 @@ vim.keymap.set(
   "n",
   "<leader>f",
   function()
-    conform.format({ async = true, lsp_fallback = true })
+    conform.format({ async = true, lsp_fallback = false })
   end,
-  { silent = true, noremap = true, desc = "Format (conform, fallback to LSP)" }
+  { silent = true, noremap = true, desc = "Format (conform)" }
 )
