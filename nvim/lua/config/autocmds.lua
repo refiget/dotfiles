@@ -47,25 +47,21 @@ local function clean_dapui_chrome(bufnr)
     return
   end
 
-  -- For dapui_console, keep a thin separator line (winbar) instead of a chunky statusline.
-  -- For dapui_scopes, keep a small highlighted title.
+  -- For dapui_console, keep a thin separator line (winbar) instead of the global winbar.
+  -- NOTE: winbar/statusline are window-local options. Setting them buffer-locally does nothing.
   local winbar_value = ""
   if ft == "dapui_console" then
     winbar_value = "%{%v:lua.require('config.ui').sepbar()%}"
-  elseif ft == "dapui_scopes" then
-    winbar_value = "%{%v:lua.require('config.ui').panel_title('dapui_scopes')%}"
   end
 
-  -- Clear statusline for *any* window showing this buffer.
+  -- Apply to *all windows* showing this buffer.
   for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
     pcall(vim.api.nvim_win_set_option, win, "statusline", "")
     pcall(vim.api.nvim_win_set_option, win, "winbar", winbar_value)
   end
-  pcall(vim.api.nvim_buf_set_option, bufnr, "statusline", "")
-  pcall(vim.api.nvim_buf_set_option, bufnr, "winbar", winbar_value)
 end
 
-vim.api.nvim_create_autocmd({ "FileType", "BufWinEnter" }, {
+vim.api.nvim_create_autocmd({ "FileType", "BufWinEnter", "WinEnter" }, {
   group = dapui_group,
   pattern = "*",
   callback = function(ev)
