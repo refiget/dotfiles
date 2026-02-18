@@ -128,6 +128,16 @@ return {
         return
       end
       noice.setup({
+        lsp = {
+          -- Let noice render hover/signature in a consistent UI.
+          hover = { enabled = true },
+          signature = { enabled = true },
+          override = {
+            ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+            ["vim.lsp.util.stylize_markdown"] = true,
+            ["cmp.entry.get_documentation"] = true,
+          },
+        },
         cmdline = {
           enabled = true,
           view = "cmdline_popup",
