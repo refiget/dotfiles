@@ -58,4 +58,4 @@ if [ "$count" -eq 0 ]; then
 fi
 
 echo "drawing=on"
-echo "label=$out"
+echo "label=\"$out\""
