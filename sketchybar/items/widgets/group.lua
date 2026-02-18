@@ -4,6 +4,9 @@ local settings = require("settings")
 local M = {}
 
 function M.make_right_bracket(item_names)
+  if not settings.widgets_right_bracket then
+    return nil
+  end
   if not item_names or #item_names == 0 then
     return nil
   end

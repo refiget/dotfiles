@@ -7,6 +7,7 @@ local widgets = {
     "battery",
     "volume",
     "wifi",
+    "background_apps",
 }
 
 local group_items = {}

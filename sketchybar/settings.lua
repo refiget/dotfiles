@@ -15,7 +15,14 @@ local function load_config()
         -- Font configuration
         font = require("helpers.default_font"),
         group_paddings = 10,
-        hide_widgets = {},
+        -- Widgets shown on the right. Default to ultra-minimal: hide system stats widgets
+        -- and show only resident apps.
+        hide_widgets = { "battery", "volume", "wifi" },
+        resident_apps = {
+            { name = "Clash Verge" },
+            { name = "Kindavim" },
+        },
+        widgets_right_bracket = false,
         icons = "NerdFont", -- alternatively available: sf-symbols
         paddings = 3,
         python_command = "python",
