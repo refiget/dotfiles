@@ -396,63 +396,67 @@ return {
       end
 
       function _G.DAPUI_UX.toggle()
-        -- Default toggle now opens a floating "panel" (premium, non-invasive).
+        -- Floating dashboard (persistent): only closes on manual toggle or when owner buffer dies.
         vim.g._dapui_owner_buf = vim.api.nvim_get_current_buf()
         vim.g._dapui_owner_tab = vim.api.nvim_get_current_tabpage()
 
-        -- If no active session, start debugging this file first.
-        pcall(function()
-          if require("dap").session() == nil then
-            _G.DAPUI_UX.debug_current_file()
-          end
-        end)
-
+        -- If already open, close it.
         if vim.g._dapui_float_wins then
           close_float_wins()
           return
         end
 
-        -- Open a compact floating dashboard: scopes + stacks + console.
-        -- (No permanent splits; close with the same key.)
-        local cur = vim.api.nvim_get_current_win()
-        vim.g._dapui_float_wins = {}
+        local function open_dashboard_floats()
+          local cur = vim.api.nvim_get_current_win()
+          vim.g._dapui_float_wins = {}
 
-        local function open_float(element, cfg)
-          cfg = cfg or {}
-          dapui.float_element(element, { enter = cfg.enter or false })
-
-          local w = vim.api.nvim_get_current_win()
-          if w ~= cur then
-            table.insert(vim.g._dapui_float_wins, w)
-          end
-
-          -- Reposition to form a dashboard on the right side (no overlap).
           local cols = vim.o.columns
           local lines = vim.o.lines
-          local width = cfg.width or math.floor(cols * 0.36)
-          local height = cfg.height or math.floor(lines * 0.25)
-          local col = cfg.col or (cols - width - 2)
-          local row = cfg.row or 2
+          local width = math.max(40, math.floor(cols * 0.34))
+          local col = cols - width - 2
+          local top = 2
+          local h1 = math.max(10, math.floor(lines * 0.30))
+          local h2 = math.max(6, math.floor(lines * 0.16))
+          local h3 = math.max(8, math.floor(lines * 0.26))
+          local gap = 1
 
-          local okc, c = pcall(vim.api.nvim_win_get_config, w)
-          if okc and c and c.relative ~= '' then
-            c.relative = 'editor'
-            c.width = width
-            c.height = height
-            c.col = col
-            c.row = row
-            c.anchor = 'NW'
-            pcall(vim.api.nvim_win_set_config, w, c)
+          local function open_float(element, row, height)
+            dapui.float_element(element, { enter = false })
+            local w = vim.api.nvim_get_current_win()
+            table.insert(vim.g._dapui_float_wins, w)
+
+            -- Force non-overlapping geometry (dapui opens centered by default).
+            local cfg = {
+              relative = 'editor',
+              anchor = 'NW',
+              width = width,
+              height = height,
+              col = col,
+              row = row,
+              focusable = true,
+              zindex = 50,
+            }
+            pcall(vim.api.nvim_win_set_config, w, cfg)
+
+            -- Make sure our float uses the unified float highlights.
+            pcall(vim.api.nvim_win_set_option, w, 'winhighlight', 'Normal:NormalFloat,FloatBorder:FloatBorder')
           end
+
+          open_float('scopes', top, h1)
+          open_float('stacks', top + h1 + gap, h2)
+          open_float('console', top + h1 + gap + h2 + gap, h3)
+
+          pcall(vim.api.nvim_set_current_win, cur)
         end
 
-        -- Keep you in the code window.
-        open_float("scopes", { enter = false, row = 2, height = math.floor(vim.o.lines * 0.32) })
-        pcall(vim.api.nvim_set_current_win, cur)
-        open_float("stacks", { enter = false, row = math.floor(vim.o.lines * 0.34) + 2, height = math.floor(vim.o.lines * 0.18) })
-        pcall(vim.api.nvim_set_current_win, cur)
-        open_float("console", { enter = false, row = math.floor(vim.o.lines * 0.54) + 2, height = math.floor(vim.o.lines * 0.28) })
-        pcall(vim.api.nvim_set_current_win, cur)
+        -- Ensure a session exists first; opening floats before/while session starts can flicker/close.
+        local ok_dap, dap = pcall(require, 'dap')
+        if ok_dap and dap.session() == nil then
+          _G.DAPUI_UX.debug_current_file()
+          vim.defer_fn(open_dashboard_floats, 200)
+        else
+          open_dashboard_floats()
+        end
       end
 
       function _G.DAPUI_UX.open_reset()
@@ -476,6 +480,7 @@ return {
           local cur = vim.api.nvim_get_current_buf()
           if vim.g._dapui_owner_buf and cur == vim.g._dapui_owner_buf then
             pcall(dapui.close)
+              pcall(close_float_wins)
           end
         end,
       })
@@ -486,6 +491,7 @@ return {
           vim.schedule(function()
             if not owner_alive() then
               pcall(dapui.close)
+              pcall(close_float_wins)
             end
           end)
         end,
