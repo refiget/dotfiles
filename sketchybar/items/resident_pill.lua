@@ -25,12 +25,14 @@ local item = sbar.add("item", "resident.pill", {
 })
 
 -- Some sketchybar versions don't reliably apply script/update_freq via the Lua wrapper.
--- Use the CLI-compatible setter.
-sbar.set(item.name, {
-  updates = true,
-  script = config_dir .. "/helpers/resident_status.sh",
-  update_freq = 5,
-})
+-- Use the sketchybar CLI to set them.
+sbar.exec(
+  "sketchybar --set "
+    .. item.name
+    .. " updates=on"
+    .. " update_freq=5"
+    .. " script=\"" .. config_dir .. "/helpers/resident_status.sh\""
+)
 
 item:subscribe({ "forced", "routine", "system_woke" }, function()
   item:set({})
