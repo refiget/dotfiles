@@ -4,7 +4,20 @@ local app_icons = require("helpers.app_icons")
 
 local spaces = {}
 
+-- Space previews (left) and notch focus pills (center) need independent tuning.
+-- Increase space_preview_offset to push the left preview group rightwards.
+local space_preview_offset = settings.space_preview_offset or 0
 local notch_gap = settings.notch_gap or 80
+
+if space_preview_offset > 0 then
+  sbar.add("item", "space.preview.spacer", {
+    position = "left",
+    width = space_preview_offset,
+    icon = { drawing = false },
+    label = { drawing = false },
+    background = { drawing = false },
+  })
+end
 
 -- Notch focus pills: left shows index, right shows apps of the current space.
 local focus_index = sbar.add("item", "space.focus.index", {
