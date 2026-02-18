@@ -10,6 +10,15 @@ local space_preview_offset = settings.space_preview_offset or 0
 local notch_gap = settings.notch_gap or 80
 local focus_apps_extra_gap = settings.focus_apps_extra_gap or 0
 
+-- Allow independent positioning of the two notch pills.
+-- - focus_index_gap controls the index pill distance from center (right padding)
+-- - focus_apps_gap controls the apps pill distance from center (left padding)
+local focus_index_gap = settings.focus_index_gap
+local focus_apps_gap = settings.focus_apps_gap
+
+local index_gap = (type(focus_index_gap) == "number") and focus_index_gap or notch_gap
+local apps_gap = (type(focus_apps_gap) == "number") and focus_apps_gap or (notch_gap + focus_apps_extra_gap)
+
 -- Left preview group should not move; keep spacer but force width=0.
 sbar.add("item", "preview.spacer", {
   position = "left",
@@ -25,7 +34,7 @@ sbar.add("item", "preview.spacer", {
 -- from the center. (Works reliably across sketchybar versions.)
 local focus_index = sbar.add("item", "space.focus.index", {
   position = "center",
-  padding_right = notch_gap,
+  padding_right = index_gap,
   icon = { drawing = false },
   label = {
     font = { family = settings.font.numbers, size = 13.0 },
@@ -39,7 +48,7 @@ local focus_index = sbar.add("item", "space.focus.index", {
 
 local focus_apps = sbar.add("item", "space.focus.apps", {
   position = "center",
-  padding_left = notch_gap + focus_apps_extra_gap,
+  padding_left = apps_gap,
   icon = { drawing = false },
   label = {
     font = "sketchybar-app-font:Regular:16.0",
