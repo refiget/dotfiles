@@ -35,7 +35,9 @@ return {
       -- Keep these plugin vars here (they're appearance-adjacent)
       -- NOTE: rainbow-delimiters does not use rainbow_active; configured in its plugin block.
 
-      -- Statusline: disabled (tmux + winbar provide enough UI)
+      -- Statusline: eleline
+      vim.g.eleline_colorscheme = "catppuccin"
+      vim.g.eleline_powerline_fonts = 0
     end,
   },
   {
@@ -125,7 +127,7 @@ return {
       end)
     end,
   },
-  -- eleline disabled (statusline removed)
+  { "theniceboy/eleline.vim", branch = "no-scrollbar", lazy = false },
   -- Word-under-cursor highlight (modern + minimal). Prefer this over vim-illuminate.
   {
     "echasnovski/mini.cursorword",
