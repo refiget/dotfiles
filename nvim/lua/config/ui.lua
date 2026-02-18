@@ -173,8 +173,16 @@ end
 
 function M.setup()
   -- Minimal chrome: let tmux own the persistent bottom UI.
-  -- Use a thin vertical separator character everywhere (less "thick bar" feel).
-  vim.opt.fillchars:append({ vert = "│" })
+  -- Use thin separator characters everywhere (less "thick bar" feel).
+  vim.opt.fillchars:append({
+    vert = "│",
+    horiz = "─",
+    horizup = "┴",
+    horizdown = "┬",
+    vertleft = "┤",
+    vertright = "├",
+    verthoriz = "┼",
+  })
 
   vim.opt.laststatus = 0
   vim.opt.showtabline = 0
