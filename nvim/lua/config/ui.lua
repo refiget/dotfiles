@@ -184,8 +184,8 @@ function M.setup()
     verthoriz = "┼",
   })
 
-  -- Statusline: enable (eleline)
-  vim.opt.laststatus = 2
+  -- Statusline is controlled dynamically in config/autocmds.lua (DAP UI only).
+  vim.opt.laststatus = 0
   vim.opt.showtabline = 0
 
   -- Use lua-powered winbar.
