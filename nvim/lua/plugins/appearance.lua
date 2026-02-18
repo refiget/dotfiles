@@ -80,6 +80,18 @@ return {
           "RainbowDelimiterCyan",
         },
       }
+
+      -- If colorscheme doesn't define these groups, set pleasant defaults.
+      pcall(function()
+        local p = require("catppuccin.palettes").get_palette("mocha")
+        vim.api.nvim_set_hl(0, "RainbowDelimiterRed", { fg = p.red })
+        vim.api.nvim_set_hl(0, "RainbowDelimiterYellow", { fg = p.yellow })
+        vim.api.nvim_set_hl(0, "RainbowDelimiterBlue", { fg = p.blue })
+        vim.api.nvim_set_hl(0, "RainbowDelimiterOrange", { fg = p.peach })
+        vim.api.nvim_set_hl(0, "RainbowDelimiterGreen", { fg = p.green })
+        vim.api.nvim_set_hl(0, "RainbowDelimiterViolet", { fg = p.mauve })
+        vim.api.nvim_set_hl(0, "RainbowDelimiterCyan", { fg = p.sapphire })
+      end)
     end,
   },
   { "theniceboy/eleline.vim", branch = "no-scrollbar", lazy = false },
@@ -93,9 +105,13 @@ return {
         return
       end
       cw.setup({ delay = 600 })
-      -- Subtle underline; let colorscheme decide foreground.
-      vim.api.nvim_set_hl(0, "MiniCursorword", { underline = true })
-      vim.api.nvim_set_hl(0, "MiniCursorwordCurrent", { underline = true })
+
+      -- Make it visible on a transparent background: use a very subtle bg tint.
+      pcall(function()
+        local p = require("catppuccin.palettes").get_palette("mocha")
+        vim.api.nvim_set_hl(0, "MiniCursorword", { bg = p.surface0 })
+        vim.api.nvim_set_hl(0, "MiniCursorwordCurrent", { bg = p.surface1 })
+      end)
 
       -- Ensure it's enabled even if another plugin toggles it.
       vim.cmd("silent! MiniCursorwordEnable")
