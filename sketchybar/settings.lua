@@ -18,9 +18,12 @@ local function load_config()
         -- Widgets shown on the right. Default to ultra-minimal: hide system stats widgets
         -- and show only resident apps.
         hide_widgets = { "battery", "volume", "wifi" },
-        resident_apps = {
-            { name = "Clash Verge" },
-            { name = "Kindavim" },
+        -- Resident tools shown on the right (icon-only)
+        resident_status = {
+            { name = "Clash Verge", pattern = "clash%-verge|verge%-mihomo" },
+            { name = "Keyboard Maestro", pattern = "Keyboard Maestro Engine" },
+            { name = "kindaVim", pattern = "kindaVim" },
+            { name = "Karabiner-Elements", pattern = "Karabiner%-Menu|karabiner_console_user_server|Karabiner%-Core%-Service" },
         },
         widgets_right_bracket = false,
         disable_right_widgets = true,
