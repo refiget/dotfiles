@@ -58,13 +58,13 @@ for i = 1, 3, 1 do
     icon = {
       font = { family = settings.font.numbers },
       string = i,
-      padding_left = 8,
-      padding_right = 8,
+      padding_left = 6,
+      padding_right = 6,
       color = colors.white,
       highlight_color = colors.red,
     },
     label = {
-      padding_right = 10,
+      padding_right = 4,
       color = colors.white,
       highlight_color = colors.white,
       font = "sketchybar-app-font:Regular:16.0",
@@ -154,7 +154,7 @@ local space_window_observer = sbar.add("item", {
 
 space_window_observer:subscribe("space_windows_change", function(env)
   -- Limit noise: show at most N app icons, then "+N" overflow.
-  local MAX_APPS = 6
+  local MAX_APPS = 4
 
   -- Ensure stable ordering (avoid jitter): sort app names.
   local app_names = {}
