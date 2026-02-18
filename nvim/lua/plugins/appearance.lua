@@ -33,10 +33,11 @@ return {
       -- Ensure popup UI has readable contrast even with transparent_background=true
       pcall(function()
         local p = require("catppuccin.palettes").get_palette("mocha")
-        vim.api.nvim_set_hl(0, "Pmenu", { fg = p.text, bg = p.mantle })
+        -- Use base (slightly lighter than mantle) to avoid the "pure black" feel.
+        vim.api.nvim_set_hl(0, "Pmenu", { fg = p.text, bg = p.base })
         vim.api.nvim_set_hl(0, "PmenuSel", { fg = p.text, bg = p.surface0 })
-        vim.api.nvim_set_hl(0, "NormalFloat", { fg = p.text, bg = p.mantle })
-        vim.api.nvim_set_hl(0, "FloatBorder", { fg = p.surface2, bg = p.mantle })
+        vim.api.nvim_set_hl(0, "NormalFloat", { fg = p.text, bg = p.base })
+        vim.api.nvim_set_hl(0, "FloatBorder", { fg = p.surface2, bg = p.base })
       end)
 
       -- Keep these plugin vars here (they're appearance-adjacent)
@@ -114,7 +115,8 @@ return {
       end
       local bg = "#1e1e2e"
       pcall(function()
-        bg = require("catppuccin.palettes").get_palette("mocha").mantle
+        -- Prefer base (less "inky" than mantle) for a more premium look.
+        bg = require("catppuccin.palettes").get_palette("mocha").base
       end)
 
       notify.setup({
