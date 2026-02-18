@@ -23,6 +23,7 @@ local function load_config()
             { name = "Kindavim" },
         },
         widgets_right_bracket = false,
+        disable_right_widgets = true,
         icons = "NerdFont", -- alternatively available: sf-symbols
         paddings = 3,
         python_command = "python",

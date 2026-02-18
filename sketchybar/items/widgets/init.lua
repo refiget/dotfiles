@@ -1,13 +1,18 @@
 local settings = require("settings")
-local tbl = require("utils.tbl")
 
+-- Right side widgets are optional. For an ultra-minimal bar, disable them.
+if settings.disable_right_widgets then
+  return
+end
+
+local tbl = require("utils.tbl")
 local group = require("items.widgets.group")
 
 local widgets = {
-    "battery",
-    "volume",
-    "wifi",
-    "background_apps",
+  "battery",
+  "volume",
+  "wifi",
+  "background_apps",
 }
 
 local group_items = {}
