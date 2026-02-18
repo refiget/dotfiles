@@ -1,5 +1,8 @@
 require("items.apple")
 require("items.menus")
-require("items.spaces")
--- Calendar/time capsule removed (terminal already shows time/date).
--- Right-side widgets removed; focus is Spaces + Space app glyphs.
+
+-- Spaces UI is split into:
+-- - items.space_focus   (notch pills)
+-- - items.space_preview (left preview pills + app glyphs)
+require("items.space_focus")
+require("items.space_preview")
