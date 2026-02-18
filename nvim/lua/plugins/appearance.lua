@@ -126,6 +126,10 @@ return {
           return math.floor(vim.o.columns * 0.4)
         end,
       })
+
+      -- Force notify window background to match catppuccin (avoid pure/near black).
+      pcall(vim.api.nvim_set_hl, 0, "NotifyBackground", { bg = bg })
+
       vim.notify = notify
     end,
   },
