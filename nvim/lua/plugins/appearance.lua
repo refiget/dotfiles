@@ -30,15 +30,7 @@ return {
 
       vim.cmd("silent! colorscheme catppuccin")
 
-      -- Ensure popup UI has readable contrast even with transparent_background=true
-      pcall(function()
-        local p = require("catppuccin.palettes").get_palette("mocha")
-        -- Use base (slightly lighter than mantle) to avoid the "pure black" feel.
-        vim.api.nvim_set_hl(0, "Pmenu", { fg = p.text, bg = p.base })
-        vim.api.nvim_set_hl(0, "PmenuSel", { fg = p.text, bg = p.surface0 })
-        vim.api.nvim_set_hl(0, "NormalFloat", { fg = p.text, bg = p.base })
-        vim.api.nvim_set_hl(0, "FloatBorder", { fg = p.surface2, bg = p.base })
-      end)
+      -- Popup highlights are managed centrally in config/highlights.lua
 
       -- Keep these plugin vars here (they're appearance-adjacent)
       -- NOTE: rainbow-delimiters does not use rainbow_active; configured in its plugin block.
@@ -192,7 +184,6 @@ return {
       end
       local bg = "#1e1e2e"
       pcall(function()
-        -- Prefer base (less "inky" than mantle) for a more premium look.
         bg = require("catppuccin.palettes").get_palette("mocha").base
       end)
 
@@ -206,8 +197,7 @@ return {
         end,
       })
 
-      -- Force notify window background to match catppuccin (avoid pure/near black).
-      pcall(vim.api.nvim_set_hl, 0, "NotifyBackground", { bg = bg })
+      -- Notify background highlight is managed centrally in config/highlights.lua
 
       vim.notify = notify
     end,

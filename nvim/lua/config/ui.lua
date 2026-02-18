@@ -125,20 +125,8 @@ end
 function M.apply_highlights()
   local accent = tmux_theme_color()
 
-  -- Reduce boxiness: soften separators.
-  -- Catppuccin Mocha-ish divider tone (surface0).
-  local divider = "#313244"
-  vim.api.nvim_set_hl(0, "WinSeparator", { fg = divider })
-  vim.api.nvim_set_hl(0, "VertSplit", { fg = divider })
-
-  -- Floats: unify borders with separators (tmux-like, low contrast).
-  vim.api.nvim_set_hl(0, "FloatBorder", { fg = divider })
-  vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
-  -- Plugin-specific borders: link to FloatBorder for consistency
-  vim.api.nvim_set_hl(0, "TelescopeBorder", { link = "FloatBorder" })
-  vim.api.nvim_set_hl(0, "TelescopePromptBorder", { link = "FloatBorder" })
-  vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { link = "FloatBorder" })
-  vim.api.nvim_set_hl(0, "TelescopePreviewBorder", { link = "FloatBorder" })
+  -- Separators/floats are managed centrally in config/highlights.lua.
+  -- Keep this module focused on winbar + tmux accent cohesion.
 
   -- Transparent background cohesion (tmux-style)
   vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
