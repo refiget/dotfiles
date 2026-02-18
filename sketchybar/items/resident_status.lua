@@ -41,6 +41,14 @@ for i, app in ipairs(resident) do
   local label_string = app.glyph or icon_for(app.name)
   local label_font = app.glyph_font or "sketchybar-app-font:Regular:16.0"
 
+  local pat = app.pattern
+  local script = app.script or (
+    "sh -c '" ..
+    "pgrep -f \"" .. pat .. "\" >/dev/null 2>&1 " ..
+    "&& sketchybar --set $NAME drawing=on " ..
+    "|| sketchybar --set $NAME drawing=off'"
+  )
+
   local item = sbar.add("item", "resident." .. i, {
     position = "right",
     drawing = false,
@@ -54,18 +62,12 @@ for i, app in ipairs(resident) do
       padding_right = 6,
     },
     click_script = app.click_script or ("open -a \"" .. app.name .. "\""),
+    script = script,
     update_freq = app.update_freq or 5,
   })
 
   item:subscribe({ "forced", "routine", "system_woke" }, function()
-    local pat = app.pattern
-    -- Use pgrep -f for robustness (matches full command line).
-    sbar.exec("pgrep -f \"" .. pat .. "\" >/dev/null 2>&1; echo $?", function(out)
-      -- sketchybar passes command stdout to callback
-      local rc = tostring(out):gsub("%s+", "")
-      local running = (rc == "0")
-      item:set({ drawing = running })
-    end)
+    item:set({})
   end)
 
   table.insert(items, item.name)
