@@ -13,7 +13,7 @@ local notch_gap = settings.notch_gap or 80
 sbar.add("item", "preview.spacer", {
   position = "left",
   width = space_preview_offset,
-  drawing = false,
+  drawing = true,
   icon = { drawing = false },
   label = { drawing = false },
   background = { drawing = false },
