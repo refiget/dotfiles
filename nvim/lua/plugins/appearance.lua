@@ -21,6 +21,8 @@ return {
             telescope = true,
             trouble = true,
             native_lsp = { enabled = true },
+            notify = true,
+            noice = true,
           },
         })
       end
@@ -29,8 +31,6 @@ return {
 
       -- Keep these plugin vars here (they're appearance-adjacent)
       vim.g.rainbow_active = 1
-      vim.g.Illuminate_delay = 750
-      vim.api.nvim_set_hl(0, "illuminatedWord", { undercurl = true })
 
       -- lightline disabled: eleline is the single statusline implementation
       vim.g.eleline_colorscheme = "catppuccin"
@@ -52,9 +52,24 @@ return {
       end
     end,
   },
-  { "HiPhish/rainbow-delimiters.nvim", event = "VeryLazy" },
+  -- Rainbow parentheses (Treesitter-based)
+  { "HiPhish/rainbow-delimiters.nvim", event = { "BufReadPost", "BufNewFile" } },
   { "theniceboy/eleline.vim", branch = "no-scrollbar", lazy = false },
-  { "RRethy/vim-illuminate", event = "BufReadPost" },
+  -- Word-under-cursor highlight (modern + minimal). Prefer this over vim-illuminate.
+  {
+    "echasnovski/mini.cursorword",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      local ok, cw = pcall(require, "mini.cursorword")
+      if not ok then
+        return
+      end
+      cw.setup({ delay = 600 })
+      -- Subtle underline; let colorscheme decide foreground.
+      vim.api.nvim_set_hl(0, "MiniCursorword", { underline = true })
+      vim.api.nvim_set_hl(0, "MiniCursorwordCurrent", { underline = true })
+    end,
+  },
   {
     "NvChad/nvim-colorizer.lua",
     event = "VeryLazy",
@@ -77,6 +92,103 @@ return {
     end,
   },
   { "kevinhwang91/nvim-hlslens", event = "CmdlineEnter" },
+
+  -- Unified message/cmdline UI (centered cmdline) + better notifications
+  {
+    "rcarriga/nvim-notify",
+    event = "VeryLazy",
+    config = function()
+      local ok, notify = pcall(require, "notify")
+      if not ok then
+        return
+      end
+      notify.setup({
+        stages = "fade",
+        timeout = 2500,
+        background_colour = "#000000",
+        render = "minimal",
+        max_width = function()
+          return math.floor(vim.o.columns * 0.4)
+        end,
+      })
+      vim.notify = notify
+    end,
+  },
+  { "MunifTanjim/nui.nvim", event = "VeryLazy" },
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "rcarriga/nvim-notify",
+    },
+    config = function()
+      local ok, noice = pcall(require, "noice")
+      if not ok then
+        return
+      end
+      noice.setup({
+        cmdline = {
+          enabled = true,
+          view = "cmdline_popup",
+          format = {
+            cmdline = { pattern = "^:", icon = ":", lang = "vim" },
+            search_down = { kind = "search", pattern = "^/", icon = " ", lang = "regex" },
+            search_up = { kind = "search", pattern = "^\\?", icon = " ", lang = "regex" },
+          },
+        },
+        views = {
+          cmdline_popup = {
+            position = {
+              row = "45%",
+              col = "50%",
+            },
+            size = {
+              width = 60,
+              height = "auto",
+            },
+            border = {
+              style = "rounded",
+              padding = { 0, 1 },
+            },
+            win_options = {
+              winblend = 10,
+            },
+          },
+          popupmenu = {
+            relative = "editor",
+            position = {
+              row = "55%",
+              col = "50%",
+            },
+            size = {
+              width = 60,
+              height = 10,
+            },
+            border = {
+              style = "rounded",
+              padding = { 0, 1 },
+            },
+            win_options = {
+              winblend = 10,
+            },
+          },
+        },
+        presets = {
+          bottom_search = false,
+          command_palette = true,
+          long_message_to_split = true,
+          inc_rename = false,
+          lsp_doc_border = true,
+        },
+        routes = {
+          -- Reduce noise
+          { filter = { event = "msg_show", kind = "search_count" }, opts = { skip = true } },
+          { filter = { event = "msg_show", kind = "wmsg" }, opts = { skip = true } },
+        },
+      })
+    end,
+  },
   -- bufferline disabled: tmux status already provides a tab strip (avoid duplicate UI)
   {
     "lewis6991/gitsigns.nvim",
