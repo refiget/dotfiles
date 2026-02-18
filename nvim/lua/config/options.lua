@@ -47,7 +47,7 @@ opt.virtualedit = "block"
 opt.inccommand = "split"
 opt.showmode = false
 
--- No built-in "ruler" stats at the bottom (statusline already shows what we need)
+-- No built-in "ruler" stats at the bottom (we use winbar + tmux status)
 opt.ruler = false
 opt.showcmd = false
 -- NOTE: don't set lazyredraw permanently.

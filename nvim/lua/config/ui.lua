@@ -184,8 +184,7 @@ function M.setup()
     verthoriz = "┼",
   })
 
-  -- Statusline: enable (eleline)
-  vim.opt.laststatus = 2
+  vim.opt.laststatus = 0
   vim.opt.showtabline = 0
 
   -- Use lua-powered winbar.
