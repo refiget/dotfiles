@@ -9,22 +9,22 @@ local spaces = {}
 local space_preview_offset = settings.space_preview_offset or 0
 local notch_gap = settings.notch_gap or 80
 
--- Always create a spacer so we can tune without changing code.
+-- Left preview group should not move; keep spacer but force width=0.
 sbar.add("item", "preview.spacer", {
   position = "left",
-  width = space_preview_offset,
-  drawing = true,
+  width = 0,
+  drawing = false,
   icon = { drawing = false },
   label = { drawing = false },
   background = { drawing = false },
 })
 
 -- Notch focus pills: left shows index, right shows apps of the current space.
--- Notch focus pills: align symmetrically around the center line.
--- Use x_offset (not padding) so spacing is independent of pill widths.
+-- Place them symmetrically around the center line by using equal padding away
+-- from the center. (Works reliably across sketchybar versions.)
 local focus_index = sbar.add("item", "space.focus.index", {
   position = "center",
-  x_offset = -notch_gap,
+  padding_right = notch_gap,
   icon = { drawing = false },
   label = {
     font = { family = settings.font.numbers, size = 13.0 },
@@ -38,7 +38,7 @@ local focus_index = sbar.add("item", "space.focus.index", {
 
 local focus_apps = sbar.add("item", "space.focus.apps", {
   position = "center",
-  x_offset = notch_gap,
+  padding_left = notch_gap,
   icon = { drawing = false },
   label = {
     font = "sketchybar-app-font:Regular:16.0",
