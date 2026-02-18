@@ -20,10 +20,10 @@ local function load_config()
         hide_widgets = { "battery", "volume", "wifi" },
         -- Resident tools shown on the right (icon-only)
         resident_status = {
-            { name = "Clash Verge", pattern = "clash%-verge|verge%-mihomo" },
+            { name = "Clash Verge", pattern = "clash-verge|verge-mihomo|clash-verge-service" },
             { name = "Keyboard Maestro", pattern = "Keyboard Maestro Engine" },
             { name = "kindaVim", pattern = "kindaVim" },
-            { name = "Karabiner-Elements", pattern = "Karabiner%-Menu|karabiner_console_user_server|Karabiner%-Core%-Service" },
+            { name = "Karabiner-Elements", pattern = "Karabiner-Menu|karabiner_console_user_server|Karabiner-Core-Service" },
         },
         widgets_right_bracket = false,
         disable_right_widgets = true,

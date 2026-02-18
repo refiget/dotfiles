@@ -7,7 +7,7 @@ local app_icons = require("helpers.app_icons")
 -- These are intentionally minimal and only draw when the process is present.
 
 local resident = settings.resident_status or {
-  { name = "Clash Verge", pattern = "clash%-verge|verge%-mihomo|clash%-verge%-service" },
+  { name = "Clash Verge", pattern = "clash-verge|verge-mihomo|clash-verge-service" },
   { name = "Keyboard Maestro", pattern = "Keyboard Maestro Engine" },
   { name = "kindaVim", pattern = "kindaVim" },
   { name = "Karabiner-Elements", pattern = "Karabiner%-Menu|karabiner_console_user_server|Karabiner%-Core%-Service" },
@@ -18,7 +18,7 @@ for _, app in ipairs(resident) do
   if app.name == "Clash Verge" then
     app.glyph = app.glyph or icons.wifi.vpn
     app.glyph_font = app.glyph_font or "SF Pro:Regular:14.0"
-    app.pattern = app.pattern or "clash%-verge|verge%-mihomo|clash%-verge%-service"
+    app.pattern = app.pattern or "clash-verge|verge-mihomo|clash-verge-service"
   elseif app.name == "Karabiner-Elements" then
     app.glyph = app.glyph or ":keyboard_maestro:"
   end
