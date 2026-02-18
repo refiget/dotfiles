@@ -49,9 +49,9 @@ function M.apply()
   -- Notify background
   vim.api.nvim_set_hl(0, "NotifyBackground", { bg = p.base })
 
-  -- Statusline background should match the buffer (transparent)
-  vim.api.nvim_set_hl(0, "StatusLine", { fg = p.text, bg = "NONE" })
-  vim.api.nvim_set_hl(0, "StatusLineNC", { fg = p.overlay0, bg = "NONE" })
+  -- Statusline background (explicit)
+  vim.api.nvim_set_hl(0, "StatusLine", { fg = p.text, bg = "#1E1E2E" })
+  vim.api.nvim_set_hl(0, "StatusLineNC", { fg = p.overlay0, bg = "#1E1E2E" })
 
   -- Subtle separators (used across UI)
   vim.api.nvim_set_hl(0, "WinSeparator", { fg = p.surface0 })
