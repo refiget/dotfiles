@@ -8,6 +8,7 @@ local spaces = {}
 -- Increase space_preview_offset to push the left preview group rightwards.
 local space_preview_offset = settings.space_preview_offset or 0
 local notch_gap = settings.notch_gap or 80
+local focus_apps_extra_gap = settings.focus_apps_extra_gap or 0
 
 -- Left preview group should not move; keep spacer but force width=0.
 sbar.add("item", "preview.spacer", {
@@ -38,7 +39,7 @@ local focus_index = sbar.add("item", "space.focus.index", {
 
 local focus_apps = sbar.add("item", "space.focus.apps", {
   position = "center",
-  padding_left = notch_gap,
+  padding_left = notch_gap + focus_apps_extra_gap,
   icon = { drawing = false },
   label = {
     font = "sketchybar-app-font:Regular:16.0",
