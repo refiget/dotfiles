@@ -23,11 +23,21 @@ return {
             native_lsp = { enabled = true },
             notify = true,
             noice = true,
+            cmp = true,
           },
         })
       end
 
       vim.cmd("silent! colorscheme catppuccin")
+
+      -- Ensure popup UI has readable contrast even with transparent_background=true
+      pcall(function()
+        local p = require("catppuccin.palettes").get_palette("mocha")
+        vim.api.nvim_set_hl(0, "Pmenu", { fg = p.text, bg = p.mantle })
+        vim.api.nvim_set_hl(0, "PmenuSel", { fg = p.text, bg = p.surface0 })
+        vim.api.nvim_set_hl(0, "NormalFloat", { fg = p.text, bg = p.mantle })
+        vim.api.nvim_set_hl(0, "FloatBorder", { fg = p.surface2, bg = p.mantle })
+      end)
 
       -- Keep these plugin vars here (they're appearance-adjacent)
       vim.g.rainbow_active = 1

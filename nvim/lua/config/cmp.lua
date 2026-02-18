@@ -37,7 +37,9 @@ cmp.setup({
   },
   window = {
     completion = cmp.config.window.bordered({
-      winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
+      -- Use Pmenu highlights so the completion menu always has contrast even with
+      -- transparent backgrounds.
+      winhighlight = "Normal:Pmenu,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
       scrollbar = false,
       col_offset = -1,
       side_padding = 1,
