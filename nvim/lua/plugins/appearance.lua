@@ -41,7 +41,7 @@ return {
       end)
 
       -- Keep these plugin vars here (they're appearance-adjacent)
-      vim.g.rainbow_active = 1
+      -- NOTE: rainbow-delimiters does not use rainbow_active; configured in its plugin block.
 
       -- lightline disabled: eleline is the single statusline implementation
       vim.g.eleline_colorscheme = "catppuccin"
@@ -64,7 +64,24 @@ return {
     end,
   },
   -- Rainbow parentheses (Treesitter-based)
-  { "HiPhish/rainbow-delimiters.nvim", event = { "BufReadPost", "BufNewFile" } },
+  {
+    "HiPhish/rainbow-delimiters.nvim",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      -- This plugin is driven by g:rainbow_delimiters (not g:rainbow_active).
+      vim.g.rainbow_delimiters = {
+        highlight = {
+          "RainbowDelimiterRed",
+          "RainbowDelimiterYellow",
+          "RainbowDelimiterBlue",
+          "RainbowDelimiterOrange",
+          "RainbowDelimiterGreen",
+          "RainbowDelimiterViolet",
+          "RainbowDelimiterCyan",
+        },
+      }
+    end,
+  },
   { "theniceboy/eleline.vim", branch = "no-scrollbar", lazy = false },
   -- Word-under-cursor highlight (modern + minimal). Prefer this over vim-illuminate.
   {
@@ -79,6 +96,9 @@ return {
       -- Subtle underline; let colorscheme decide foreground.
       vim.api.nvim_set_hl(0, "MiniCursorword", { underline = true })
       vim.api.nvim_set_hl(0, "MiniCursorwordCurrent", { underline = true })
+
+      -- Ensure it's enabled even if another plugin toggles it.
+      vim.cmd("silent! MiniCursorwordEnable")
     end,
   },
   {
