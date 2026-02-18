@@ -227,4 +227,13 @@ function M.sepbar()
   return string.format("%%#WinSeparator#%s%%#WinBar#", string.rep("─", w - 1))
 end
 
+-- Small title for panels (no chunky statusline)
+function M.panel_title(title)
+  if not title or title == "" then
+    return ""
+  end
+  -- Always highlight (subtle accent), and keep it short.
+  return string.format("%%#WinBarMod#[%s]%%#WinBar#", title)
+end
+
 return M

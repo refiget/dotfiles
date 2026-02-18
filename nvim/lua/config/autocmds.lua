@@ -48,8 +48,13 @@ local function clean_dapui_chrome(bufnr)
   end
 
   -- For dapui_console, keep a thin separator line (winbar) instead of a chunky statusline.
-  local want_sepbar = (ft == "dapui_console")
-  local winbar_value = want_sepbar and "%{%v:lua.require('config.ui').sepbar()%}" or ""
+  -- For dapui_scopes, keep a small highlighted title.
+  local winbar_value = ""
+  if ft == "dapui_console" then
+    winbar_value = "%{%v:lua.require('config.ui').sepbar()%}"
+  elseif ft == "dapui_scopes" then
+    winbar_value = "%{%v:lua.require('config.ui').panel_title('dapui_scopes')%}"
+  end
 
   -- Clear statusline for *any* window showing this buffer.
   for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
