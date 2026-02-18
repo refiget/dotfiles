@@ -442,8 +442,11 @@ return {
             pcall(vim.api.nvim_win_set_option, w, 'winhighlight', 'Normal:NormalFloat,FloatBorder:FloatBorder')
           end
 
+          pcall(vim.api.nvim_set_current_win, cur)
           open_float('scopes', top, h1)
+          pcall(vim.api.nvim_set_current_win, cur)
           open_float('stacks', top + h1 + gap, h2)
+          pcall(vim.api.nvim_set_current_win, cur)
           open_float('console', top + h1 + gap + h2 + gap, h3)
 
           pcall(vim.api.nvim_set_current_win, cur)
@@ -452,8 +455,9 @@ return {
         -- Ensure a session exists first; opening floats before/while session starts can flicker/close.
         local ok_dap, dap = pcall(require, 'dap')
         if ok_dap and dap.session() == nil then
+          -- Defer opening until after the session is actually initialized (prevents flicker/disappear).
+          vim.g._dapui_dashboard_pending = true
           _G.DAPUI_UX.debug_current_file()
-          vim.defer_fn(open_dashboard_floats, 200)
         else
           open_dashboard_floats()
         end
@@ -502,6 +506,29 @@ return {
       dap.listeners.after.event_initialized["dapui_config"] = function() end
       dap.listeners.before.event_terminated["dapui_config"] = function() end
       dap.listeners.before.event_exited["dapui_config"] = function() end
+
+      -- Our floating dashboard: open after session initializes if requested.
+      dap.listeners.after.event_initialized["dapui_float_dashboard"] = function()
+        if vim.g._dapui_dashboard_pending then
+          vim.g._dapui_dashboard_pending = false
+          pcall(_G.DAPUI_UX.toggle)
+          -- toggle() will have opened + immediately closed if wins existed; ensure open.
+          if vim.g._dapui_float_wins == nil then
+            pcall(_G.DAPUI_UX.toggle)
+          end
+        end
+      end
+
+      -- Keep dashboard tiled on resize.
+      vim.api.nvim_create_autocmd("VimResized", {
+        group = group,
+        callback = function()
+          if vim.g._dapui_float_wins then
+            pcall(_G.DAPUI_UX.toggle)
+            pcall(_G.DAPUI_UX.toggle)
+          end
+        end,
+      })
     end,
   },
 }
