@@ -60,8 +60,10 @@ for i, app in ipairs(resident) do
   item:subscribe({ "forced", "routine", "system_woke" }, function()
     local pat = app.pattern
     -- Use pgrep -f for robustness (matches full command line).
-    sbar.exec("pgrep -f \"" .. pat .. "\" >/dev/null 2>&1; echo $?", function(code)
-      local running = tostring(code):match("^0") ~= nil
+    sbar.exec("pgrep -f \"" .. pat .. "\" >/dev/null 2>&1; echo $?", function(out)
+      -- sketchybar passes command stdout to callback
+      local rc = tostring(out):gsub("%s+", "")
+      local running = (rc == "0")
       item:set({ drawing = running })
     end)
   end)
