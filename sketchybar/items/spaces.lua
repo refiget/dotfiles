@@ -4,7 +4,7 @@ local app_icons = require("helpers.app_icons")
 
 local spaces = {}
 
-local notch_gap = settings.notch_gap or 120
+local notch_gap = settings.notch_gap or 80
 
 -- Notch focus pills: left shows index, right shows apps of the current space.
 local focus_index = sbar.add("item", "space.focus.index", {
@@ -52,7 +52,7 @@ for i = 1, 3, 1 do
     },
     label = {
       padding_right = 10,
-      color = colors.grey,
+      color = colors.white,
       highlight_color = colors.white,
       font = "sketchybar-app-font:Regular:16.0",
       y_offset = -1,
