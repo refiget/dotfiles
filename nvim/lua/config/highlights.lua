@@ -34,6 +34,7 @@ end
 
 function M.apply()
   local p = palette()
+  local bar_bg = "#1E1E2E"
 
   -- Floating windows (Noice/cmp/telescope/dap-ui/notify) should have a real background
   -- even when the main editor uses transparent background.
@@ -49,9 +50,28 @@ function M.apply()
   -- Notify background
   vim.api.nvim_set_hl(0, "NotifyBackground", { bg = p.base })
 
-  -- Statusline background (explicit)
-  vim.api.nvim_set_hl(0, "StatusLine", { fg = p.text, bg = "#1E1E2E" })
-  vim.api.nvim_set_hl(0, "StatusLineNC", { fg = p.overlay0, bg = "#1E1E2E" })
+  -- Bars background (explicit, global)
+  vim.api.nvim_set_hl(0, "StatusLine", { fg = p.text, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "StatusLineNC", { fg = p.overlay0, bg = bar_bg })
+
+  -- Winbar (your custom winbar uses these groups)
+  vim.api.nvim_set_hl(0, "WinBar", { fg = p.text, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "WinBarNC", { fg = p.overlay0, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "WinBarMeta", { fg = p.overlay0, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "WinBarPath", { fg = p.overlay0, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "WinBarPathNC", { fg = p.overlay0, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "WinBarFile", { fg = p.text, bg = bar_bg, bold = true })
+  vim.api.nvim_set_hl(0, "WinBarFileNC", { fg = p.text, bg = bar_bg, bold = true })
+  vim.api.nvim_set_hl(0, "WinBarDiagNone", { fg = p.overlay0, bg = bar_bg })
+  -- Keep diag colors but enforce background
+  vim.api.nvim_set_hl(0, "WinBarDiagWarn", { fg = p.yellow, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "WinBarDiagErr", { fg = p.red, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "WinBarMod", { fg = p.mauve, bg = bar_bg, bold = true })
+
+  -- Tabline (mostly off in your setup, but keep consistent)
+  vim.api.nvim_set_hl(0, "TabLine", { fg = p.overlay0, bg = bar_bg })
+  vim.api.nvim_set_hl(0, "TabLineSel", { fg = p.text, bg = bar_bg, bold = true })
+  vim.api.nvim_set_hl(0, "TabLineFill", { bg = bar_bg })
 
   -- Subtle separators (used across UI)
   vim.api.nvim_set_hl(0, "WinSeparator", { fg = p.surface0 })
