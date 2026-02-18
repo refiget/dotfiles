@@ -288,7 +288,8 @@ return {
         vim.api.nvim_set_hl(0, "DapUIModifiedValue", { link = "DiagnosticWarn" })
         vim.api.nvim_set_hl(0, "DapUIStoppedThread", { link = "DiagnosticError" })
         vim.api.nvim_set_hl(0, "DapUIStoppedThreadText", { link = "DiagnosticError" })
-        vim.api.nvim_set_hl(0, "DapUIFrameName", { link = "Title" })
+        -- Avoid the purple "Title" highlight (too loud); keep it neutral.
+        vim.api.nvim_set_hl(0, "DapUIFrameName", { link = "Normal" })
         vim.api.nvim_set_hl(0, "DapUISource", { link = "Comment" })
         vim.api.nvim_set_hl(0, "DapUILineNumber", { link = "LineNr" })
         -- Separators: keep them subtle (same as splits)

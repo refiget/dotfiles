@@ -53,6 +53,12 @@ function M.apply()
   vim.api.nvim_set_hl(0, "WinSeparator", { fg = p.surface0 })
   vim.api.nvim_set_hl(0, "VertSplit", { fg = p.surface0 })
 
+  -- DAP UI: keep separators/borders consistent and avoid loud title colors
+  vim.api.nvim_set_hl(0, "DapUIBorder", { link = "WinSeparator" })
+  vim.api.nvim_set_hl(0, "DapUIFloatBorder", { link = "FloatBorder" })
+  vim.api.nvim_set_hl(0, "DapUISeparator", { link = "WinSeparator" })
+  vim.api.nvim_set_hl(0, "DapUISeparatorActive", { link = "WinSeparator" })
+
   -- Keep telescope borders consistent
   vim.api.nvim_set_hl(0, "TelescopeBorder", { link = "FloatBorder" })
   vim.api.nvim_set_hl(0, "TelescopePromptBorder", { link = "FloatBorder" })

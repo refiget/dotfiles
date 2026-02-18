@@ -28,24 +28,38 @@ vim.api.nvim_create_autocmd("ModeChanged", {
 
 -- UI hygiene: keep DAP UI panels clean (no winbar/statusline)
 local dapui_group = vim.api.nvim_create_augroup("DapUiMinimalChrome", { clear = true })
-vim.api.nvim_create_autocmd("FileType", {
-  group = dapui_group,
-  pattern = {
-    "dapui_scopes",
-    "dapui_stacks",
-    "dapui_breakpoints",
-    "dapui_watches",
-    "dapui_console",
-    "dap-repl",
-  },
-  callback = function(ev)
-    local win = vim.api.nvim_get_current_win()
-    -- Window-local: remove the cheap thick bars inside dap-ui splits.
+local dapui_fts = {
+  ["dapui_scopes"] = true,
+  ["dapui_stacks"] = true,
+  ["dapui_breakpoints"] = true,
+  ["dapui_watches"] = true,
+  ["dapui_console"] = true,
+  ["dap-repl"] = true,
+}
+
+local function clean_dapui_chrome(bufnr)
+  bufnr = bufnr or 0
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    return
+  end
+  local ft = vim.bo[bufnr].filetype
+  if not dapui_fts[ft] then
+    return
+  end
+  -- Clear winbar/statusline for *any* window showing this buffer.
+  for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
     pcall(vim.api.nvim_win_set_option, win, "winbar", "")
     pcall(vim.api.nvim_win_set_option, win, "statusline", "")
-    -- Buffer-local: also ensure they don't come back.
-    pcall(vim.api.nvim_buf_set_option, ev.buf, "winbar", "")
-    pcall(vim.api.nvim_buf_set_option, ev.buf, "statusline", "")
+  end
+  pcall(vim.api.nvim_buf_set_option, bufnr, "winbar", "")
+  pcall(vim.api.nvim_buf_set_option, bufnr, "statusline", "")
+end
+
+vim.api.nvim_create_autocmd({ "FileType", "BufWinEnter" }, {
+  group = dapui_group,
+  pattern = "*",
+  callback = function(ev)
+    clean_dapui_chrome(ev.buf)
   end,
 })
 
