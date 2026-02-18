@@ -25,6 +25,7 @@ local resident = settings.resident_status or {
   },
   {
     name = "Karabiner-Elements",
+    glyph = ":keyboard:",
     pattern = "Karabiner%-Menu|karabiner_console_user_server|Karabiner%-Core%-Service",
   },
 }
