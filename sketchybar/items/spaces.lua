@@ -14,7 +14,7 @@ local focus_apps_extra_gap = settings.focus_apps_extra_gap or 0
 -- - focus_index_gap controls the index pill distance from center (right padding)
 -- - focus_apps_gap controls the apps pill distance from center (left padding)
 local focus_index_gap = settings.focus_index_gap
-local focus_index_x_offset = settings.focus_index_x_offset or 0
+local focus_index_pad_left = settings.focus_index_pad_left or 0
 local focus_apps_gap = settings.focus_apps_gap
 
 local index_gap = (type(focus_index_gap) == "number") and focus_index_gap or notch_gap
@@ -35,8 +35,8 @@ sbar.add("item", "preview.spacer", {
 -- from the center. (Works reliably across sketchybar versions.)
 local focus_index = sbar.add("item", "space.focus.index", {
   position = "center",
+  padding_left = focus_index_pad_left,
   padding_right = index_gap,
-  x_offset = focus_index_x_offset,
   icon = { drawing = false },
   label = {
     font = { family = settings.font.numbers, size = 13.0 },
