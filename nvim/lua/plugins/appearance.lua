@@ -56,7 +56,48 @@ return {
       if not ok then
         return
       end
-      scrollbar.setup()
+
+      -- Make the "relative position bar" look premium: subtle handle, not a black slab.
+      local handle = "#313244" -- surface0 fallback
+      local hl = vim.api.nvim_set_hl
+      pcall(function()
+        local p = require("catppuccin.palettes").get_palette("mocha")
+        handle = p.surface0
+        hl(0, "ScrollbarHandle", { bg = p.surface0 })
+        hl(0, "ScrollbarCursorHandle", { bg = p.surface1 })
+        hl(0, "ScrollbarGitAdd", { fg = p.green })
+        hl(0, "ScrollbarGitChange", { fg = p.yellow })
+        hl(0, "ScrollbarGitDelete", { fg = p.red })
+        hl(0, "ScrollbarSearch", { fg = p.mauve })
+        hl(0, "ScrollbarError", { fg = p.red })
+        hl(0, "ScrollbarWarn", { fg = p.yellow })
+        hl(0, "ScrollbarInfo", { fg = p.blue })
+        hl(0, "ScrollbarHint", { fg = p.teal })
+      end)
+
+      scrollbar.setup({
+        show_in_active_only = true,
+        handle = {
+          color = handle,
+          -- a bit smaller to avoid the "fat bar" look
+          blend = 10,
+        },
+        excluded_filetypes = {
+          "NvimTree",
+          "lazy",
+          "help",
+          "TelescopePrompt",
+          "TelescopeResults",
+          "TelescopePreview",
+          "dapui_scopes",
+          "dapui_stacks",
+          "dapui_breakpoints",
+          "dapui_watches",
+          "dapui_console",
+          "dap-repl",
+        },
+      })
+
       local ok_search, search = pcall(require, "scrollbar.handlers.search")
       if ok_search then
         search.setup()

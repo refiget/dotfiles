@@ -20,6 +20,14 @@ local function is_normal_file_buf(bufnr)
     ["Trouble"] = true,
     ["help"] = true,
     ["lazy"] = true,
+
+    -- DAP UI panels should not show the global winbar (looks like a cheap thick bar)
+    ["dapui_scopes"] = true,
+    ["dapui_stacks"] = true,
+    ["dapui_breakpoints"] = true,
+    ["dapui_watches"] = true,
+    ["dapui_console"] = true,
+    ["dap-repl"] = true,
   }
   if deny[ft] then
     return false
