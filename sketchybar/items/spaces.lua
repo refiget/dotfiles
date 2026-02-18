@@ -4,6 +4,41 @@ local app_icons = require("helpers.app_icons")
 
 local spaces = {}
 
+local notch_gap = settings.notch_gap or 120
+
+-- Notch focus pills: left shows index, right shows apps of the current space.
+local focus_index = sbar.add("item", "space.focus.index", {
+  position = "center",
+  icon = { drawing = false },
+  label = {
+    font = { family = settings.font.numbers, size = 13.0 },
+    color = colors.white,
+    string = "1",
+    padding_left = 10,
+    padding_right = 10,
+  },
+  background = { color = colors.bg1, corner_radius = 999, height = 26 },
+  padding_right = notch_gap,
+})
+
+local focus_apps = sbar.add("item", "space.focus.apps", {
+  position = "center",
+  icon = { drawing = false },
+  label = {
+    font = "sketchybar-app-font:Regular:16.0",
+    color = colors.white,
+    string = "—",
+    padding_left = 10,
+    padding_right = 10,
+    y_offset = -1,
+  },
+  background = { color = colors.bg1, corner_radius = 999, height = 26 },
+  padding_left = notch_gap,
+})
+
+local current_space = 1
+local apps_by_space = { [1] = "—", [2] = "—", [3] = "—" }
+
 for i = 1, 3, 1 do
   local space = sbar.add("space", "space." .. i, {
     space = i,
@@ -67,13 +102,20 @@ for i = 1, 3, 1 do
 
   space:subscribe("space_change", function(env)
     local selected = env.SELECTED == "true"
+    if selected then
+      current_space = i
+      focus_index:set({ label = { string = tostring(i) } })
+      focus_apps:set({ label = { string = apps_by_space[i] or "—" } })
+    end
+
+    -- Keep left preview pills visually static (no focus highlight).
     space:set({
-      icon = { highlight = selected },
-      label = { highlight = selected },
-      background = { border_color = selected and colors.black or colors.bg2 }
+      icon = { highlight = false },
+      label = { highlight = false },
+      background = { border_color = colors.bg2 }
     })
     space_bracket:set({
-      background = { border_color = selected and colors.grey or colors.bg2 }
+      background = { border_color = colors.bg2 }
     })
   end)
 
@@ -125,7 +167,13 @@ space_window_observer:subscribe("space_windows_change", function(env)
     icon_line = icon_line .. " +" .. tostring(n_apps - MAX_APPS)
   end
 
+  local sid = env.INFO.space
+  apps_by_space[sid] = icon_line
+
   sbar.animate("tanh", 10, function()
-    spaces[env.INFO.space]:set({ label = icon_line })
+    spaces[sid]:set({ label = icon_line })
+    if sid == current_space then
+      focus_apps:set({ label = { string = icon_line } })
+    end
   end)
 end)
