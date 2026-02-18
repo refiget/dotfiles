@@ -1,5 +1,6 @@
 local colors = require("colors")
 local settings = require("settings")
+local icons = require("icons")
 local app_icons = require("helpers.app_icons")
 
 -- Right-side: show only key resident background tools (icon-only, like left-side app glyphs).
@@ -8,8 +9,11 @@ local app_icons = require("helpers.app_icons")
 local resident = settings.resident_status or {
   {
     name = "Clash Verge",
+    -- Show a network/proxy indicator (SF Symbol) rather than an app-font icon.
+    glyph = icons.wifi.vpn,
+    glyph_font = "SF Pro:Regular:14.0",
     -- The UI process is "clash-verge" (lowercase) on your machine; also track mihomo core.
-    pattern = "clash%-verge|verge%-mihomo",
+    pattern = "clash%-verge|verge%-mihomo|clash%-verge%-service",
   },
   {
     name = "Keyboard Maestro",
@@ -32,14 +36,17 @@ local function icon_for(app_name)
 end
 
 for i, app in ipairs(resident) do
+  local label_string = app.glyph or icon_for(app.name)
+  local label_font = app.glyph_font or "sketchybar-app-font:Regular:16.0"
+
   local item = sbar.add("item", "resident." .. i, {
     position = "right",
     drawing = false,
     icon = { drawing = false },
     label = {
       drawing = true,
-      string = icon_for(app.name),
-      font = "sketchybar-app-font:Regular:16.0",
+      string = label_string,
+      font = label_font,
       color = colors.white,
       padding_left = 6,
       padding_right = 6,
