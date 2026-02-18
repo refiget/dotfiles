@@ -9,15 +9,15 @@ local spaces = {}
 local space_preview_offset = settings.space_preview_offset or 0
 local notch_gap = settings.notch_gap or 80
 
-if space_preview_offset > 0 then
-  sbar.add("item", "space.preview.spacer", {
-    position = "left",
-    width = space_preview_offset,
-    icon = { drawing = false },
-    label = { drawing = false },
-    background = { drawing = false },
-  })
-end
+-- Always create a spacer so we can tune without changing code.
+sbar.add("item", "space.preview.spacer", {
+  position = "left",
+  width = space_preview_offset,
+  drawing = false,
+  icon = { drawing = false },
+  label = { drawing = false },
+  background = { drawing = false },
+})
 
 -- Notch focus pills: left shows index, right shows apps of the current space.
 -- Notch focus pills: align symmetrically around the center line.
