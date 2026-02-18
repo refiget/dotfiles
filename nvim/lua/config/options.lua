@@ -46,7 +46,9 @@ opt.updatetime = 100
 opt.virtualedit = "block"
 opt.inccommand = "split"
 opt.showmode = false
-opt.lazyredraw = true
+-- NOTE: don't set lazyredraw permanently.
+-- Noice (and some UI plugins) rely on timely redraws.
+opt.lazyredraw = false
 opt.visualbell = true
 opt.colorcolumn = "100"
 opt.re = 0
