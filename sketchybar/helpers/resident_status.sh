@@ -25,6 +25,7 @@ add_if_running "Keyboard Maestro Engine" ":keyboard_maestro:"
 add_if_running "kindaVim" ":vim:"
 # Karabiner-Elements intentionally hidden (too noisy)
 add_if_running "clash-verge|verge-mihomo|clash-verge-service" ":proton_vpn:"
+add_if_running "AutoSwitchInput Pro|AutoSwitchInputTool" ":keyboard:"
 
 if [ "$count" -eq 0 ]; then
   "$SK" --set "$NAME" drawing=off

@@ -140,6 +140,8 @@ return {
 	["Karabiner-Elements"] = ":keyboard_maestro:",
 	["kindaVim"] = ":vim:",
 	["Clash Verge"] = ":proton_vpn:",
+	["AutoSwitchInput Pro"] = ":keyboard:",
+	["AutoSwitchInput"] = ":keyboard:",
 	["Keynote"] = ":keynote:",
 	["Keynote 讲演"] = ":keynote:",
 	["kitty"] = ":kitty:",
