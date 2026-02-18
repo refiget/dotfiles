@@ -1,0 +1,31 @@
+local colors = require("colors")
+local settings = require("settings")
+
+-- Right-side pill that mimics the left space app glyph string.
+-- It runs a small helper script that prints sketchybar key=value lines:
+--   drawing=on/off
+--   label=<glyphs>
+
+local item = sbar.add("item", "resident.pill", {
+  position = "right",
+  drawing = false,
+  icon = { drawing = false },
+  label = {
+    drawing = true,
+    string = "",
+    font = "sketchybar-app-font:Regular:16.0",
+    color = colors.white,
+    padding_left = 10,
+    padding_right = 10,
+    y_offset = -1,
+  },
+  background = { color = colors.bg1, corner_radius = 999, height = 26 },
+  script = "$CONFIG_DIR/helpers/resident_status.sh",
+  update_freq = 5,
+})
+
+item:subscribe({ "forced", "routine", "system_woke" }, function()
+  item:set({})
+end)
+
+return { item.name }
