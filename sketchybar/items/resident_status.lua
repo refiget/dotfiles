@@ -25,7 +25,8 @@ local resident = settings.resident_status or {
   },
   {
     name = "Karabiner-Elements",
-    glyph = ":keyboard:",
+    -- Use app-font keyboard icon (available in sketchybar-app-font)
+    glyph = ":keyboard_maestro:",
     pattern = "Karabiner%-Menu|karabiner_console_user_server|Karabiner%-Core%-Service",
   },
 }
