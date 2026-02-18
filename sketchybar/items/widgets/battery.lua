@@ -10,7 +10,7 @@ local battery = sbar.add("item", "widgets.battery", {
       size = 18.0,
     }
   },
-  label = { font = { family = settings.font.numbers } },
+  label = { font = { family = settings.font.numbers }, drawing = false },
   update_freq = 180,
   popup = { align = "center" }
 })
@@ -99,7 +99,10 @@ battery:subscribe({"routine", "power_source_change", "system_woke"}, function()
         string = icon,
         color = color
       },
-      label = { string = lead .. label },
+      label = {
+        string = lead .. label,
+        drawing = (charging ~= nil) or (found and charge <= 20),
+      },
     })
   end)
 end)

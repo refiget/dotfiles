@@ -10,6 +10,7 @@ local volume_percent = sbar.add("item", "widgets.volume1", {
   label = {
     string = "??%",
     padding_left = -1,
+    drawing = false,
     font = { family = settings.font.numbers }
   },
 })
@@ -57,6 +58,14 @@ local volume_slider = sbar.add("slider", popup_width, {
   click_script = 'osascript -e "set volume output volume $PERCENTAGE"'
 })
 
+
+local function flash_percent()
+  volume_percent:set({ label = { drawing = true } })
+  sbar.delay(2, function()
+    volume_percent:set({ label = { drawing = false } })
+  end)
+end
+
 volume_percent:subscribe("volume_change", function(env)
   local volume = tonumber(env.INFO)
   local icon = icons.volume._0
@@ -73,6 +82,7 @@ volume_percent:subscribe("volume_change", function(env)
   volume_icon:set({ label = icon })
   volume_percent:set({ label = volume .. "%" })
   volume_slider:set({ slider = { percentage = volume } })
+  flash_percent()
 end)
 
 local function volume_collapse_details()
@@ -138,7 +148,10 @@ local function volume_scroll(env)
 end
 
 volume_icon:subscribe("mouse.clicked", volume_toggle_details)
-volume_icon:subscribe("mouse.scrolled", volume_scroll)
+volume_icon:subscribe("mouse.scrolled", function(env)
+  flash_percent()
+  volume_scroll(env)
+end)
 volume_percent:subscribe("mouse.clicked", volume_toggle_details)
 
 -- Auto-hide popup when the cursor leaves the bar, or when focus/space changes.
@@ -147,6 +160,9 @@ volume_icon:subscribe("mouse.exited.global", volume_collapse_details)
 volume_icon:subscribe({"front_app_switched", "space_change", "display_change"}, volume_collapse_details)
 volume_percent:subscribe({"front_app_switched", "space_change", "display_change"}, volume_collapse_details)
 
-volume_percent:subscribe("mouse.scrolled", volume_scroll)
+volume_percent:subscribe("mouse.scrolled", function(env)
+  flash_percent()
+  volume_scroll(env)
+end)
 
 return { volume_icon.name, volume_percent.name }

@@ -9,6 +9,7 @@ sbar.exec("killall network_load >/dev/null; $CONFIG_DIR/helpers/event_providers/
 local popup_width = 220
 
 local wifi_up = sbar.add("item", "widgets.wifi1", {
+  drawing = false,
   position = "right",
   padding_left = -5,
   width = 0,
@@ -35,6 +36,7 @@ local wifi_up = sbar.add("item", "widgets.wifi1", {
 })
 
 local wifi_down = sbar.add("item", "widgets.wifi2", {
+  drawing = false,
   position = "right",
   padding_left = -5,
   icon = {
@@ -172,6 +174,23 @@ local function format_rate(s)
   return out
 end
 
+local hide_timer = 0
+
+local function show_rates()
+  wifi_up:set({ drawing = true })
+  wifi_down:set({ drawing = true })
+end
+
+local function hide_rates_later()
+  hide_timer = hide_timer + 1
+  local token = hide_timer
+  sbar.delay(3, function()
+    if token ~= hide_timer then return end
+    wifi_up:set({ drawing = false })
+    wifi_down:set({ drawing = false })
+  end)
+end
+
 wifi_up:subscribe("network_update", function(env)
   local up = format_rate(env.upload)
   local down = format_rate(env.download)
@@ -187,6 +206,13 @@ wifi_up:subscribe("network_update", function(env)
     icon = { color = down_color },
     label = { string = down, color = down_color }
   })
+
+  if up == "—" and down == "—" then
+    hide_rates_later()
+  else
+    show_rates()
+    hide_rates_later()
+  end
 end)
 
 wifi:subscribe({"wifi_change", "system_woke", "front_app_switched", "space_change", "display_change"}, function(env)
