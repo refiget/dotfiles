@@ -3,13 +3,68 @@
 local cmp = require("cmp")
 local luasnip = require("luasnip")
 
+local kind_icons = {
+  Text = "",
+  Method = "󰆧",
+  Function = "󰊕",
+  Constructor = "",
+  Field = "󰇽",
+  Variable = "󰂡",
+  Class = "󰠱",
+  Interface = "",
+  Module = "",
+  Property = "󰜢",
+  Unit = "",
+  Value = "󰎠",
+  Enum = "",
+  Keyword = "󰌋",
+  Snippet = "",
+  Color = "󰏘",
+  File = "󰈙",
+  Reference = "",
+  Folder = "󰉋",
+  EnumMember = "",
+  Constant = "󰏿",
+  Struct = "",
+  Event = "",
+  Operator = "󰆕",
+  TypeParameter = "󰅲",
+}
+
 cmp.setup({
   performance = {
-    max_view_entries = 5,
+    max_view_entries = 8,
+  },
+  window = {
+    completion = cmp.config.window.bordered({
+      winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
+      scrollbar = false,
+      col_offset = -1,
+      side_padding = 1,
+    }),
+    documentation = cmp.config.window.bordered({
+      winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,Search:None",
+    }),
   },
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
+    end,
+  },
+  formatting = {
+    fields = { "kind", "abbr", "menu" },
+    format = function(entry, vim_item)
+      vim_item.kind = (kind_icons[vim_item.kind] or "") .. " " .. vim_item.kind
+      vim_item.menu = ({
+        nvim_lsp = "[LSP]",
+        luasnip = "[Snip]",
+        buffer = "[Buf]",
+        path = "[Path]",
+        cmdline = "[Cmd]",
+        nvim_lua = "[Lua]",
+        spell = "[Spell]",
+      })[entry.source.name] or ("[" .. entry.source.name .. "]")
+      return vim_item
     end,
   },
   mapping = cmp.mapping.preset.insert({

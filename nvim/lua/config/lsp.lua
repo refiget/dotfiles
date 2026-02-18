@@ -245,10 +245,32 @@ local diag_signs = {
 }
 
 vim.diagnostic.config({
+  -- Inline diagnostics: keep them informative but not noisy.
   virtual_text = {
     severity = { min = vim.diagnostic.severity.WARN },
     spacing = 2,
     prefix = "·",
+    format = function(d)
+      -- Include code/source when available, and trim to avoid long lines.
+      local code = d.code and tostring(d.code) or ""
+      local src = d.source and tostring(d.source) or ""
+      local head = ""
+      if code ~= "" and src ~= "" then
+        head = string.format("[%s:%s] ", src, code)
+      elseif src ~= "" then
+        head = string.format("[%s] ", src)
+      elseif code ~= "" then
+        head = string.format("[%s] ", code)
+      end
+
+      local msg = (d.message or ""):gsub("\n", " ")
+      local out = head .. msg
+      local max = 80
+      if #out > max then
+        out = out:sub(1, max - 1) .. "…"
+      end
+      return out
+    end,
   },
   signs = {
     text = diag_signs,
@@ -256,6 +278,12 @@ vim.diagnostic.config({
   underline = true,
   update_in_insert = true,
   severity_sort = true,
+  float = {
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
+  },
 })
 
 setup_lsp()
