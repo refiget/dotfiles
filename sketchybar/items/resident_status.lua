@@ -37,6 +37,7 @@ for i, app in ipairs(resident) do
     drawing = false,
     icon = { drawing = false },
     label = {
+      drawing = true,
       string = icon_for(app.name),
       font = "sketchybar-app-font:Regular:16.0",
       color = colors.white,
@@ -47,7 +48,7 @@ for i, app in ipairs(resident) do
     update_freq = app.update_freq or 5,
   })
 
-  item:subscribe({ "routine", "system_woke" }, function()
+  item:subscribe({ "forced", "routine", "system_woke" }, function()
     local pat = app.pattern
     -- Use pgrep -f for robustness (matches full command line).
     sbar.exec("pgrep -f \"" .. pat .. "\" >/dev/null 2>&1; echo $?", function(code)
