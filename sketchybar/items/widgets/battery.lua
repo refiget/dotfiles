@@ -139,11 +139,5 @@ battery:subscribe({"front_app_switched", "space_change", "display_change"}, func
   battery:set({ popup = { drawing = "off" } })
 end)
 
-sbar.add("bracket", "widgets.battery.bracket", { battery.name }, {
-  background = { color = colors.bg1, corner_radius = 999, height = 28 }
-})
 
-sbar.add("item", "widgets.battery.padding", {
-  position = "right",
-  width = settings.group_paddings
-})
+return { battery.name }

@@ -17,6 +17,7 @@ local volume_percent = sbar.add("item", "widgets.volume1", {
 local volume_icon = sbar.add("item", "widgets.volume2", {
   position = "right",
   padding_right = -1,
+  popup = { align = "center" },
   icon = {
     string = icons.volume._100,
     width = 0,
@@ -37,21 +38,8 @@ local volume_icon = sbar.add("item", "widgets.volume2", {
   },
 })
 
-local volume_bracket = sbar.add("bracket", "widgets.volume.bracket", {
-  volume_icon.name,
-  volume_percent.name
-}, {
-  background = { color = colors.bg1, corner_radius = 999, height = 28 },
-  popup = { align = "center" }
-})
-
-sbar.add("item", "widgets.volume.padding", {
-  position = "right",
-  width = settings.group_paddings
-})
-
 local volume_slider = sbar.add("slider", popup_width, {
-  position = "popup." .. volume_bracket.name,
+  position = "popup." .. volume_icon.name,
   slider = {
     highlight_color = colors.blue,
     background = {
@@ -88,9 +76,9 @@ volume_percent:subscribe("volume_change", function(env)
 end)
 
 local function volume_collapse_details()
-  local drawing = volume_bracket:query().popup.drawing == "on"
+  local drawing = volume_icon:query().popup.drawing == "on"
   if not drawing then return end
-  volume_bracket:set({ popup = { drawing = false } })
+  volume_icon:set({ popup = { drawing = false } })
   sbar.remove('/volume.device\\.*/')
 end
 
@@ -101,9 +89,9 @@ local function volume_toggle_details(env)
     return
   end
 
-  local should_draw = volume_bracket:query().popup.drawing == "off"
+  local should_draw = volume_icon:query().popup.drawing == "off"
   if should_draw then
-    volume_bracket:set({ popup = { drawing = true } })
+    volume_icon:set({ popup = { drawing = true } })
 
     -- Optional dependency: SwitchAudioSource (device chooser). If missing, keep
     -- the slider popup only (no errors/no noise).
@@ -125,7 +113,7 @@ local function volume_toggle_details(env)
             end
 
             sbar.add("item", "volume.device." .. counter, {
-              position = "popup." .. volume_bracket.name,
+              position = "popup." .. volume_icon.name,
               width = popup_width,
               align = "center",
               label = { string = device, color = color },
@@ -155,9 +143,10 @@ volume_percent:subscribe("mouse.clicked", volume_toggle_details)
 
 -- Auto-hide popup when the cursor leaves the bar, or when focus/space changes.
 volume_percent:subscribe("mouse.exited.global", volume_collapse_details)
-volume_bracket:subscribe("mouse.exited.global", volume_collapse_details)
 volume_icon:subscribe("mouse.exited.global", volume_collapse_details)
 volume_icon:subscribe({"front_app_switched", "space_change", "display_change"}, volume_collapse_details)
 volume_percent:subscribe({"front_app_switched", "space_change", "display_change"}, volume_collapse_details)
 
 volume_percent:subscribe("mouse.scrolled", volume_scroll)
+
+return { volume_icon.name, volume_percent.name }

@@ -61,6 +61,7 @@ local wifi_down = sbar.add("item", "widgets.wifi2", {
 
 local wifi = sbar.add("item", "widgets.wifi.padding", {
   position = "right",
+  popup = { align = "center", height = 30 },
   icon = {
     font = {
       style = settings.font.style_map["Bold"],
@@ -71,17 +72,8 @@ local wifi = sbar.add("item", "widgets.wifi.padding", {
 })
 
 -- Background around the item
-local wifi_bracket = sbar.add("bracket", "widgets.wifi.bracket", {
-  wifi.name,
-  wifi_up.name,
-  wifi_down.name
-}, {
-  background = { color = colors.bg1, corner_radius = 999, height = 28 },
-  popup = { align = "center", height = 30 }
-})
-
 local ssid = sbar.add("item", {
-  position = "popup." .. wifi_bracket.name,
+  position = "popup." .. wifi.name,
   width = popup_width,
   icon = {
     font = {
@@ -106,7 +98,7 @@ local ssid = sbar.add("item", {
 })
 
 local hostname = sbar.add("item", {
-  position = "popup." .. wifi_bracket.name,
+  position = "popup." .. wifi.name,
   icon = {
     align = "left",
     string = "Hostname:",
@@ -121,7 +113,7 @@ local hostname = sbar.add("item", {
 })
 
 local ip = sbar.add("item", {
-  position = "popup." .. wifi_bracket.name,
+  position = "popup." .. wifi.name,
   icon = {
     align = "left",
     string = "IP:",
@@ -135,7 +127,7 @@ local ip = sbar.add("item", {
 })
 
 local mask = sbar.add("item", {
-  position = "popup." .. wifi_bracket.name,
+  position = "popup." .. wifi.name,
   icon = {
     align = "left",
     string = "Subnet mask:",
@@ -149,7 +141,7 @@ local mask = sbar.add("item", {
 })
 
 local router = sbar.add("item", {
-  position = "popup." .. wifi_bracket.name,
+  position = "popup." .. wifi.name,
   icon = {
     align = "left",
     string = "Router:",
@@ -161,8 +153,6 @@ local router = sbar.add("item", {
     align = "right",
   },
 })
-
-sbar.add("item", { position = "right", width = settings.group_paddings })
 
 local function format_rate(s)
   if not s or s == "" then return "—" end
@@ -223,11 +213,11 @@ wifi:subscribe({"wifi_change", "system_woke", "front_app_switched", "space_chang
 end)
 
 local function hide_details()
-  wifi_bracket:set({ popup = { drawing = false } })
+  wifi:set({ popup = { drawing = false } })
 end
 
 local function toggle_details(env)
-  local should_draw = wifi_bracket:query().popup.drawing == "off"
+  local should_draw = wifi:query().popup.drawing == "off"
   if not should_draw then
     hide_details()
     return
@@ -237,7 +227,7 @@ local function toggle_details(env)
   -- Advanced details (hostname/ip/router) only on right-click or shift.
   local advanced = (env and (env.BUTTON == "right" or env.MODIFIER == "shift"))
 
-  wifi_bracket:set({ popup = { drawing = true }})
+  wifi:set({ popup = { drawing = true }})
 
   -- Always show SSID (truncated)
   sbar.exec("ipconfig getsummary en0 | awk -F ' SSID : '  '/ SSID : / {print $2}'", function(result)
@@ -271,7 +261,6 @@ wifi_down:subscribe("mouse.clicked", toggle_details)
 wifi:subscribe("mouse.clicked", toggle_details)
 -- Auto-hide popup when leaving the bar, or when focus/space changes.
 wifi:subscribe("mouse.exited.global", hide_details)
-wifi_bracket:subscribe("mouse.exited.global", hide_details)
 ssid:subscribe("mouse.exited.global", hide_details)
 hostname:subscribe("mouse.exited.global", hide_details)
 ip:subscribe("mouse.exited.global", hide_details)
@@ -294,3 +283,5 @@ hostname:subscribe("mouse.clicked", copy_label_to_clipboard)
 ip:subscribe("mouse.clicked", copy_label_to_clipboard)
 mask:subscribe("mouse.clicked", copy_label_to_clipboard)
 router:subscribe("mouse.clicked", copy_label_to_clipboard)
+
+return { wifi.name, wifi_up.name, wifi_down.name }
