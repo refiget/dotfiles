@@ -1,5 +1,5 @@
 require("items.apple")
 require("items.menus")
 require("items.spaces")
-require("items.calendar")
-require("items.widgets")
+-- Calendar/time capsule removed (terminal already shows time/date).
+-- Right-side widgets removed; focus is Spaces + Space app glyphs.

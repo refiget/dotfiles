@@ -24,6 +24,7 @@ local function load_config()
         },
         widgets_right_bracket = false,
         disable_right_widgets = true,
+        notch_gap = 160,
         icons = "NerdFont", -- alternatively available: sf-symbols
         paddings = 3,
         python_command = "python",
