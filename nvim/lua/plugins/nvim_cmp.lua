@@ -38,6 +38,6 @@ return {
       end,
     })
 
-    require("plugins.lib.cmp")
+    require("core.cmp_config")
   end,
 }

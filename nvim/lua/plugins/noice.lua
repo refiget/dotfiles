@@ -26,9 +26,10 @@ return {
         enabled = true,
         view = "cmdline_popup",
         format = {
-          cmdline = { pattern = "^:", icon = ":", lang = "vim" },
-          search_down = { kind = "search", pattern = "^/", icon = " ", lang = "regex" },
-          search_up = { kind = "search", pattern = "^\\?", icon = " ", lang = "regex" },
+          -- 隐藏顶部类型标题（Cmdline/Search），保留图标
+          cmdline = { pattern = "^:", icon = ":", lang = "vim", title = "" },
+          search_down = { kind = "search", pattern = "^/", icon = " ", lang = "regex", title = "" },
+          search_up = { kind = "search", pattern = "^\\?", icon = " ", lang = "regex", title = "" },
         },
       },
       views = {
@@ -38,7 +39,7 @@ return {
             col = "50%",
           },
           size = {
-            width = 60,
+            width = 72,
             height = "auto",
           },
           border = {
@@ -57,6 +58,13 @@ return {
         long_message_to_split = true,
         inc_rename = false,
         lsp_doc_border = true,
+      },
+      -- 长通知直接进 split，避免浮窗里被截断/省略
+      routes = {
+        {
+          filter = { event = "notify", min_height = 6 },
+          view = "split",
+        },
       },
     })
   end,

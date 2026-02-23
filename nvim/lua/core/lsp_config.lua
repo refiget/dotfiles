@@ -64,74 +64,35 @@ local function setup_lsp()
     return p and p ~= "" and fn.filereadable(p) == 1
   end
 
-  local function path_join(a, b)
-    if a:sub(-1) == "/" then
-      return a .. b
-    end
-    return a .. "/" .. b
-  end
-
-  local function detect_project_python(root_dir)
-    -- Prefer active venv if Neovim was launched inside one
+  local function current_python_from_env()
     local venv = vim.env.VIRTUAL_ENV
-    if venv and venv ~= "" then
-      local p = path_join(venv, "bin/python")
-      if file_exists(p) then
-        return p
-      end
-      p = path_join(venv, "bin/python3")
-      if file_exists(p) then
-        return p
-      end
+    if not venv or venv == "" then
+      return nil
     end
 
-    -- Then prefer .venv/ or venv/ inside the project root
-    local candidates = {
-      root_dir .. "/.venv/bin/python",
-      root_dir .. "/.venv/bin/python3",
-      root_dir .. "/venv/bin/python",
-      root_dir .. "/venv/bin/python3",
-      root_dir .. "/.env/bin/python",
-      root_dir .. "/.env/bin/python3",
-    }
-    for _, p in ipairs(candidates) do
-      if file_exists(p) then
-        return p
-      end
+    local p = venv .. "/bin/python"
+    if file_exists(p) then
+      return p
+    end
+
+    p = venv .. "/bin/python3"
+    if file_exists(p) then
+      return p
     end
 
     return nil
   end
 
-  local function detect_pyright_venv(root_dir, python_path)
-    -- Prefer explicit project-local venv names
-    local venv_names = { ".venv", "venv", ".env" }
-    for _, name in ipairs(venv_names) do
-      local p1 = root_dir .. "/" .. name .. "/bin/python"
-      local p2 = root_dir .. "/" .. name .. "/bin/python3"
-      if file_exists(p1) or file_exists(p2) then
-        return { venvPath = root_dir, venv = name }
-      end
-    end
-
-    -- If python comes from an activated venv, set venvPath/venv from VIRTUAL_ENV
+  local function current_venv_config()
     local venv = vim.env.VIRTUAL_ENV
-    if venv and venv ~= "" then
-      local parent = fn.fnamemodify(venv, ":h")
-      local base = fn.fnamemodify(venv, ":t")
-      if parent and base and parent ~= "" and base ~= "" then
-        return { venvPath = parent, venv = base }
-      end
+    if not venv or venv == "" then
+      return nil
     end
 
-    -- Fallback: try to infer from python_path like /.../<name>/bin/python
-    if python_path and python_path ~= "" then
-      local venv_dir = fn.fnamemodify(python_path, ":h:h")
-      local parent = fn.fnamemodify(venv_dir, ":h")
-      local base = fn.fnamemodify(venv_dir, ":t")
-      if parent and base and parent ~= "" and base ~= "" then
-        return { venvPath = parent, venv = base }
-      end
+    local parent = fn.fnamemodify(venv, ":h")
+    local base = fn.fnamemodify(venv, ":t")
+    if parent and base and parent ~= "" and base ~= "" then
+      return { venvPath = parent, venv = base }
     end
 
     return nil
@@ -140,31 +101,25 @@ local function setup_lsp()
   local servers = {
     pyright = {
       on_attach = on_attach,
-      -- Make pyright automatically use ./.venv or ./venv when present
-      -- Note: Neovim's new vim.lsp.config path may not always apply on_new_config;
-      -- we also set it again in on_init and notify the server.
-      on_new_config = function(new_config, root_dir)
-        local py = detect_project_python(root_dir)
-        if py then
-          new_config.settings = new_config.settings or {}
-          new_config.settings.python = new_config.settings.python or {}
-
-          new_config.settings.python.pythonPath = py
-
-          local venv_cfg = detect_pyright_venv(root_dir, py)
-          if venv_cfg then
-            new_config.settings.python.venvPath = venv_cfg.venvPath
-            new_config.settings.python.venv = venv_cfg.venv
-          end
-        end
-      end,
-      on_init = function(client)
-        local root_dir = client.config.root_dir
-        if not root_dir or root_dir == "" then
+      -- Use only the currently activated virtual environment.
+      on_new_config = function(new_config)
+        local py = current_python_from_env()
+        if not py then
           return
         end
 
-        local py = detect_project_python(root_dir)
+        new_config.settings = new_config.settings or {}
+        new_config.settings.python = new_config.settings.python or {}
+        new_config.settings.python.pythonPath = py
+
+        local venv_cfg = current_venv_config()
+        if venv_cfg then
+          new_config.settings.python.venvPath = venv_cfg.venvPath
+          new_config.settings.python.venv = venv_cfg.venv
+        end
+      end,
+      on_init = function(client)
+        local py = current_python_from_env()
         if not py then
           return
         end
@@ -173,13 +128,12 @@ local function setup_lsp()
         client.config.settings.python = client.config.settings.python or {}
         client.config.settings.python.pythonPath = py
 
-        local venv_cfg = detect_pyright_venv(root_dir, py)
+        local venv_cfg = current_venv_config()
         if venv_cfg then
           client.config.settings.python.venvPath = venv_cfg.venvPath
           client.config.settings.python.venv = venv_cfg.venv
         end
 
-        -- Push updated settings to server
         pcall(function()
           client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
         end)
@@ -234,7 +188,7 @@ local function setup_lsp()
   end
 end
 
-local lsp_ui = require("plugins.lib.lsp_ui")
+local lsp_ui = require("core.lsp_ui_config")
 vim.diagnostic.config(lsp_ui.diagnostics)
 
 setup_lsp()

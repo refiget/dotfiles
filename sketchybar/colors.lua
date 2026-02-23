@@ -1,32 +1,32 @@
--- Catppuccin Mocha palette (ARGB: 0xAARRGGBB)
+-- macOS-like dark palette (vibrant B) (ARGB: 0xAARRGGBB)
 return {
   -- Core
-  black = 0xff181825,      -- mantle
-  white = 0xffcdd6f4,      -- text
-  grey  = 0xff6c7086,      -- overlay0
+  black = 0xff1c1c1e,
+  white = 0xfff2f2f7,
+  grey  = 0xff8e8e93,
   transparent = 0x00000000,
 
-  -- Accents (Catppuccin-ish)
-  red     = 0xfff38ba8,
-  green   = 0xffa6e3a1,
-  blue    = 0xff89b4fa,
-  yellow  = 0xfff9e2af,
-  orange  = 0xfffab387,    -- peach
-  magenta = 0xffcba6f7,
+  -- Accents (a bit more lively)
+  red     = 0xffff453a,
+  green   = 0xff30d158,
+  blue    = 0xff5aa9ff,   -- brighter + more airy
+  yellow  = 0xffffd60a,
+  orange  = 0xffff9f0a,
+  magenta = 0xffbf5af2,
 
   -- Surfaces
   bar = {
-    bg = 0xfa1e1e2e,       -- base with a touch more transparency (-10 alpha)
-    border = 0xff313244,   -- surface0
+    bg = 0xb21c1c1e,
+    border = 0x5a4a4a4d,
   },
   popup = {
-    bg = 0xc01e1e2e,
-    border = 0xff6c7086,
+    bg = 0xe6262629,
+    border = 0x7085858f,
   },
 
-  -- Used throughout items as pill backgrounds/borders
-  bg1 = 0xf5313244,        -- surface0 (+10 transparency)
-  bg2 = 0xf545475a,        -- surface1 (+10 transparency)
+  -- Pill backgrounds/borders
+  bg1 = 0xc338383c,
+  bg2 = 0xaa505055,
 
   with_alpha = function(color, alpha)
     if alpha > 1.0 or alpha < 0.0 then return color end

@@ -1,4 +1,3 @@
-require("items.apple")
 require("items.menus")
 
 -- Spaces UI is split into:

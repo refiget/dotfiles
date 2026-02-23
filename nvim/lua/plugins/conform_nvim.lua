@@ -4,6 +4,6 @@ return {
   "stevearc/conform.nvim",
   event = { "BufReadPre", "BufNewFile" },
   config = function()
-    require("plugins.lib.conform")
+    require("core.conform_config")
   end,
 }

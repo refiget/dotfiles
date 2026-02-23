@@ -24,6 +24,7 @@ return {
           notify = true,
           noice = true,
           cmp = true,
+          bufferline = true,
         },
       })
     end
