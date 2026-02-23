@@ -24,9 +24,12 @@ return {
       end,
     })
 
+    local PERSIST_TIMEOUT = 500000 -- 500s
+
     notify.setup({
       stages = "fade",
-      timeout = 2500,
+      -- nvim-notify timers require a number; use a very large timeout to mimic persistence.
+      timeout = PERSIST_TIMEOUT,
       background_colour = bg,
       render = "minimal",
       max_width = function()
@@ -34,6 +37,14 @@ return {
       end,
     })
 
-    vim.notify = notify
+    -- Normalize timeout=false/nil to a large numeric timeout to avoid timer errors.
+    local base_notify = notify
+    vim.notify = function(msg, level, opts)
+      opts = opts or {}
+      if opts.timeout == nil or opts.timeout == false then
+        opts.timeout = PERSIST_TIMEOUT
+      end
+      return base_notify(msg, level, opts)
+    end
   end,
 }

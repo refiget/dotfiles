@@ -13,10 +13,6 @@ return {
   keys = {},
 
   config = function()
-    local ok, trouble = pcall(require, "trouble")
-    if not ok then
-      return
-    end
-    trouble.setup({})
+    require("trouble").setup(require("plugins.lib.lsp_ui").trouble)
   end,
 }

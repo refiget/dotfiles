@@ -30,7 +30,6 @@ else
   echo "警告：未找到 zsh 模块目录 $ZSH_CONF_DIR"
 fi
 
-# OpenClaw Completion（只在交互 shell，且文件存在）
-if [[ -o interactive && -f "/Users/bob/.openclaw/completions/openclaw.zsh" ]]; then
-  source "/Users/bob/.openclaw/completions/openclaw.zsh"
-fi
+
+# OpenClaw Completion
+source "/Users/bob/.openclaw/completions/openclaw.zsh"

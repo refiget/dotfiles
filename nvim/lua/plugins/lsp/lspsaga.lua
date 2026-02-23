@@ -13,22 +13,6 @@ return {
   keys = {},
 
   config = function()
-    local ok, lspsaga = pcall(require, "lspsaga")
-    if not ok then
-      return
-    end
-    lspsaga.setup({
-      lightbulb = {
-        enable = false,
-        sign = false,
-        virtual_text = false,
-      },
-      symbol_in_winbar = {
-        enable = false,
-      },
-      ui = {
-        border = "rounded",
-      },
-    })
+    require("lspsaga").setup(require("plugins.lib.lsp_ui").lspsaga)
   end,
 }

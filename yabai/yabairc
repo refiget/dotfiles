@@ -46,12 +46,6 @@ yabai -m config window_shadow float
 # - Space 3: no transparency
 # - Other spaces: unfocused windows 0.8, focused 1.0
 # (Applied dynamically via space_changed signal below)
-yabai -m config window_opacity on
-yabai -m config active_window_opacity 1.0
-yabai -m config normal_window_opacity 0.95
-
-# Optional: make opacity changes feel snappier
-# yabai -m config window_opacity_duration 0.0
 
 
 # Wallpaper auto-switch (focused app fullscreen-ish)
