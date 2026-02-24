@@ -86,20 +86,26 @@ echo "---------------------------------------------"
 
 # --- 根目录文件 ---
 link_file "$DOTFILES_DIR/.zshrc"      "$HOME/.zshrc"
+link_file "$DOTFILES_DIR/.zprofile"   "$HOME/.zprofile"
 link_file "$DOTFILES_DIR/.zimrc"      "$HOME/.zimrc"
 link_file "$DOTFILES_DIR/.tmux.conf"  "$HOME/.tmux.conf"
 link_file "$DOTFILES_DIR/.gitconfig"  "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/.ignore"     "$HOME/.ignore"
 
 # --- .config 目录下的文件夹 ---
-link_file "$DOTFILES_DIR/nvim"        "$CONFIG_DIR/nvim"
-link_file "$DOTFILES_DIR/tmux"        "$CONFIG_DIR/tmux"
-link_file "$DOTFILES_DIR/yazi"        "$CONFIG_DIR/yazi"
-link_file "$DOTFILES_DIR/fastfetch"   "$CONFIG_DIR/fastfetch"
-link_file "$DOTFILES_DIR/yabai/yabairc" "$CONFIG_DIR/yabai/yabairc"
-link_file "$DOTFILES_DIR/qutebrowser" "$CONFIG_DIR/qutebrowser"
-link_file "$DOTFILES_DIR/sketchybar"  "$CONFIG_DIR/sketchybar"
-link_file "$DOTFILES_DIR/scripts"     "$HOME/scripts"
+link_file "$DOTFILES_DIR/nvim"          "$CONFIG_DIR/nvim"
+link_file "$DOTFILES_DIR/tmux"          "$CONFIG_DIR/tmux"
+link_file "$DOTFILES_DIR/yazi"          "$CONFIG_DIR/yazi"
+link_file "$DOTFILES_DIR/fastfetch"     "$CONFIG_DIR/fastfetch"
+link_file "$DOTFILES_DIR/iterm2"        "$CONFIG_DIR/iterm2"
+link_file "$DOTFILES_DIR/borders"       "$CONFIG_DIR/borders"
+link_file "$DOTFILES_DIR/yabai"         "$CONFIG_DIR/yabai"
+link_file "$DOTFILES_DIR/qutebrowser"   "$CONFIG_DIR/qutebrowser"
+link_file "$DOTFILES_DIR/sketchybar"    "$CONFIG_DIR/sketchybar"
+link_file "$DOTFILES_DIR/jupyter"       "$CONFIG_DIR/jupyter"
+link_file "$DOTFILES_DIR/starship/starship-tmux.toml" "$CONFIG_DIR/starship-tmux.toml"
+link_file "$DOTFILES_DIR/starship/starship-tmux-inactive.toml" "$CONFIG_DIR/starship-tmux-inactive.toml"
+link_file "$DOTFILES_DIR/scripts"       "$HOME/scripts"
 
 # --- LazyGit（只修改这里）-----------------------------------
 # Linux 使用 ~/.config/lazygit

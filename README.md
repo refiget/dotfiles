@@ -52,12 +52,15 @@ A keyboard-first macOS setup focused on a clean terminal workflow: **tmux + Neov
 ├── README-tmux.md
 ├── README-zsh.md
 ├── assets/
+├── borders/
 ├── deploy.sh
 ├── iterm2/
+├── jupyter/
 ├── lazygit/
 ├── nvim/
 ├── qutebrowser/
 ├── sketchybar/
+├── starship/
 ├── tmux/
 ├── yabai/
 ├── yazi/
