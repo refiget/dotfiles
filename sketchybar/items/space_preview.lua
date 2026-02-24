@@ -5,13 +5,18 @@ local space_state = require("services.space_state")
 local focus = require("items.space_focus")
 
 local spaces = {}
+local SPACE_ICONS = {
+  [1] = utf8.char(0xF03A6),
+  [2] = utf8.char(0xF03A9),
+  [3] = utf8.char(0xF03AC),
+}
 
 for i = 1, 3, 1 do
   local space = sbar.add("space", "space." .. i, {
     space = i,
     icon = {
-      font = { family = settings.font.numbers },
-      string = i,
+      font = { family = settings.font.numbers, size = 19.0 },
+      string = SPACE_ICONS[i] or i,
       padding_left = 6,
       padding_right = 6,
       color = colors.white,
@@ -28,10 +33,11 @@ for i = 1, 3, 1 do
     padding_right = 1,
     padding_left = 1,
     background = {
-      color = colors.bg1,
-      border_width = 1,
+      color = colors.transparent,
+      border_width = 2,
       height = 26,
-      border_color = colors.black,
+      corner_radius = 10,
+      border_color = colors.bg2,
     },
     popup = { background = { border_width = 5, border_color = colors.black } },
   })
@@ -41,9 +47,9 @@ for i = 1, 3, 1 do
   local space_bracket = sbar.add("bracket", { space.name }, {
     background = {
       color = colors.transparent,
-      border_color = colors.bg2,
+      border_color = colors.transparent,
       height = 28,
-      border_width = 2,
+      border_width = 0,
     },
   })
 
@@ -78,7 +84,7 @@ for i = 1, 3, 1 do
       label = { highlight = false },
       background = { border_color = colors.bg2 },
     })
-    space_bracket:set({ background = { border_color = colors.bg2 } })
+    space_bracket:set({ background = { border_color = colors.transparent } })
   end)
 
   space:subscribe("mouse.clicked", function(env)

@@ -14,19 +14,35 @@ local focus_apps_gap = settings.focus_apps_gap
 local index_gap = (type(focus_index_gap) == "number") and focus_index_gap or notch_gap
 local apps_gap = (type(focus_apps_gap) == "number") and focus_apps_gap or (notch_gap + focus_apps_extra_gap)
 
+local SPACE_ICONS = {
+  [1] = utf8.char(0xF03A6),
+  [2] = utf8.char(0xF03A9),
+  [3] = utf8.char(0xF03AC),
+}
+
+local function space_display(id)
+  return SPACE_ICONS[tonumber(id)] or tostring(id)
+end
+
 local focus_index = sbar.add("item", "space.focus.index", {
   position = "center",
   padding_left = focus_index_pad_left,
   padding_right = index_gap,
   icon = { drawing = false },
   label = {
-    font = { family = settings.font.numbers, size = 13.0 },
+    font = { family = settings.font.numbers, size = 18.0 },
     color = colors.white,
-    string = tostring(space_state.current_space),
+    string = space_display(space_state.current_space),
     padding_left = 14,
     padding_right = 14,
   },
-  background = { color = colors.bg1, corner_radius = 10, height = 26 },
+  background = {
+    color = colors.transparent,
+    corner_radius = 10,
+    height = 26,
+    border_width = 2,
+    border_color = colors.bg2,
+  },
 })
 
 local focus_apps = sbar.add("item", "space.focus.apps", {
@@ -41,7 +57,13 @@ local focus_apps = sbar.add("item", "space.focus.apps", {
     padding_right = 10,
     y_offset = -1,
   },
-  background = { color = colors.bg1, corner_radius = 999, height = 26 },
+  background = {
+    color = colors.transparent,
+    corner_radius = 999,
+    height = 26,
+    border_width = 2,
+    border_color = colors.bg2,
+  },
 })
 
 local current_apps_gap = apps_gap
@@ -128,7 +150,7 @@ local M = {}
 
 function M.set_space(space_id)
   space_state.set_current_space(space_id)
-  focus_index:set({ label = { string = tostring(space_state.current_space) } })
+  focus_index:set({ label = { string = space_display(space_state.current_space) } })
   focus_apps:set({ label = { string = space_state.get_apps_for_space(space_state.current_space) } })
   rebalance_to_screen_center()
 end

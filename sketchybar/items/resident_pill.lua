@@ -21,7 +21,13 @@ local item = sbar.add("item", "resident.pill", {
     padding_right = 10,
     y_offset = -1,
   },
-  background = { color = colors.bg1, corner_radius = 999, height = 26 },
+  background = {
+    color = colors.transparent,
+    corner_radius = 999,
+    height = 26,
+    border_width = 2,
+    border_color = colors.bg2,
+  },
 })
 
 -- Some sketchybar versions don't reliably apply script/update_freq via the Lua wrapper.
