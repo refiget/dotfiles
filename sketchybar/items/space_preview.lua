@@ -5,18 +5,13 @@ local space_state = require("services.space_state")
 local focus = require("items.space_focus")
 
 local spaces = {}
-local SPACE_ICONS = {
-  [1] = utf8.char(0xF03A6),
-  [2] = utf8.char(0xF03A9),
-  [3] = utf8.char(0xF03AC),
-}
 
 for i = 1, 3, 1 do
   local space = sbar.add("space", "space." .. i, {
     space = i,
     icon = {
       font = { family = settings.font.numbers, size = 19.0 },
-      string = SPACE_ICONS[i] or i,
+      string = tostring(i),
       padding_left = 6,
       padding_right = 6,
       color = colors.white,

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>custom</key>
+	<string>on alfred_script(q)
+    -- Alfred 自带环境变量等
+    tell application "System Events"
+        set isRunning to exists (processes where name is "iTerm2")
+    end tell
+
+    tell application "iTerm2"
+        activate
+        if not isRunning then
+            delay 0.3
+        end if
+        tell current window
+            tell current session
+                -- 永远用 tmux new-window -A 来执行 Alfred 输入命令
+                write text "tmux new-window -A -n alfred '\''" &amp; q &amp; "'\''"
+            end tell
+        end tell
+    end tell
+end alfred_script</string>
+	<key>prefix</key>
+	<integer>2</integer>
+</dict>
+</plist>

@@ -4,17 +4,11 @@ sudo yabai --load-sa
 
 # Debug
 yabai -m config debug_output off
-
-# bsp or float (default: float)
-
-# Global padding/gaps (leave room for rounded focus border)
-# Tune these if you want tighter/looser spacing.
 yabai -m config top_padding    8
 yabai -m config bottom_padding 8
 yabai -m config left_padding   8
 yabai -m config right_padding  8
 yabai -m config window_gap     8
-yabai -m config window_border off
 
 # Focus border (JankyBorders)
 # Loads ~/.config/borders/bordersrc when started without args.
@@ -22,47 +16,11 @@ yabai -m config window_border off
 pkill -x borders 2>/dev/null
 borders >/dev/null 2>&1 &
 
-# Per-space layouts/padding (Bob: space1/2 work, space3 comm/debug)
-# Space 1/2: work (tighter)
-yabai -m config --space 1 layout bsp
-
-yabai -m config --space 2 layout bsp
-
-yabai -m config --space 3 layout float
-
-
-
-# modify window shadows (default: on, options: on, off, float)
-# example: show shadows only for floating windows
-yabai -m config window_shadow float
-
-# Focus / mouse behaviour
-# - focus follows mouse: hover window to focus
-# - mouse follows focus: when focus changes (e.g. via keyboard), move mouse to focused window
-
-
-# window opacity (default: off)
-# Policy:
-# - Space 3: no transparency
-# - Other spaces: unfocused windows 0.8, focused 1.0
-# (Applied dynamically via space_changed signal below)
-
-
-# Wallpaper auto-switch (focused app fullscreen-ish)
-
-# Focus follows space change (per-space recent window)
-# - record last focused window per space
-# - when changing space, refocus the recorded window for that space
-# Note: requires yabai scripting addition + yabai socket running.
-yabai -m signal --add event=window_focused action="$HOME/.config/yabai/focus_recent.py record"
-yabai -m signal --add event=space_changed  action="/bin/bash -lc 'sleep 0.10; $HOME/.config/yabai/focus_recent.py focus'"
-
-# Per-space opacity (space3 disables transparency)
-
-# Rules: exclude problematic utility windows from tiling
 yabai -m rule --add app="^iPhone Mirroring$" manage=off
 yabai -m rule --add app="^System Settings$" manage=off
 yabai -m rule --add app="^System Preferences$" manage=off
+yabai -m rule --add app="^Installer$" manage=off
+yabai -m rule --add app="^Install macOS.*$" manage=off
 
 
 

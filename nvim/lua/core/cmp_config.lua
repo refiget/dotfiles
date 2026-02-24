@@ -3,6 +3,28 @@
 local cmp = require("cmp")
 local luasnip = require("luasnip")
 
+-- Python: doctest snippet (run via `python3 file.py`)
+luasnip.add_snippets("python", {
+  luasnip.snippet({ trig = "doctest", name = "Python doctest template" }, {
+    luasnip.text_node({
+      "\"\"\"",
+      "Example:",
+      "    >>> ",
+    }),
+    luasnip.insert_node(1, "func(args)"),
+    luasnip.text_node({"", "    "}),
+    luasnip.insert_node(2, "expected"),
+    luasnip.text_node({
+      "",
+      "\"\"\"",
+      "",
+      "if __name__ == \"__main__\":",
+      "    import doctest",
+      "    doctest.testmod(verbose=True)",
+    }),
+  }),
+})
+
 local kind_icons = {
   Text = "",
   Method = "󰆧",

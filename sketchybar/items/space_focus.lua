@@ -14,14 +14,8 @@ local focus_apps_gap = settings.focus_apps_gap
 local index_gap = (type(focus_index_gap) == "number") and focus_index_gap or notch_gap
 local apps_gap = (type(focus_apps_gap) == "number") and focus_apps_gap or (notch_gap + focus_apps_extra_gap)
 
-local SPACE_ICONS = {
-  [1] = utf8.char(0xF03A6),
-  [2] = utf8.char(0xF03A9),
-  [3] = utf8.char(0xF03AC),
-}
-
 local function space_display(id)
-  return SPACE_ICONS[tonumber(id)] or tostring(id)
+  return tostring(id)
 end
 
 local focus_index = sbar.add("item", "space.focus.index", {
