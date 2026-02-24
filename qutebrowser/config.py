@@ -30,8 +30,24 @@ import catppuccin_mocha
 
 catppuccin_mocha.apply(c)
 
-# Tabs (bottom "tag bar")
-c.tabs.position = "bottom"
+# Tabs (top bar)
+c.tabs.position = "top"
+
+# --- Custom light tab/theme color (#F1F3F5) ---
+# Keep explicit overrides after theme apply() so they take effect.
+c.colors.tabs.bar.bg = "#F1F3F5"
+c.colors.tabs.even.bg = "#F1F3F5"
+c.colors.tabs.odd.bg = "#F1F3F5"
+c.colors.tabs.selected.even.bg = "#F1F3F5"
+c.colors.tabs.selected.odd.bg = "#F1F3F5"
+c.colors.tabs.even.fg = "#111111"
+c.colors.tabs.odd.fg = "#111111"
+c.colors.tabs.selected.even.fg = "#111111"
+c.colors.tabs.selected.odd.fg = "#111111"
+c.colors.statusbar.normal.bg = "#F1F3F5"
+c.colors.statusbar.normal.fg = "#111111"
+c.colors.completion.category.bg = "#F1F3F5"
+c.colors.completion.category.fg = "#111111"
 # Slightly more padding for a premium look
 c.tabs.padding = {"top": 6, "bottom": 6, "left": 8, "right": 8}
 # Keep separators subtle

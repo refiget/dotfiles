@@ -22,5 +22,19 @@ yabai -m rule --add app="^System Preferences$" manage=off
 yabai -m rule --add app="^Installer$" manage=off
 yabai -m rule --add app="^Install macOS.*$" manage=off
 
+# --- Fixed app -> space placement ---
+# Prevent cross-space launches from scrambling your workspace.
+yabai -m rule --add app="^iTerm2$" space=1
+yabai -m rule --add app="^(ChatGPT|ChatGPT Desktop)$" space=2
+yabai -m rule --add app="^(WeChat|微信)$" space=3
+
+# Space 3 should behave as float workspace.
+yabai -m config --space 1 layout bsp
+yabai -m config --space 2 layout bsp
+yabai -m config --space 3 layout float
+
+# Auto re-arrange on app lifecycle (idempotent script)
+yabai -m signal --add event=application_launched action="/Users/bob/dotfiles/scripts/yabai_rerange_spaces.sh"
+yabai -m signal --add event=application_terminated action="/Users/bob/dotfiles/scripts/yabai_rerange_spaces.sh"
 
 
