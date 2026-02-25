@@ -2,7 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>lightthemeuid</key>
-	<string>theme.urlimport.A44CAA30-4743-4D75-A395-C105DD7B2C30</string>
+	<key>axe_keyword</key>
+	<string>kill</string>
+	<key>refresh_rate</key>
+	<integer>2</integer>
 </dict>
 </plist>

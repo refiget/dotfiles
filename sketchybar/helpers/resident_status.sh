@@ -4,7 +4,16 @@ set -eu
 # Update the right-side resident pill to mimic the left app-glyph style.
 # This script is executed by sketchybar with $NAME set.
 
-SK=${SKETCHYBAR_BIN:-$(command -v sketchybar 2>/dev/null || echo /opt/homebrew/bin/sketchybar)}
+SK=${SKETCHYBAR_BIN:-$(command -v sketchybar 2>/dev/null || true)}
+if [ -z "$SK" ]; then
+  if [ -x /opt/homebrew/bin/sketchybar ]; then
+    SK=/opt/homebrew/bin/sketchybar
+  elif [ -x /usr/local/bin/sketchybar ]; then
+    SK=/usr/local/bin/sketchybar
+  else
+    exit 0
+  fi
+fi
 
 running() {
   pgrep -f "$1" >/dev/null 2>&1

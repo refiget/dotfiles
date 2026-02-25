@@ -59,7 +59,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>open -g "rectangle-pro://execute-layout?name=layout"</string>
+				<string>open  -g "rectangle-pro://execute-layout?name=layout"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -89,9 +89,9 @@
 		<key>DE9A4C2F-4C66-4F6B-B117-88CD394D7D1C</key>
 		<dict>
 			<key>xpos</key>
-			<real>430</real>
+			<real>395</real>
 			<key>ypos</key>
-			<real>155</real>
+			<real>200</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>

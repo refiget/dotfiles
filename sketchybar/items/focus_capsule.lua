@@ -13,13 +13,13 @@ end
 local DURATION_MINUTES = tonumber(settings.focus_timer_minutes) or 30
 local DURATION_SECONDS = math.max(1, math.floor(DURATION_MINUTES * 60))
 
--- 依赖：brew 安装的 confetti CLI
-local CONFETTI_CMD = "/opt/homebrew/bin/confetti -p intense"
+-- 依赖：brew 安装的 confetti CLI（兼容 ARM/Intel macOS）
+local CONFETTI_CMD = "if command -v confetti >/dev/null 2>&1; then confetti -p intense; elif [ -x /opt/homebrew/bin/confetti ]; then /opt/homebrew/bin/confetti -p intense; elif [ -x /usr/local/bin/confetti ]; then /usr/local/bin/confetti -p intense; fi"
 
+-- 固定“最大文本宽度”，避免秒数跳动（按 XX:88 预留）
 local LAYOUT = {
-  width = 96,
-  icon = { width = 16, align = "center", padding_left = 2, padding_right = 4 },
-  label = { width = 58, align = "center", padding_left = 0, padding_right = 8 },
+  icon = { padding_left = 5, padding_right = 3 },
+  label = { width = 46, align = "left", padding_left = 0, padding_right = 8 },
 }
 
 local active = false
@@ -30,7 +30,6 @@ local capsule = sbar.add("item", "focus.capsule", {
   position = "right",
   updates = true,
   update_freq = 1,
-  width = LAYOUT.width,
   icon = {
     drawing = true,
     string = ICON_IDLE,
@@ -40,8 +39,6 @@ local capsule = sbar.add("item", "focus.capsule", {
       style = settings.font.style_map["Bold"],
       size = 14.0,
     },
-    width = LAYOUT.icon.width,
-    align = LAYOUT.icon.align,
     padding_left = LAYOUT.icon.padding_left,
     padding_right = LAYOUT.icon.padding_right,
   },

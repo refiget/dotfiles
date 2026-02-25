@@ -2,11 +2,26 @@
 # JankyBorders config
 # Apply with: borders (no args) or restart the borders process.
 
-exec /opt/homebrew/bin/borders \
+BORDERS_BIN="$(command -v borders 2>/dev/null || true)"
+if [ ! -x "${BORDERS_BIN:-}" ]; then
+  BORDERS_BIN="/opt/homebrew/bin/borders"
+fi
+if [ ! -x "${BORDERS_BIN:-}" ]; then
+  BORDERS_BIN="/usr/local/bin/borders"
+fi
+if [ ! -x "${BORDERS_BIN:-}" ]; then
+  echo "borders binary not found" >&2
+  exit 1
+fi
+
+# High-contrast premium look (works on white windows)
+# - Deeper navy active border for clear edge definition
+# - Refined cool-gray inactive border (still visible on light bg)
+exec "$BORDERS_BIN" \
 	style=round \
 	width=5.0 \
 	hidpi=on \
 	ax_focus=on \
-	active_color=0xff2F6BFF \
-	inactive_color=0x99A0A8B3 \
+	active_color=0xFF1E3A8A \
+	inactive_color=0xB04B5563 \
 	background_color=0x00000000
