@@ -22,21 +22,24 @@ def run_tmux(args: List[str], check: bool = True, capture: bool = False) -> str:
 
 
 DEFAULT_LABEL = "new"
-NAME_SEP = "_"
+NAME_SEP = "__"
 
 
 def sanitize_label(label: str) -> str:
     label = label.strip()
     if not label:
         return DEFAULT_LABEL
-    return label.replace(":", NAME_SEP)
+    # Keep labels simple and separator-safe.
+    label = label.replace(":", "-")
+    label = label.replace(NAME_SEP, "-")
+    return label
 
 
 def cleanup_label(index: int, label: str) -> str:
     label = sanitize_label(label)
     # Remove repeated leading "<index><sep>" prefixes caused by earlier bugs.
     while True:
-        match = re.match(rf"^{index}[:_-](.*)$", label)
+        match = re.match(rf"^{index}(?:__|[:_-])(.*)$", label)
         if not match:
             break
         label = match.group(1)
@@ -46,6 +49,16 @@ def cleanup_label(index: int, label: str) -> str:
 
 
 def parse_session_name(name: str) -> Tuple[Optional[int], str]:
+    # Preferred canonical format: <index>__<label>
+    match = re.match(r"^(\d+)__(.*)$", name)
+    if match:
+        index = int(match.group(1))
+        label = match.group(2)
+        if index <= 0:
+            return None, sanitize_label(label)
+        return index, cleanup_label(index, label)
+
+    # Backward compatibility with legacy separators: 1_main / 2-new / 3:foo
     match = re.match(r"^(\d+)([:_-])(.*)$", name)
     if match:
         index = int(match.group(1))
@@ -53,11 +66,14 @@ def parse_session_name(name: str) -> Tuple[Optional[int], str]:
         if index <= 0:
             return None, sanitize_label(label)
         return index, cleanup_label(index, label)
+
     if name.isdigit():
         index = int(name)
         if index <= 0:
             return None, DEFAULT_LABEL
         return index, DEFAULT_LABEL
+
+    # Unindexed plain names become labels and get indexed during ensure().
     return None, sanitize_label(name)
 
 

@@ -22,23 +22,17 @@ fi
 
 # TMUX_MODE is handled elsewhere (kept out of this left segment to keep it static).
 
-# Session pill should be STATIC (no mode color switching).
-# Use a neutral background that matches the tab strip / overall UI.
-# Allow override via tmux option @session_bg.
-active_bg=$(tmux show -gqv '@session_bg')
-[[ -z "$active_bg" ]] && active_bg="#1e1e2e"  # base
-
+# Session label should be visually DISTINCT from window tabs.
+# Keep it as plain text (no block background) to avoid hierarchy confusion.
 # Palette (Catppuccin Mocha-ish)
 text="#cdd6f4"
 overlay0="#6c7086"
+# Session label gets a distinct cool accent so it won't blend with window tabs.
+session_accent=$(tmux show -gqv '@session_label_fg')
+[[ -z "$session_accent" ]] && session_accent="#a6adc8"
 
-# Neutral, consistent typography
-active_fg="$text"
+active_fg="$session_accent"
 idx_fg="$overlay0"
-
-# Session pill styling (keep it clean; avoid powerline arrows)
-left_pad=" "
-right_pad=" "
 max_width=16
 
 # width-based label policy: when narrow (<80 cols by default),
@@ -98,15 +92,9 @@ while IFS= read -r entry; do
 
   session_id_norm=$(normalize_session_id "$session_id")
   if [[ "$session_id" == "$current_session_id" || "$session_id_norm" == "$current_session_id_norm" ]]; then
-    trimmed_name=$(trim_label "$name")
-    idx=$(extract_index "$name")
-
-    if [[ -n "$idx" ]]; then
-      # Deemphasize the index by separating it; styling is handled in printf below.
-      label="${idx}:${trimmed_name}"
-    else
-      label="$trimmed_name"
-    fi
+    # Keep session navigation naming (e.g. "3_cootron") intact internally,
+    # but display only the human-readable label in the bar.
+    label=$(trim_label "$name")
 
     if (( ${#label} > max_width )); then
       label="${label:0:max_width-1}…"
@@ -119,27 +107,17 @@ if [[ -z "$label" ]]; then
   exit 0
 fi
 
-# Render as a compact pill with consistent padding.
-# If the label is "<idx>:<name>", we show idx a bit dimmer for hierarchy.
-idx_part=""
+# Render as plain text prefix to separate session-vs-window hierarchy.
+# Use Nerd Font icon (override via TMUX_SESSION_ICON).
+session_icon="${TMUX_SESSION_ICON:-}"
 name_part="$label"
-if [[ "$label" =~ ^([0-9]+):(.*)$ ]]; then
-  idx_part="${BASH_REMATCH[1]}:"
-  name_part="${BASH_REMATCH[2]}"
-fi
 
-# Narrow-screen policy: show less to keep the bar calm.
-# - If we have an index, show only the index on narrow screens.
-# - Otherwise show a shorter name.
+# Narrow-screen policy: keep it concise.
 if (( is_narrow == 1 )); then
   max_width=12
-  if [[ -n "$idx_part" ]]; then
-    name_part=""
-  fi
 fi
 
-# Stable width: truncate name_part relative to idx length.
-reserve=$(( ${#idx_part} + ${#left_pad} + ${#right_pad} ))
+reserve=6 # "<icon> ses:" approx visible width budget
 avail=$(( max_width - reserve ))
 if (( avail < 4 )); then
   avail=4
@@ -148,21 +126,5 @@ if [[ -n "$name_part" ]] && (( ${#name_part} > avail )); then
   name_part="${name_part:0:avail-1}…"
 fi
 
-if [[ -n "$idx_part" && -n "$name_part" ]]; then
-  printf '#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]%s%s#[default]' \
-    "$active_fg" "$active_bg" \
-    "$left_pad" \
-    "$idx_fg" "$active_bg" "$idx_part" \
-    "$active_fg" "$active_bg" "$name_part" \
-    "$right_pad"
-elif [[ -n "$idx_part" ]]; then
-  printf '#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]%s%s#[default]' \
-    "$active_fg" "$active_bg" \
-    "$left_pad" \
-    "$idx_fg" "$active_bg" "$idx_part" \
-    "$right_pad"
-else
-  printf '#[fg=%s,bg=%s]%s%s%s#[default]' \
-    "$active_fg" "$active_bg" \
-    "$left_pad" "$name_part" "$right_pad"
-fi
+printf '#[fg=%s]%s ses:%s#[default] ' \
+  "$active_fg" "$session_icon" "$name_part"
