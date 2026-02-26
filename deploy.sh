@@ -99,11 +99,11 @@ link_file "$DOTFILES_DIR/yazi"          "$CONFIG_DIR/yazi"
 link_file "$DOTFILES_DIR/fastfetch"     "$CONFIG_DIR/fastfetch"
 link_file "$DOTFILES_DIR/iterm2"        "$CONFIG_DIR/iterm2"
 link_file "$DOTFILES_DIR/borders"       "$CONFIG_DIR/borders"
-# yabai default config path on macOS is ~/.yabairc
-link_file "$DOTFILES_DIR/yabai/yabairc" "$HOME/.yabairc"
+# yabai config directory path
+link_file "$DOTFILES_DIR/yabai"         "$CONFIG_DIR/yabai"
 
-# qutebrowser uses XDG default: ~/.config/qutebrowser
-link_file "$DOTFILES_DIR/qutebrowser"   "$CONFIG_DIR/qutebrowser"
+# qutebrowser: use Bob's default path (~/.qutebrowser)
+link_file "$DOTFILES_DIR/qutebrowser"   "$HOME/.qutebrowser"
 link_file "$DOTFILES_DIR/sketchybar"    "$CONFIG_DIR/sketchybar"
 
 # Jupyter default config path is ~/.jupyter
@@ -113,9 +113,32 @@ link_file "$DOTFILES_DIR/starship/starship-tmux.toml" "$CONFIG_DIR/starship-tmux
 link_file "$DOTFILES_DIR/starship/starship-tmux-inactive.toml" "$CONFIG_DIR/starship-tmux-inactive.toml"
 link_file "$DOTFILES_DIR/scripts"       "$HOME/scripts"
 
+# qutebrowser compatibility bridge:
+# Some launch methods read ~/.qutebrowser, others use XDG (~/.config/qutebrowser).
+# Keep both paths consistent by linking ~/.config/qutebrowser -> ~/.qutebrowser.
+if [ -e "$CONFIG_DIR/qutebrowser" ] || [ -L "$CONFIG_DIR/qutebrowser" ]; then
+    if [ -L "$CONFIG_DIR/qutebrowser" ] && [ "$(readlink "$CONFIG_DIR/qutebrowser")" = "$HOME/.qutebrowser" ]; then
+        echo "✅ qutebrowser XDG 兼容链接已就绪"
+    else
+        if [[ "$FORCE_SYNC" -eq 1 ]]; then
+            echo "♻️  覆盖 qutebrowser XDG 路径（force sync）: $CONFIG_DIR/qutebrowser"
+            rm -rf "$CONFIG_DIR/qutebrowser"
+            ln -s "$HOME/.qutebrowser" "$CONFIG_DIR/qutebrowser"
+        else
+            TS=$(date +%s)
+            echo "🔄 备份 qutebrowser XDG 路径: $CONFIG_DIR/qutebrowser -> $BACKUP_DIR/qutebrowser_${TS}"
+            mv "$CONFIG_DIR/qutebrowser" "$BACKUP_DIR/qutebrowser_${TS}"
+            ln -s "$HOME/.qutebrowser" "$CONFIG_DIR/qutebrowser"
+        fi
+    fi
+else
+    ln -s "$HOME/.qutebrowser" "$CONFIG_DIR/qutebrowser"
+    echo "🔗 建立 qutebrowser XDG 兼容链接: $CONFIG_DIR/qutebrowser -> $HOME/.qutebrowser"
+fi
+
 # Legacy paths cleanup hints (non-destructive):
-if [ -e "$CONFIG_DIR/yabai" ] || [ -L "$CONFIG_DIR/yabai" ]; then
-    echo "ℹ️  检测到旧路径 $CONFIG_DIR/yabai（yabai 默认读取 ~/.yabairc）"
+if [ -e "$HOME/.yabairc" ] || [ -L "$HOME/.yabairc" ]; then
+    echo "ℹ️  检测到旧路径 $HOME/.yabairc（当前方案使用 $CONFIG_DIR/yabai）"
 fi
 if [ -e "$CONFIG_DIR/jupyter" ] || [ -L "$CONFIG_DIR/jupyter" ]; then
     echo "ℹ️  检测到旧路径 $CONFIG_DIR/jupyter（Jupyter 默认读取 ~/.jupyter）"
