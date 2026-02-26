@@ -43,5 +43,6 @@ yabai -m config --space 3 layout float
 # Auto re-arrange on app lifecycle (idempotent script)
 yabai -m signal --add event=application_launched action="$HOME/dotfiles/scripts/yabai_rerange_spaces.sh"
 yabai -m signal --add event=application_terminated action="$HOME/dotfiles/scripts/yabai_rerange_spaces.sh"
+yabai -m config external_bar all:30:0
 
 
