@@ -34,7 +34,7 @@ done
 
 mkdir -p "$CONFIG_DIR"
 mkdir -p "$BACKUP_DIR"
-mkdir -p "$CONFIG_DIR/yabai"
+mkdir -p "$HOME/.jupyter"
 
 # ==========================================
 # 核心函数: 兼容 Bash 3.2 (macOS) 和 Bash 5+ (Linux)
@@ -99,14 +99,27 @@ link_file "$DOTFILES_DIR/yazi"          "$CONFIG_DIR/yazi"
 link_file "$DOTFILES_DIR/fastfetch"     "$CONFIG_DIR/fastfetch"
 link_file "$DOTFILES_DIR/iterm2"        "$CONFIG_DIR/iterm2"
 link_file "$DOTFILES_DIR/borders"       "$CONFIG_DIR/borders"
-link_file "$DOTFILES_DIR/yabai"         "$CONFIG_DIR/yabai"
+# yabai default config path on macOS is ~/.yabairc
+link_file "$DOTFILES_DIR/yabai/yabairc" "$HOME/.yabairc"
+
+# qutebrowser uses XDG default: ~/.config/qutebrowser
 link_file "$DOTFILES_DIR/qutebrowser"   "$CONFIG_DIR/qutebrowser"
 link_file "$DOTFILES_DIR/sketchybar"    "$CONFIG_DIR/sketchybar"
-link_file "$DOTFILES_DIR/jupyter"       "$CONFIG_DIR/jupyter"
+
+# Jupyter default config path is ~/.jupyter
+link_file "$DOTFILES_DIR/jupyter/jupyter.json" "$HOME/.jupyter/jupyter.json"
 link_file "$DOTFILES_DIR/kitty"         "$CONFIG_DIR/kitty"
 link_file "$DOTFILES_DIR/starship/starship-tmux.toml" "$CONFIG_DIR/starship-tmux.toml"
 link_file "$DOTFILES_DIR/starship/starship-tmux-inactive.toml" "$CONFIG_DIR/starship-tmux-inactive.toml"
 link_file "$DOTFILES_DIR/scripts"       "$HOME/scripts"
+
+# Legacy paths cleanup hints (non-destructive):
+if [ -e "$CONFIG_DIR/yabai" ] || [ -L "$CONFIG_DIR/yabai" ]; then
+    echo "ℹ️  检测到旧路径 $CONFIG_DIR/yabai（yabai 默认读取 ~/.yabairc）"
+fi
+if [ -e "$CONFIG_DIR/jupyter" ] || [ -L "$CONFIG_DIR/jupyter" ]; then
+    echo "ℹ️  检测到旧路径 $CONFIG_DIR/jupyter（Jupyter 默认读取 ~/.jupyter）"
+fi
 
 # --- LazyGit（只修改这里）-----------------------------------
 # Linux 使用 ~/.config/lazygit
