@@ -3,8 +3,14 @@ local fn = vim.fn
 local function check_lsp_deps()
   local warns = {}
 
+  local mason_bin = fn.stdpath("data") .. "/mason/bin"
+
   local function has_exec(bin)
-    return fn.executable(bin) == 1
+    if fn.executable(bin) == 1 then
+      return true
+    end
+    local p = mason_bin .. "/" .. bin
+    return fn.executable(p) == 1
   end
 
   local host = vim.g.python3_host_prog or "python3"
@@ -12,36 +18,33 @@ local function check_lsp_deps()
     table.insert(warns, "未检测到 python3 host (" .. host .. ")，请安装对应解释器（macOS: brew install python）")
   end
 
-  local lsp_servers = {
-    { "pyright-langserver", "npm install -g pyright", "Python" },
-    { "lua-language-server", "brew install lua-language-server", "Lua" },
-    { "vscode-json-language-server", "npm install -g vscode-langservers-extracted", "JSON" },
-    { "yaml-language-server", "npm install -g yaml-language-server", "YAML" },
-    { "typescript-language-server", "npm install -g typescript typescript-language-server", "TypeScript/JavaScript" },
-    { "bash-language-server", "npm install -g bash-language-server", "Shell" }
-  }
-  local tools = {
-    { "black", "pip install black", "Python formatter" },
-    -- flake8 intentionally disabled (too noisy for style rules)
-    { "stylua", "brew install stylua", "Lua formatter" },
+  local deps = {
+    { "pyright-langserver", "Python LSP", "MasonInstall pyright" },
+    { "lua-language-server", "Lua LSP", "MasonInstall lua-language-server" },
+    { "vscode-json-language-server", "JSON LSP", "MasonInstall json-lsp" },
+    { "yaml-language-server", "YAML LSP", "MasonInstall yaml-language-server" },
+    { "typescript-language-server", "TypeScript/JavaScript LSP", "MasonInstall typescript-language-server" },
+    { "bash-language-server", "Shell LSP", "MasonInstall bash-language-server" },
+    { "black", "Python formatter", "MasonInstall black" },
+    { "stylua", "Lua formatter", "MasonInstall stylua" },
+    { "shfmt", "Shell formatter", "MasonInstall shfmt" },
+    { "prettier", "Web formatter", "MasonInstall prettier" },
   }
 
-  for _, server in ipairs(lsp_servers) do
-    local bin, install_cmd, lang = server[1], server[2], server[3]
+  for _, dep in ipairs(deps) do
+    local bin, name, install_hint = dep[1], dep[2], dep[3]
     if not has_exec(bin) then
-      table.insert(warns, string.format("未检测到 %s (%s)，请安装：%s", lang, bin, install_cmd))
-    end
-  end
-  for _, tool in ipairs(tools) do
-    local bin, install_cmd, name = tool[1], tool[2], tool[3]
-    if not has_exec(bin) then
-      table.insert(warns, string.format("未检测到 %s (%s)，请安装：%s", name, bin, install_cmd))
+      table.insert(warns, string.format("未检测到 %s (%s)，可执行 :%s", name, bin, install_hint))
     end
   end
 
   if #warns > 0 then
     vim.schedule(function()
-      vim.notify(table.concat(warns, "\n"), vim.log.levels.WARN, { title = "LSP 依赖检查" })
+      vim.notify(
+        table.concat(warns, "\n") .. "\n\n提示：Mason 安装后重启 Neovim 或执行 :LspRestart",
+        vim.log.levels.WARN,
+        { title = "LSP/Formatter 依赖检查" }
+      )
     end)
   end
 end

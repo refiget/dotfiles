@@ -105,6 +105,7 @@ link_file "$DOTFILES_DIR/yabai"         "$CONFIG_DIR/yabai"
 # qutebrowser: use Bob's default path (~/.qutebrowser)
 link_file "$DOTFILES_DIR/qutebrowser"   "$HOME/.qutebrowser"
 link_file "$DOTFILES_DIR/sketchybar"    "$CONFIG_DIR/sketchybar"
+link_file "$DOTFILES_DIR/karabiner"    "$CONFIG_DIR/karabiner"
 
 # Jupyter default config path is ~/.jupyter
 link_file "$DOTFILES_DIR/jupyter/jupyter.json" "$HOME/.jupyter/jupyter.json"
