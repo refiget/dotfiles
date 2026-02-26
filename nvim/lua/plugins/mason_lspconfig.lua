@@ -9,7 +9,14 @@ return {
       return
     end
     mlsp.setup({
-      ensure_installed = { "pyright" },
+      ensure_installed = {
+        "pyright",
+        "lua_ls",
+        "jsonls",
+        "yamlls",
+        "ts_ls",
+        "bashls",
+      },
       automatic_installation = true,
     })
   end,
