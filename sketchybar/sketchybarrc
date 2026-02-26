@@ -1,5 +1,15 @@
-#!/usr/bin/env lua
+#!/usr/bin/env sh
+# Robust launcher for SketchyBar Lua config on fresh machines.
+# - Ensures CONFIG_DIR exists in launchd environments
+# - Uses brewed lua when available, then falls back to system lua
 
--- Load the sketchybar-package and prepare the helper binaries
-require("helpers")
-require("init")
+export CONFIG_DIR="${CONFIG_DIR:-$HOME/.config/sketchybar}"
+
+if [ -x /opt/homebrew/bin/lua ]; then
+  exec /opt/homebrew/bin/lua "$CONFIG_DIR/sketchybarrc.lua"
+elif command -v lua >/dev/null 2>&1; then
+  exec lua "$CONFIG_DIR/sketchybarrc.lua"
+else
+  echo "[sketchybar] lua not found (install: brew install lua)" >&2
+  exit 1
+fi

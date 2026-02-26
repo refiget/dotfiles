@@ -1,7 +1,11 @@
 local colors = require("colors")
 local settings = require("settings")
 
-local config_dir = os.getenv("CONFIG_DIR") or "$CONFIG_DIR"
+local config_dir = os.getenv("CONFIG_DIR")
+if not config_dir or config_dir == "" then
+  local home = os.getenv("HOME")
+  config_dir = (home and home ~= "") and (home .. "/.config/sketchybar") or "."
+end
 
 -- Right-side pill that mimics the left space app glyph string.
 -- It runs a small helper script that prints sketchybar key=value lines:

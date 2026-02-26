@@ -1,7 +1,7 @@
 local colors = require("colors")
 local settings = require("settings")
 local space_state = require("services.space_state")
-local lunajson = require("lunajson")
+local has_lunajson, lunajson = pcall(require, "lunajson")
 
 -- Notch focus pills
 local notch_gap = settings.notch_gap or 80
@@ -112,6 +112,10 @@ local function rebalance_to_screen_center()
 
   local index_right_inner = irect.right - i_label_pr
   local apps_left_inner = arect.left + a_label_pl
+
+  if not has_lunajson then
+    return
+  end
 
   sbar.exec("sketchybar --query displays", function(raw)
     local ok, displays = pcall(lunajson.decode, raw)

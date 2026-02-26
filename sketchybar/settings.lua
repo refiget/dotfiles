@@ -1,4 +1,4 @@
-local lunajson = require 'lunajson'
+local has_lunajson, lunajson = pcall(require, 'lunajson')
 
 local file = require("utils.file")
 local tbl = require("utils.tbl")
@@ -25,11 +25,23 @@ local function load_config()
     icons = "NerdFont",
   }
 
-  local config_filepath = os.getenv("CONFIG_DIR") .. "/config.json"
+  local config_dir = os.getenv("CONFIG_DIR")
+  if not config_dir or config_dir == "" then
+    local home = os.getenv("HOME")
+    if home and home ~= "" then
+      config_dir = home .. "/.config/sketchybar"
+    else
+      config_dir = "."
+    end
+  end
+
+  local config_filepath = config_dir .. "/config.json"
   local content, error = file.read(config_filepath)
-  if not error then
-    local json_content = lunajson.decode(content)
-    tbl.merge(config, json_content)
+  if not error and has_lunajson then
+    local ok, json_content = pcall(lunajson.decode, content)
+    if ok and type(json_content) == "table" then
+      tbl.merge(config, json_content)
+    end
   end
 
   return config
