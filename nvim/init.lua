@@ -22,7 +22,7 @@ require("config.lazy")
 
 do
 	local fn = vim.fn
-	local nvim_python_path = fn.expand("~/venvs/nvim/bin/python3")
+	local nvim_python_path = fn.expand("~/venvs/nvim/bin/python3") -- expand to the abs path according to OS
 
 	-- = `vim.g.python3_host_prog` is the python provider of nvim. =
 	-- = use `:checkhealth provider` to check the provider path(nvim venv path)
