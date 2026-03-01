@@ -75,10 +75,10 @@ do
 
 	opt.completeopt = { "menuone", "noselect" }
 
-	opt.updatetime = 100
-	opt.virtualedit = "block"
-	opt.inccommand = "split"
-	opt.showmode = false
+	opt.updatetime = 100 -- hover 100 ms to show the  LSP menu
+	opt.virtualedit = "block" -- enable us to move to blank arae
+	opt.inccommand = "split" -- when using subtitute CMD, we can preview the outcome in the bottom(split)
+	opt.showmode = false -- show the INSERT/NORMAL mode
 
 	opt.backupdir = fn.expand("$HOME/.config/nvim/tmp/backup,.")
 	opt.directory = fn.expand("$HOME/.config/nvim/tmp/backup,.")
@@ -105,6 +105,10 @@ require("core.ui").setup()
 --  ___) |  _  | |_| |  _ < | || |___| |_| | | |  ___) |
 -- |____/|_| |_|\___/|_| \_\|_| \____|\___/  |_| |____/
 -- =============================================================================
+--
+--  Leader key : space
+--  Local Leader : ,
+--  `:verbose nmap <leader>b` to check the binding of `<leader>b`
 
 local keymap = vim.keymap.set
 local opts = { silent = true, noremap = true }
@@ -121,8 +125,12 @@ keymap("n", "K", "5k", opts)
 keymap("x", "J", "5j", opts)
 keymap("x", "K", "5k", opts)
 
+keymap("n", "<C-g>", ":echo line('.') col('.')<CR>", opts)
+
 -- Surround a word by brackets (, [, or (}.)
--- keymap("n", "<leader>b", "bi(<ESC>ea)<ESC>", opts)
+keymap("n", "<leader>(", "bi(<ESC>ea)<ESC>", opts)
+keymap("n", "<leader>[", "bi[<ESC>ea]<ESC>", opts)
+keymap("n", "<leader>{", "bi{<ESC>ea}<ESC>", opts)
 
 keymap("n", "s", "<nop>")
 
@@ -135,9 +143,9 @@ keymap("t", "<C-N>", "<C-\\><C-N>", opts)
 
 -- == Run current Python file ==
 local function run_python()
-	vim.cmd("w")
-	local file = vim.fn.expand("%") -- "%": path of current file
-	vim.cmd("botright 10split | term python3 " .. file)
+	vim.cmd("w") -- Save first
+	local file = vim.fn.expand("%") -- "%": the name of current file
+	vim.cmd("botright 10split | term python3 " .. file) -- It inherits the venv when opening the file.
 end
 
 keymap("n", "R", run_python, { silent = true, desc = "Run Python file" })
@@ -150,7 +158,6 @@ keymap("n", "R", run_python, { silent = true, desc = "Run Python file" })
 -- /_/   \_\__,_|\__\___/ \___|_| |_| |_|\__,_|
 -- =============================================================================
 
--- Restore cursor to last edit position (official-style BufReadPost recipe).
 local RESTORE_CURSOR_SKIP_FT = { gitcommit = true, gitrebase = true, svn = true, hgcommit = true }
 
 vim.api.nvim_create_autocmd("BufReadPost", {
