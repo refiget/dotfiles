@@ -194,7 +194,7 @@
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
-	<string>Axe Processes</string>
+	<string>Kill Process</string>
 	<key>objects</key>
 	<array>
 		<dict>

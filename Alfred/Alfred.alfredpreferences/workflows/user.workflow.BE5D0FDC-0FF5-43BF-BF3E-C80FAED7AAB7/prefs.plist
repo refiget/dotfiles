@@ -6,5 +6,7 @@
 	<string>kill</string>
 	<key>refresh_rate</key>
 	<integer>2</integer>
+	<key>sort_by_flag</key>
+	<string>m</string>
 </dict>
 </plist>
