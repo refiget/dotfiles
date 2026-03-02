@@ -150,24 +150,32 @@ end
 
 keymap("n", "R", run_python, { silent = true, desc = "Run Python file" })
 
--- == Surround the Selected Text
-local function get_visual_selection()
-	-- 保存当前模式
-	local saved_reg = vim.fn.getreg('"')
-	local saved_regtype = vim.fn.getregtype('"')
-	-- 复制当前 Visual 选区到默认寄存器
-	vim.cmd('normal! "vy')
-	-- 读取
-	local text = vim.fn.getreg('"')
-	-- 恢复寄存器
-	vim.fn.setreg('"', saved_reg, saved_regtype)
-	return text
-end
-local result = get_visual_selection
-keymap("v", "<leader>b", function()
-	local result = "(" .. get_visual_selection() .. ")"
-	print(result)
-end, opts)
+-- vim.fn.getpos("'<")   to get the position of begining of Selected words
+-- vim.fn.getpos("'>")  to get the position of end of Selected words
+-- return {0, line, col, off}  0: for current windows
+-- vim.api.nvim_win_set_cursor(0, {line, col}) move the cursor to the position
+
+-- keymap('v', '<leader>b', function ()
+-- 	begin_point_group = vim.fn.getpos("'<")
+-- 	end_point_group = vim.fn.getpos("'>")
+-- 	begin_point_line = begin_point_group[1]
+-- 	begin_point_col = begin_point_group[2]
+-- 	end_point_line = end_point_group[1]
+-- 	end_point_col = end_point_group[2]
+-- 	vim.api.nvim_win_set_cursor(0, {begin_point_line, begin_point_col})
+-- 	vim.api.nvim_feedkeys(
+--   vim.api.nvim_replace_termcodes("i(<Esc>", true, false, true),
+--   "n",
+--   true
+-- )
+-- 	vim.api.nvim_win_set_cursor(0, {end_point_line, end_point_col})
+--   vim.api.nvim_replace_termcodes("a)<Esc>", true, false, true),
+--   "n",
+--   true
+-- )
+--
+--
+-- end
 
 -- =============================================================================
 --     _         _                           _
