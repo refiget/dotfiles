@@ -26,7 +26,7 @@ conform.setup({
     zsh = { "shfmt" },
     json = { "prettier" },
     yaml = { "prettier" },
-    markdown = { "prettier" },
+    -- markdown formatter removed
   },
 })
 

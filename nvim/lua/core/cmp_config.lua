@@ -125,7 +125,7 @@ cmp.setup({
 	}),
 })
 
-cmp.setup.filetype({ "markdown", "text" }, {
+cmp.setup.filetype({ "text" }, {
 	sources = cmp.config.sources({
 		{ name = "spell" },
 		{ name = "buffer" },

@@ -73,9 +73,7 @@ Below tables list the most important custom shortcuts.
 
 ## Markdown
 
-| Mode                | Key              | Action                                  |
-| ------------------- | ---------------- | --------------------------------------- |
-| n (markdown buffer) | `<localleader>t` | Open in Typora + apply Rectangle layout |
+(removed)
 
 ## Jtext
 

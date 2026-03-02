@@ -2,7 +2,7 @@
 
 return {
   "kamykn/spelunker.vim",
-  ft = { "markdown", "text" },
+  ft = { "text" },
   config = function()
     vim.g.spelunker_check_type = 2
     vim.g.spelunker_highlight_type = 2
@@ -13,7 +13,7 @@ return {
     }
 
     vim.api.nvim_create_autocmd("FileType", {
-      pattern = { "markdown", "text" },
+      pattern = { "text" },
       callback = function()
         vim.opt_local.spell = true
       end,

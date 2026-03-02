@@ -15,7 +15,7 @@ return {
     end
 
     configs.setup({
-      ensure_installed = { "lua", "vim", "markdown", "markdown_inline", "python", "json", "bash", "javascript", "c" },
+      ensure_installed = { "lua", "vim", "python", "json", "bash", "javascript", "c" },
       highlight = { enable = true },
       indent = { enable = true },
     })

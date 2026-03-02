@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string></string>
+	<key>connections</key>
+	<dict>
+		<key>0D37E528-4B89-4660-BBFC-9A96BAF17C19</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8E54E9A1-360D-47CD-96C8-56034B21B5EE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string></string>
+	<key>description</key>
+	<string></string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Clash Verge Tun Mode Swich</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>-- ignoring application responses
+tell application "Keyboard Maestro Engine"
+	do script "9A3DC6E9-8F33-4D84-B8ED-5B56FA0532E3"
+	-- or: do script "Clash Verge"
+	-- or: do script "9A3DC6E9-8F33-4D84-B8ED-5B56FA0532E3" with parameter "Whatever"
+end tell
+-- end ignoring</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>6</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>8E54E9A1-360D-47CD-96C8-56034B21B5EE</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>tun</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>script</key>
+				<string>#!/usr/bin/env bash
+
+# 1) 从 Keyboard Maestro 读取变量
+STATE=$(osascript &lt;&lt;EOF
+tell application "Keyboard Maestro Engine"
+    getvariable "ClasVergeOpen"
+end tell
+EOF
+)
+
+# 2) 默认值保护
+# 如果 KM 变量为空、或者不是 0/1，则认为是 “0” (即需要开启)
+if [[ "$STATE" != "0" &amp;&amp; "$STATE" != "1" ]]; then
+    STATE="0"
+fi
+
+# 3) 根据变量判断下一个动作
+if [[ "$STATE" == "0" ]]; then
+    NEXT_ACTION="ON"
+else
+    NEXT_ACTION="OFF"
+fi
+
+# 4) 输出 Alfred JSON
+cat &lt;&lt;EOF
+{
+  "items": [
+    {
+      "uid": "tun_toggle",
+      "title": "TUN $NEXT_ACTION",
+      "subtitle": "Next action based on current state ($STATE)",
+      "arg": "$NEXT_ACTION"
+    }
+  ]
+}
+EOF</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string></string>
+				<key>title</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>0D37E528-4B89-4660-BBFC-9A96BAF17C19</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string></string>
+	<key>uidata</key>
+	<dict>
+		<key>0D37E528-4B89-4660-BBFC-9A96BAF17C19</key>
+		<dict>
+			<key>xpos</key>
+			<real>105</real>
+			<key>ypos</key>
+			<real>215</real>
+		</dict>
+		<key>8E54E9A1-360D-47CD-96C8-56034B21B5EE</key>
+		<dict>
+			<key>xpos</key>
+			<real>350</real>
+			<key>ypos</key>
+			<real>205</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array/>
+	<key>webaddress</key>
+	<string></string>
+</dict>
+</plist>
