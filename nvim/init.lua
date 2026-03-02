@@ -150,6 +150,25 @@ end
 
 keymap("n", "R", run_python, { silent = true, desc = "Run Python file" })
 
+-- == Surround the Selected Text
+local function get_visual_selection()
+	-- 保存当前模式
+	local saved_reg = vim.fn.getreg('"')
+	local saved_regtype = vim.fn.getregtype('"')
+	-- 复制当前 Visual 选区到默认寄存器
+	vim.cmd('normal! "vy')
+	-- 读取
+	local text = vim.fn.getreg('"')
+	-- 恢复寄存器
+	vim.fn.setreg('"', saved_reg, saved_regtype)
+	return text
+end
+local result = get_visual_selection
+keymap("v", "<leader>b", function()
+	local result = "(" .. get_visual_selection() .. ")"
+	print(result)
+end, opts)
+
 -- =============================================================================
 --     _         _                           _
 --    / \  _   _| |_ ___   ___ _ __ ___   __| |
