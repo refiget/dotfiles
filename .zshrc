@@ -16,7 +16,7 @@ fi
 
 # 3) Compile current loader for faster startups
 if [[ -n "$__zshrc_path" ]]; then
-  local zwc="${__zshrc_path}.zwc"
+  typeset zwc="${__zshrc_path}.zwc"
   if [[ ! -f "$zwc" || "$__zshrc_path" -nt "$zwc" ]]; then
     zcompile "$__zshrc_path" 2>/dev/null
   fi
