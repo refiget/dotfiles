@@ -34,6 +34,15 @@ require("lazy").setup({
 	checker = { enabled = false, notify = false },
 
 	-- keep existing behavior
-	defaults = { lazy = true },
+	defaults = {
+		lazy = true,
+		-- In VSCode (vscode-neovim), only load plugins explicitly marked `vscode = true`.
+		cond = function(plugin)
+			if vim.g.vscode then
+				return plugin.vscode == true
+			end
+			return true
+		end,
+	},
 	ui = { border = "rounded" },
 })
