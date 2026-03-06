@@ -22,7 +22,32 @@ return {
     vim.opt.termguicolors = true
     vim.opt.showtabline = 2
 
+    local base_bg = "#2C323B"
+    local surface = "#3a414b"
+    local text = "#cdd6f4"
+    local muted = "#8b93a0"
+
     bufferline.setup({
+      highlights = {
+        fill = { bg = base_bg },
+        background = { bg = base_bg, fg = muted },
+        buffer_visible = { bg = base_bg, fg = muted },
+        buffer_selected = { bg = base_bg, fg = text, bold = true, italic = false },
+
+        separator = { bg = base_bg, fg = base_bg },
+        separator_visible = { bg = base_bg, fg = base_bg },
+        separator_selected = { bg = base_bg, fg = base_bg },
+
+        tab = { bg = base_bg, fg = muted },
+        tab_selected = { bg = surface, fg = text, bold = true },
+        tab_separator = { bg = base_bg, fg = base_bg },
+        tab_separator_selected = { bg = surface, fg = surface },
+
+        close_button = { bg = base_bg, fg = muted },
+        close_button_visible = { bg = base_bg, fg = muted },
+        close_button_selected = { bg = base_bg, fg = text },
+        indicator_selected = { fg = "#b294bb", bg = base_bg },
+      },
       options = {
         mode = "buffers",
         numbers = "none",

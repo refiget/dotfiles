@@ -66,10 +66,12 @@ function M.setup()
 			overlay0 = "#6c7086",
 		}
 
-		vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
-		vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
-		vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE" })
-		vim.api.nvim_set_hl(0, "FoldColumn", { bg = "NONE" })
+		local base_bg = "#2C323B"
+		vim.api.nvim_set_hl(0, "Normal", { bg = base_bg })
+		vim.api.nvim_set_hl(0, "NormalNC", { bg = base_bg })
+		vim.api.nvim_set_hl(0, "SignColumn", { bg = base_bg })
+		vim.api.nvim_set_hl(0, "LineNr", { bg = base_bg })
+		vim.api.nvim_set_hl(0, "FoldColumn", { bg = base_bg })
 
 		vim.api.nvim_set_hl(0, "WinBar", { fg = p.text })
 		vim.api.nvim_set_hl(0, "WinBarNC", { fg = p.overlay0 })
@@ -88,6 +90,12 @@ function M.setup()
 
 		vim.api.nvim_set_hl(0, "NonText", { fg = "#181825" })
 		vim.api.nvim_set_hl(0, "Whitespace", { fg = "#181825" })
+
+		vim.api.nvim_set_hl(0, "StatusLine", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "StatusLineNC", { bg = base_bg, fg = p.overlay0 })
+		vim.api.nvim_set_hl(0, "TabLineFill", { bg = base_bg, fg = p.overlay0 })
+		vim.api.nvim_set_hl(0, "TabLine", { bg = base_bg, fg = p.overlay0 })
+		vim.api.nvim_set_hl(0, "TabLineSel", { bg = "#3a414b", fg = p.text, bold = true })
 	end
 
 	vim.opt.fillchars:append({
