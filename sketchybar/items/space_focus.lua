@@ -39,6 +39,8 @@ local focus_index = sbar.add("item", "space.focus.index", {
   },
 })
 
+local current_apps_string = space_state.get_apps_for_space(space_state.current_space)
+
 local focus_apps = sbar.add("item", "space.focus.apps", {
   position = "center",
   padding_left = apps_gap,
@@ -46,7 +48,7 @@ local focus_apps = sbar.add("item", "space.focus.apps", {
   label = {
     font = "sketchybar-app-font:Regular:16.0",
     color = colors.white,
-    string = space_state.get_apps_for_space(space_state.current_space),
+    string = current_apps_string,
     padding_left = 10,
     padding_right = 10,
     y_offset = -1,
@@ -58,6 +60,28 @@ local focus_apps = sbar.add("item", "space.focus.apps", {
     border_width = 2,
     border_color = colors.bg2,
   },
+})
+
+local focus_apps_right = sbar.add("item", "space.focus.apps.right", {
+  position = "right",
+  icon = { drawing = false },
+  label = {
+    font = "sketchybar-app-font:Regular:16.0",
+    color = colors.white,
+    string = current_apps_string,
+    padding_left = 10,
+    padding_right = 10,
+    y_offset = -1,
+  },
+  background = {
+    color = colors.transparent,
+    corner_radius = 999,
+    height = 26,
+    border_width = 2,
+    border_color = colors.bg2,
+  },
+  padding_left = 0,
+  padding_right = 5,
 })
 
 local current_apps_gap = apps_gap
@@ -148,8 +172,10 @@ local M = {}
 
 function M.set_space(space_id)
   space_state.set_current_space(space_id)
+  local current_line = space_state.get_apps_for_space(space_state.current_space)
   focus_index:set({ label = { string = space_display(space_state.current_space) } })
-  focus_apps:set({ label = { string = space_state.get_apps_for_space(space_state.current_space) } })
+  focus_apps:set({ label = { string = current_line } })
+  focus_apps_right:set({ label = { string = current_line } })
   rebalance_to_screen_center()
 end
 
@@ -157,6 +183,7 @@ function M.set_apps_for_space(space_id, icon_line)
   space_state.set_apps_for_space(space_id, icon_line)
   if tonumber(space_id) == space_state.current_space then
     focus_apps:set({ label = { string = icon_line } })
+    focus_apps_right:set({ label = { string = icon_line } })
     rebalance_to_screen_center()
   end
 end

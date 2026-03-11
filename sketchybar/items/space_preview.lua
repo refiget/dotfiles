@@ -103,9 +103,9 @@ local space_window_observer = sbar.add("item", {
 })
 
 space_window_observer:subscribe("space_windows_change", function(env)
-  local MAX_APPS = 4
-  local icon_line = space_state.format_apps_line(env.INFO.apps, MAX_APPS)
   local sid = env.INFO.space
+  local max_apps = (tonumber(sid) == 3) and 99 or 4
+  local icon_line = space_state.format_apps_line(env.INFO.apps, max_apps)
 
   space_state.set_apps_for_space(sid, icon_line)
 

@@ -5,14 +5,13 @@ local settings = require("settings")
 sbar.bar({
   height = settings.bar_height,
   color = colors.transparent,
-  margin = 8,
-  corner_radius = 12,
-  padding_right = 8,
-  padding_left = 8,
+  margin = 0,
+  corner_radius = 0,
+  padding_right = 0,
+  padding_left = 5,
 
-  -- With menu-guard enabled, keep this at 0 (the guard will hide SketchyBar
-  -- when the menu bar reveal zone is active).
-  y_offset = 0,
+  -- Slightly tuck the bar upward so it feels thinner visually.
+  y_offset = -7,
 
   -- Let the macOS menu bar / menus appear above SketchyBar
   topmost = "off"

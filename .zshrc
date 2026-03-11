@@ -28,3 +28,11 @@ for conf_file in "$ZSH_CONF_DIR"/*.conf; do
   [[ "$conf_file" == "$ZSH_CONF_DIR/01_env_path.conf" ]] && continue
   source "$conf_file"
 done
+
+# pnpm
+export PNPM_HOME="/Users/bob/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
