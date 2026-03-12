@@ -30,6 +30,24 @@ yabai -m rule --add app="^kitty$" space=1 manage=on
 yabai -m rule --add app="^(ChatGPT|ChatGPT Desktop)$" space=2
 yabai -m rule --add app="^(WeChat|微信)$" space=3
 
+# Float Settings / Preferences windows only for selected apps
+setting_float_apps=(
+  "IntelliJ IDEA"
+  "Visual Studio Code"
+)
+
+escape_regex() {
+  printf '%s' "$1" | sed -E 's/[][(){}.^$*+?|\\/]/\\&/g'
+}
+
+setting_float_apps_regex="^("
+for app in "${setting_float_apps[@]}"; do
+  setting_float_apps_regex+="$(escape_regex "$app")|"
+done
+setting_float_apps_regex="${setting_float_apps_regex%|})$"
+
+yabai -m rule --add app="$setting_float_apps_regex" title="^(Settings|Preferences).*" manage=off
+
 # Space layout policy
 yabai -m config --space 1 layout bsp
 yabai -m config --space 2 layout bsp

@@ -45,18 +45,11 @@ return {
 			controls = { enabled = false },
 			layouts = {
 				{
-					position = "right",
-					size = 34,
-					elements = {
-						{ id = "scopes", size = 0.7 },
-						{ id = "stacks", size = 0.3 },
-					},
-				},
-				{
 					position = "bottom",
-					size = 9,
+					size = 12,
 					elements = {
-						{ id = "console", size = 1.0 },
+						{ id = "stacks", size = 15 },
+						{ id = "scopes", size = 0.7 },
 					},
 				},
 			},
