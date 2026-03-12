@@ -67,11 +67,14 @@ function M.setup()
 		}
 
 		local base_bg = "#2C323B"
+		local surface_bg = "#3a414b"
 		vim.api.nvim_set_hl(0, "Normal", { bg = base_bg })
 		vim.api.nvim_set_hl(0, "NormalNC", { bg = base_bg })
+		vim.api.nvim_set_hl(0, "NormalSB", { bg = base_bg, fg = p.text })
 		vim.api.nvim_set_hl(0, "SignColumn", { bg = base_bg })
 		vim.api.nvim_set_hl(0, "LineNr", { bg = base_bg })
 		vim.api.nvim_set_hl(0, "FoldColumn", { bg = base_bg })
+		vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = base_bg, bg = base_bg })
 
 		vim.api.nvim_set_hl(0, "WinBar", { fg = p.text })
 		vim.api.nvim_set_hl(0, "WinBarNC", { fg = p.overlay0 })
@@ -88,14 +91,32 @@ function M.setup()
 		vim.api.nvim_set_hl(0, "CursorLineNr", { fg = accent, bold = true })
 		vim.api.nvim_set_hl(0, "CursorLine", { bg = "NONE" })
 
-		vim.api.nvim_set_hl(0, "NonText", { fg = "#181825" })
-		vim.api.nvim_set_hl(0, "Whitespace", { fg = "#181825" })
+		vim.api.nvim_set_hl(0, "NonText", { fg = "#232831" })
+		vim.api.nvim_set_hl(0, "Whitespace", { fg = "#232831" })
 
 		vim.api.nvim_set_hl(0, "StatusLine", { bg = base_bg, fg = p.text })
 		vim.api.nvim_set_hl(0, "StatusLineNC", { bg = base_bg, fg = p.overlay0 })
 		vim.api.nvim_set_hl(0, "TabLineFill", { bg = base_bg, fg = p.overlay0 })
 		vim.api.nvim_set_hl(0, "TabLine", { bg = base_bg, fg = p.overlay0 })
-		vim.api.nvim_set_hl(0, "TabLineSel", { bg = "#3a414b", fg = p.text, bold = true })
+		vim.api.nvim_set_hl(0, "TabLineSel", { bg = surface_bg, fg = p.text, bold = true })
+
+		-- Common plugin windows that otherwise fall back to catppuccin defaults.
+		vim.api.nvim_set_hl(0, "LazyNormal", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "MasonNormal", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "TroubleNormal", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "TroubleNormalNC", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "SagaNormal", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "SagaBorder", { bg = base_bg, fg = p.overlay0 })
+		vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "NvimTreeNormalNC", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "NvimTreeNormalFloat", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "NvimTreeNormalFloatBorder", { bg = base_bg, fg = p.overlay0 })
+		vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer", { fg = base_bg, bg = base_bg })
+		vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { fg = p.overlay0, bg = base_bg })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingError", { link = "DiagnosticError" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingWarn", { link = "DiagnosticWarn" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingInfo", { link = "DiagnosticInfo" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingHint", { link = "DiagnosticHint" })
 	end
 
 	vim.opt.fillchars:append({
