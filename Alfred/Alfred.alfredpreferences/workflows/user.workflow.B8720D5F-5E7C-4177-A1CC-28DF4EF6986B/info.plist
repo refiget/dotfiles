@@ -6,6 +6,19 @@
 	<string></string>
 	<key>connections</key>
 	<dict>
+		<key>553D36C6-AEB9-4F6A-8229-88932BB604B3</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C6D3C091-755F-43B1-A270-DFA5ECA488D5</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>8AFBEDED-3AF2-4CEC-B7B5-ED405717FEEA</key>
 		<array>
 			<dict>
@@ -117,6 +130,44 @@
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>inputmode</key>
+				<integer>-1</integer>
+				<key>outputmode</key>
+				<integer>0</integer>
+				<key>shortcut</key>
+				<string>30min Timer(confetti)</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.automation.runshortcut</string>
+			<key>uid</key>
+			<string>C6D3C091-755F-43B1-A270-DFA5ECA488D5</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>30m</string>
+				<key>subtext</key>
+				<string></string>
+				<key>text</key>
+				<string>30 minutes timer</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>553D36C6-AEB9-4F6A-8229-88932BB604B3</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
@@ -128,6 +179,13 @@
 			<real>360</real>
 			<key>ypos</key>
 			<real>70</real>
+		</dict>
+		<key>553D36C6-AEB9-4F6A-8229-88932BB604B3</key>
+		<dict>
+			<key>xpos</key>
+			<real>30</real>
+			<key>ypos</key>
+			<real>425</real>
 		</dict>
 		<key>5DA12B71-FCD1-4996-A689-6B4933440B91</key>
 		<dict>
@@ -149,6 +207,13 @@
 			<real>75</real>
 			<key>ypos</key>
 			<real>80</real>
+		</dict>
+		<key>C6D3C091-755F-43B1-A270-DFA5ECA488D5</key>
+		<dict>
+			<key>xpos</key>
+			<real>215</real>
+			<key>ypos</key>
+			<real>395</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
