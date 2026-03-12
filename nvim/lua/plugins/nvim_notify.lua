@@ -8,9 +8,11 @@ return {
     if not ok then
       return
     end
-    local bg = "#1e1e2e"
+    local bg = "#2C323B"
     pcall(function()
-      bg = require("catppuccin.palettes").get_palette("mocha").base
+      -- Keep notify aligned with the custom editor background instead of
+      -- catppuccin's default base.
+      require("catppuccin.palettes").get_palette("mocha")
     end)
 
     local function apply_notify_hl()

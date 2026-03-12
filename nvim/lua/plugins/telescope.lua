@@ -183,6 +183,23 @@ return {
     end, { nargs = 0, desc = "Telescope: clear search paths" })
 
     local function apply_telescope_hl()
+      local ok, p = pcall(function()
+        return require("catppuccin.palettes").get_palette("mocha")
+      end)
+      local text = (ok and p and p.text) or "#cdd6f4"
+      local muted = (ok and p and p.overlay0) or "#6c7086"
+      local base_bg = "#2C323B"
+      local surface_bg = "#3a414b"
+
+      vim.api.nvim_set_hl(0, "TelescopeNormal", { fg = text, bg = base_bg })
+      vim.api.nvim_set_hl(0, "TelescopePromptNormal", { fg = text, bg = base_bg })
+      vim.api.nvim_set_hl(0, "TelescopeResultsNormal", { fg = text, bg = base_bg })
+      vim.api.nvim_set_hl(0, "TelescopePreviewNormal", { fg = text, bg = base_bg })
+      vim.api.nvim_set_hl(0, "TelescopeTitle", { fg = text, bg = base_bg, bold = true })
+      vim.api.nvim_set_hl(0, "TelescopePromptTitle", { fg = text, bg = base_bg, bold = true })
+      vim.api.nvim_set_hl(0, "TelescopeResultsTitle", { fg = muted, bg = base_bg })
+      vim.api.nvim_set_hl(0, "TelescopePreviewTitle", { fg = muted, bg = base_bg })
+      vim.api.nvim_set_hl(0, "TelescopeSelection", { fg = text, bg = surface_bg, bold = true })
       vim.api.nvim_set_hl(0, "TelescopeBorder", { link = "FloatBorder" })
       vim.api.nvim_set_hl(0, "TelescopePromptBorder", { link = "FloatBorder" })
       vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { link = "FloatBorder" })

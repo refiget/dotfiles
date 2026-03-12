@@ -47,7 +47,7 @@ return {
             padding = { 0, 1 },
           },
           win_options = {
-            winblend = 10,
+            winblend = 0,
             winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
           },
         },

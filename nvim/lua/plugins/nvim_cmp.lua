@@ -15,19 +15,18 @@ return {
   },
   config = function()
     local function apply_cmp_hl()
-      -- Completion menu contrast (plugin-owned UX)
+      -- Completion menu contrast aligned with the custom #2C323B UI base.
       local ok, p = pcall(function()
         return require("catppuccin.palettes").get_palette("mocha")
       end)
-      local base = (ok and p and p.base) or "#1e1e2e"
-      local mantle = (ok and p and p.mantle) or "#181825"
-      local surface0 = (ok and p and p.surface0) or "#313244"
+      local base = "#2C323B"
+      local surface0 = "#3a414b"
       local surface1 = (ok and p and p.surface1) or "#45475a"
       local text = (ok and p and p.text) or "#cdd6f4"
 
       vim.api.nvim_set_hl(0, "Pmenu", { fg = text, bg = base })
       vim.api.nvim_set_hl(0, "PmenuSel", { fg = text, bg = surface0 })
-      vim.api.nvim_set_hl(0, "PmenuSbar", { bg = mantle })
+      vim.api.nvim_set_hl(0, "PmenuSbar", { bg = base })
       vim.api.nvim_set_hl(0, "PmenuThumb", { bg = surface1 })
     end
 
