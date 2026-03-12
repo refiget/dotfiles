@@ -282,7 +282,7 @@ return {
           results = { "─", "│", "─", "│", "├", "┤", "╯", "╰" },
           preview = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
         },
-        winblend = 10,
+        winblend = 0,
         mappings = {
           i = {
             ["<C-j>"] = "move_selection_next",

@@ -89,7 +89,7 @@ function M.setup()
 		vim.api.nvim_set_hl(0, "WinBarMod", { fg = accent, bold = true })
 
 		vim.api.nvim_set_hl(0, "CursorLineNr", { fg = accent, bold = true })
-		vim.api.nvim_set_hl(0, "CursorLine", { bg = "NONE" })
+		vim.api.nvim_set_hl(0, "CursorLine", { bg = surface_bg })
 
 		vim.api.nvim_set_hl(0, "NonText", { fg = "#232831" })
 		vim.api.nvim_set_hl(0, "Whitespace", { fg = "#232831" })
@@ -102,21 +102,52 @@ function M.setup()
 
 		-- Common plugin windows that otherwise fall back to catppuccin defaults.
 		vim.api.nvim_set_hl(0, "LazyNormal", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "LazyButton", { bg = surface_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "LazyButtonActive", { bg = accent, fg = "#1f2330", bold = true })
+		vim.api.nvim_set_hl(0, "LazyH1", { bg = surface_bg, fg = p.text, bold = true })
+		vim.api.nvim_set_hl(0, "LazyH2", { fg = p.text, bold = true })
+		vim.api.nvim_set_hl(0, "LazyProp", { fg = p.overlay0 })
+
 		vim.api.nvim_set_hl(0, "MasonNormal", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "MasonHighlight", { fg = accent, bold = true })
+		vim.api.nvim_set_hl(0, "MasonHighlightSecondary", { fg = p.text })
+		vim.api.nvim_set_hl(0, "MasonHighlightBlock", { bg = surface_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "MasonHighlightBlockBold", { bg = surface_bg, fg = p.text, bold = true })
+		vim.api.nvim_set_hl(0, "MasonHighlightBlockSecondary", { bg = surface_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "MasonHighlightBlockBoldSecondary", { bg = accent, fg = "#1f2330", bold = true })
+		vim.api.nvim_set_hl(0, "MasonCursorLine", { bg = surface_bg })
+
 		vim.api.nvim_set_hl(0, "TroubleNormal", { bg = base_bg, fg = p.text })
 		vim.api.nvim_set_hl(0, "TroubleNormalNC", { bg = base_bg, fg = p.text })
+		vim.api.nvim_set_hl(0, "TroubleText", { fg = p.text, bg = base_bg })
+		vim.api.nvim_set_hl(0, "TroubleCount", { bg = surface_bg, fg = p.text, bold = true })
+		vim.api.nvim_set_hl(0, "TroubleIndent", { fg = p.overlay0, bg = base_bg })
+
 		vim.api.nvim_set_hl(0, "SagaNormal", { bg = base_bg, fg = p.text })
 		vim.api.nvim_set_hl(0, "SagaBorder", { bg = base_bg, fg = p.overlay0 })
+		vim.api.nvim_set_hl(0, "SagaTitle", { fg = p.text, bold = true })
+		vim.api.nvim_set_hl(0, "SagaActionTitle", { bg = accent, fg = "#1f2330", bold = true })
+		vim.api.nvim_set_hl(0, "CodeActionCursorLine", { bg = surface_bg })
+
 		vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = base_bg, fg = p.text })
 		vim.api.nvim_set_hl(0, "NvimTreeNormalNC", { bg = base_bg, fg = p.text })
 		vim.api.nvim_set_hl(0, "NvimTreeNormalFloat", { bg = base_bg, fg = p.text })
 		vim.api.nvim_set_hl(0, "NvimTreeNormalFloatBorder", { bg = base_bg, fg = p.overlay0 })
 		vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer", { fg = base_bg, bg = base_bg })
 		vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { fg = p.overlay0, bg = base_bg })
+		vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = surface_bg })
+		vim.api.nvim_set_hl(0, "NvimTreeCursorLineNr", { fg = accent, bg = surface_bg, bold = true })
+		vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = p.overlay0, bg = base_bg })
+		vim.api.nvim_set_hl(0, "NvimTreeOpenedHL", { fg = accent, bold = true })
+
 		vim.api.nvim_set_hl(0, "DiagnosticFloatingError", { link = "DiagnosticError" })
 		vim.api.nvim_set_hl(0, "DiagnosticFloatingWarn", { link = "DiagnosticWarn" })
 		vim.api.nvim_set_hl(0, "DiagnosticFloatingInfo", { link = "DiagnosticInfo" })
 		vim.api.nvim_set_hl(0, "DiagnosticFloatingHint", { link = "DiagnosticHint" })
+		vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#e78284", bg = "NONE", italic = true })
+		vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#ef9f76", bg = "NONE", italic = true })
+		vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#85c1dc", bg = "NONE", italic = true })
+		vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#81c8be", bg = "NONE", italic = true })
 	end
 
 	vim.opt.fillchars:append({
