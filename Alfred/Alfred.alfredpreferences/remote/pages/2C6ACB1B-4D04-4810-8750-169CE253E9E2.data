@@ -27,21 +27,7 @@
 			<key>itemuid</key>
 			<string>E6EFAF3D-B285-4C27-B2A1-6B11E0BF56F1</string>
 		</dict>
-		<dict>
-			<key>actionconfig</key>
-			<dict>
-				<key>path</key>
-				<string>~/Desktop</string>
-			</dict>
-			<key>actionuid</key>
-			<string>remote.alfred.launchfile</string>
-			<key>buttoniconid</key>
-			<string>17B9DAA6-18FC-4491-BB3F-8AF18DB54AC4</string>
-			<key>buttonlabel</key>
-			<string>Desktop</string>
-			<key>itemuid</key>
-			<string>C5E37701-A923-4072-A0F6-4A61E50DA206</string>
-		</dict>
+		<dict/>
 		<dict>
 			<key>actionconfig</key>
 			<dict>
@@ -57,21 +43,7 @@
 			<key>itemuid</key>
 			<string>A637DBDC-008A-4875-825A-0B0287A8C166</string>
 		</dict>
-		<dict>
-			<key>actionconfig</key>
-			<dict>
-				<key>path</key>
-				<string>~/Downloads</string>
-			</dict>
-			<key>actionuid</key>
-			<string>remote.alfred.launchfile</string>
-			<key>buttoniconid</key>
-			<string>AE863891-DCAF-4518-9FD0-3A5B6459276B</string>
-			<key>buttonlabel</key>
-			<string>Downloads</string>
-			<key>itemuid</key>
-			<string>60710CD0-F9C4-4D35-BC7F-218AC01CE711</string>
-		</dict>
+		<dict/>
 		<dict>
 			<key>actionconfig</key>
 			<dict>
@@ -132,10 +104,21 @@
 			<key>itemuid</key>
 			<string>706B33FA-B881-46D6-A1DF-0FE5059C4E3F</string>
 		</dict>
-		<dict/>
-		<dict/>
-		<dict/>
-		<dict/>
+		<dict>
+			<key>actionconfig</key>
+			<dict>
+				<key>path</key>
+				<string>/Users</string>
+			</dict>
+			<key>actionuid</key>
+			<string>remote.alfred.launchfile</string>
+			<key>buttoniconid</key>
+			<string>041D7972-060F-4B39-8FD7-D679AF10D6F6</string>
+			<key>buttonlabel</key>
+			<string>Users</string>
+			<key>itemuid</key>
+			<string>F0486B02-8DCF-4D41-88CE-6DB11D97E51B</string>
+		</dict>
 		<dict>
 			<key>actionconfig</key>
 			<dict>
@@ -170,17 +153,34 @@
 			<key>actionconfig</key>
 			<dict>
 				<key>path</key>
-				<string>/Users</string>
+				<string>~/Desktop</string>
 			</dict>
 			<key>actionuid</key>
 			<string>remote.alfred.launchfile</string>
 			<key>buttoniconid</key>
-			<string>041D7972-060F-4B39-8FD7-D679AF10D6F6</string>
+			<string>17B9DAA6-18FC-4491-BB3F-8AF18DB54AC4</string>
 			<key>buttonlabel</key>
-			<string>Users</string>
+			<string>Desktop</string>
 			<key>itemuid</key>
-			<string>F0486B02-8DCF-4D41-88CE-6DB11D97E51B</string>
+			<string>C5E37701-A923-4072-A0F6-4A61E50DA206</string>
 		</dict>
+		<dict>
+			<key>actionconfig</key>
+			<dict>
+				<key>path</key>
+				<string>~/Downloads</string>
+			</dict>
+			<key>actionuid</key>
+			<string>remote.alfred.launchfile</string>
+			<key>buttoniconid</key>
+			<string>AE863891-DCAF-4518-9FD0-3A5B6459276B</string>
+			<key>buttonlabel</key>
+			<string>Downloads</string>
+			<key>itemuid</key>
+			<string>60710CD0-F9C4-4D35-BC7F-218AC01CE711</string>
+		</dict>
+		<dict/>
+		<dict/>
 		<dict/>
 	</array>
 	<key>itemsall</key>
@@ -200,21 +200,7 @@
 			<key>itemuid</key>
 			<string>E6EFAF3D-B285-4C27-B2A1-6B11E0BF56F1</string>
 		</dict>
-		<dict>
-			<key>actionconfig</key>
-			<dict>
-				<key>path</key>
-				<string>~/Desktop</string>
-			</dict>
-			<key>actionuid</key>
-			<string>remote.alfred.launchfile</string>
-			<key>buttoniconid</key>
-			<string>17B9DAA6-18FC-4491-BB3F-8AF18DB54AC4</string>
-			<key>buttonlabel</key>
-			<string>Desktop</string>
-			<key>itemuid</key>
-			<string>C5E37701-A923-4072-A0F6-4A61E50DA206</string>
-		</dict>
+		<dict/>
 		<dict>
 			<key>actionconfig</key>
 			<dict>
@@ -230,21 +216,7 @@
 			<key>itemuid</key>
 			<string>A637DBDC-008A-4875-825A-0B0287A8C166</string>
 		</dict>
-		<dict>
-			<key>actionconfig</key>
-			<dict>
-				<key>path</key>
-				<string>~/Downloads</string>
-			</dict>
-			<key>actionuid</key>
-			<string>remote.alfred.launchfile</string>
-			<key>buttoniconid</key>
-			<string>AE863891-DCAF-4518-9FD0-3A5B6459276B</string>
-			<key>buttonlabel</key>
-			<string>Downloads</string>
-			<key>itemuid</key>
-			<string>60710CD0-F9C4-4D35-BC7F-218AC01CE711</string>
-		</dict>
+		<dict/>
 		<dict>
 			<key>actionconfig</key>
 			<dict>
@@ -305,10 +277,21 @@
 			<key>itemuid</key>
 			<string>706B33FA-B881-46D6-A1DF-0FE5059C4E3F</string>
 		</dict>
-		<dict/>
-		<dict/>
-		<dict/>
-		<dict/>
+		<dict>
+			<key>actionconfig</key>
+			<dict>
+				<key>path</key>
+				<string>/Users</string>
+			</dict>
+			<key>actionuid</key>
+			<string>remote.alfred.launchfile</string>
+			<key>buttoniconid</key>
+			<string>041D7972-060F-4B39-8FD7-D679AF10D6F6</string>
+			<key>buttonlabel</key>
+			<string>Users</string>
+			<key>itemuid</key>
+			<string>F0486B02-8DCF-4D41-88CE-6DB11D97E51B</string>
+		</dict>
 		<dict>
 			<key>actionconfig</key>
 			<dict>
@@ -343,17 +326,34 @@
 			<key>actionconfig</key>
 			<dict>
 				<key>path</key>
-				<string>/Users</string>
+				<string>~/Desktop</string>
 			</dict>
 			<key>actionuid</key>
 			<string>remote.alfred.launchfile</string>
 			<key>buttoniconid</key>
-			<string>041D7972-060F-4B39-8FD7-D679AF10D6F6</string>
+			<string>17B9DAA6-18FC-4491-BB3F-8AF18DB54AC4</string>
 			<key>buttonlabel</key>
-			<string>Users</string>
+			<string>Desktop</string>
 			<key>itemuid</key>
-			<string>F0486B02-8DCF-4D41-88CE-6DB11D97E51B</string>
+			<string>C5E37701-A923-4072-A0F6-4A61E50DA206</string>
 		</dict>
+		<dict>
+			<key>actionconfig</key>
+			<dict>
+				<key>path</key>
+				<string>~/Downloads</string>
+			</dict>
+			<key>actionuid</key>
+			<string>remote.alfred.launchfile</string>
+			<key>buttoniconid</key>
+			<string>AE863891-DCAF-4518-9FD0-3A5B6459276B</string>
+			<key>buttonlabel</key>
+			<string>Downloads</string>
+			<key>itemuid</key>
+			<string>60710CD0-F9C4-4D35-BC7F-218AC01CE711</string>
+		</dict>
+		<dict/>
+		<dict/>
 		<dict/>
 		<dict/>
 		<dict/>
