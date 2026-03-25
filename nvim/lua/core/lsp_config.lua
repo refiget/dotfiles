@@ -25,6 +25,7 @@ local function check_lsp_deps()
     { "yaml-language-server", "YAML LSP", "MasonInstall yaml-language-server" },
     { "typescript-language-server", "TypeScript/JavaScript LSP", "MasonInstall typescript-language-server" },
     { "bash-language-server", "Shell LSP", "MasonInstall bash-language-server" },
+    { "jdtls", "Java LSP", "MasonInstall jdtls" },
     { "black", "Python formatter", "MasonInstall black" },
     { "stylua", "Lua formatter", "MasonInstall stylua" },
     { "shfmt", "Shell formatter", "MasonInstall shfmt" },

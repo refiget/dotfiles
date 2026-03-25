@@ -115,3 +115,32 @@ Below tables list the most important custom shortcuts.
 - **Scopes**: local variables/args (primary)
 - **Stacks**: call stack / current frame
 - **Console**: program output + exceptions
+
+
+## Java (JDTLS + Project config)
+
+Project-level Java config file: `.nvim-java.json` at project root.
+
+Example:
+
+```json
+{
+  "sourcePaths": ["src/main/java", "src/test/java"],
+  "testSourcePaths": ["src/test/java"],
+  "outputPath": "out",
+  "referencedLibraries": ["lib/**/*.jar"],
+  "mainClass": "com.example.Main"
+}
+```
+
+Commands (Java buffer):
+
+- `:JavaProjectInit` create/open project config template
+- `:JavaProjectInfo` show effective project config
+- `:JavaProjectReload` restart Java LSP
+
+Keymaps (Java buffer, localleader=`,`):
+
+- `,jc` create/edit `.nvim-java.json`
+- `,ji` show project config info
+- `,jl` reload Java LSP
