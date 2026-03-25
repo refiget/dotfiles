@@ -5,8 +5,16 @@ end
 
 local project_cfg = require("java.project_config")
 
-local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", "settings.gradle" }
-local root_dir = require("jdtls.setup").find_root(root_markers) or vim.fn.getcwd()
+local root_markers = { "conf.json", ".nvim-java.json", ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", "settings.gradle" }
+local root_dir = require("jdtls.setup").find_root(root_markers)
+
+if not root_dir or root_dir == "" then
+  root_dir = vim.fs.dirname(vim.fs.find(root_markers, { upward = true, path = vim.fn.expand("%:p:h") })[1] or "")
+end
+
+if not root_dir or root_dir == "" then
+  root_dir = vim.fn.getcwd()
+end
 
 local project_name = vim.fn.fnamemodify(root_dir, ":t")
 local workspace_dir = vim.fn.stdpath("cache") .. "/jdtls-workspace/" .. project_name
