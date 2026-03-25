@@ -148,12 +148,12 @@ local function shellescape(v)
 end
 
 local function open_run_term(cmd)
-	vim.cmd("botright 10split")
-	if type(cmd) == "table" then
-		vim.fn.termopen(cmd)
-	else
-		vim.fn.termopen(cmd)
-	end
+	-- Open a fresh terminal buffer in bottom split, avoid replacing file buffer/swap conflicts.
+	vim.cmd("botright 10new")
+	vim.bo.buflisted = false
+	vim.bo.swapfile = false
+	vim.bo.bufhidden = "wipe"
+	vim.fn.termopen(cmd)
 	vim.cmd("startinsert")
 end
 
