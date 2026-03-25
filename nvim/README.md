@@ -145,3 +145,9 @@ Keymaps (Java buffer, localleader=`,`):
 - `,jc` create/edit project config (`conf.json`)
 - `,ji` show project config info
 - `,jl` reload Java LSP
+
+
+Notes for JDK:
+
+- If Java is installed via Homebrew (`brew install openjdk@17`), default global Java is usually enough; you can leave `jdkHome` unset in project config.
+- If you want to pin project JDK explicitly, use: `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home`.
