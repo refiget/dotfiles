@@ -66,7 +66,7 @@ vim.keymap.set("n", "<localleader>jl", "<cmd>JavaProjectReload<CR>", { buffer = 
 
 jdtls.start_or_attach({
   cmd = {
-    project_cfg.java_exec(cfg),
+    project_cfg.java_exec_for_jdtls(cfg),
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",

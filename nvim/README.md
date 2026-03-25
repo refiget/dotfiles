@@ -151,3 +151,9 @@ Notes for JDK:
 
 - If Java is installed via Homebrew (`brew install openjdk@17`), default global Java is usually enough; you can leave `jdkHome` unset in project config.
 - If you want to pin project JDK explicitly, use: `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home`.
+
+
+JDK notes for Java LSP:
+
+- `jdtls` process requires Java 21+ (launcher JVM).
+- Keep project target JDK in `jdkHome` (e.g. 17), and use `launchJdkHome` for jdtls startup (e.g. Homebrew openjdk@21).

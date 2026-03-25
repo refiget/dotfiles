@@ -11,6 +11,8 @@ M.defaults = {
   mainClass = nil,
   -- Optional: absolute/~/ path to JDK home, e.g. "~/jdks/temurin-21.jdk/Contents/Home"
   jdkHome = nil,
+  -- JDTLS process itself requires Java 21+ (new upstream baseline).
+  launchJdkHome = "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
 }
 
 local function normalize(cfg)
@@ -34,6 +36,9 @@ local function normalize(cfg)
   end
   if merged.jdkHome ~= nil and (type(merged.jdkHome) ~= "string" or merged.jdkHome == "") then
     merged.jdkHome = nil
+  end
+  if merged.launchJdkHome ~= nil and (type(merged.launchJdkHome) ~= "string" or merged.launchJdkHome == "") then
+    merged.launchJdkHome = nil
   end
 
   return merged
@@ -96,16 +101,23 @@ function M.write_default(root_dir)
   return path, nil
 end
 
-function M.java_exec(cfg)
-  local home = M.expand_path(cfg and cfg.jdkHome)
-  if not home or home == "" then
-    return "java"
+function M.java_exec_for_jdtls(cfg)
+  local candidates = {
+    cfg and cfg.launchJdkHome,
+    "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    cfg and cfg.jdkHome,
+  }
+
+  for _, home in ipairs(candidates) do
+    home = M.expand_path(home)
+    if home and home ~= "" then
+      local bin = home .. "/bin/java"
+      if vim.fn.executable(bin) == 1 then
+        return bin
+      end
+    end
   end
 
-  local bin = home .. "/bin/java"
-  if vim.fn.executable(bin) == 1 then
-    return bin
-  end
   return "java"
 end
 
@@ -146,6 +158,7 @@ function M.info_lines(cfg, path, exists)
     "referencedLibraries: " .. table.concat(libs, ", "),
     "mainClass: " .. tostring(cfg.mainClass),
     "jdkHome: " .. tostring(M.expand_path(cfg.jdkHome)),
+    "launchJdkHome: " .. tostring(M.expand_path(cfg.launchJdkHome)),
   }
 end
 
