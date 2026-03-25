@@ -142,14 +142,102 @@ keymap("n", "<leader>h", "<C-w>h", opts)
 
 keymap("t", "<C-N>", "<C-\\><C-N>", opts)
 
--- == Run current Python file ==
-local function run_python()
-	vim.cmd("w") -- Save first
-	local file = vim.fn.expand("%") -- "%": the name of current file
-	vim.cmd("botright 10split | term python3 " .. file) -- It inherits the venv when opening the file.
+-- == Run current file (Python/Java) ==
+local function shellescape(v)
+	return vim.fn.shellescape(v)
 end
 
-keymap("n", "R", run_python, { silent = true, desc = "Run Python file" })
+local function open_run_term(cmd)
+	vim.cmd("botright 10split")
+	vim.cmd("terminal " .. cmd)
+end
+
+local function detect_java_root()
+	local markers = { "conf.json", ".nvim-java.json", ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", "settings.gradle" }
+	local here = vim.fn.expand("%:p:h")
+	local found = vim.fs.find(markers, { upward = true, path = here })[1]
+	if found and found ~= "" then
+		return vim.fs.dirname(found)
+	end
+	return vim.fn.getcwd()
+end
+
+local function run_python()
+	vim.cmd("w")
+	local file = vim.fn.expand("%:p")
+	open_run_term("python3 " .. shellescape(file))
+end
+
+local function run_java()
+	vim.cmd("w")
+	local ok, project_cfg = pcall(require, "java.project_config")
+	if not ok then
+		vim.notify("java.project_config 未加载", vim.log.levels.ERROR)
+		return
+	end
+
+	local root = detect_java_root()
+	local cfg = project_cfg.load(root)
+	local out_dir = root .. "/" .. (cfg.outputPath or "out")
+	local main_class = cfg.mainClass
+	if not main_class or main_class == "" then
+		vim.notify("请先在 conf.json 配置 mainClass", vim.log.levels.WARN)
+		return
+	end
+
+	local java_home = project_cfg.expand_path(cfg.jdkHome)
+	local javac_bin = "javac"
+	local java_bin = "java"
+	if java_home and java_home ~= "" then
+		local j = java_home .. "/bin/java"
+		local c = java_home .. "/bin/javac"
+		if vim.fn.executable(j) == 1 then
+			java_bin = j
+		end
+		if vim.fn.executable(c) == 1 then
+			javac_bin = c
+		end
+	end
+
+	local cp_items = { out_dir }
+	for _, pattern in ipairs(cfg.referencedLibraries or {}) do
+		local expanded = project_cfg.expand_path(pattern)
+		for _, jar in ipairs(vim.fn.glob(expanded, true, true)) do
+			table.insert(cp_items, jar)
+		end
+	end
+	local cp = table.concat(cp_items, ":")
+
+	local src_parts = {}
+	for _, p in ipairs(cfg.sourcePaths or {}) do
+		table.insert(src_parts, shellescape(root .. "/" .. p))
+	end
+	local src_join = table.concat(src_parts, " ")
+
+	local cmd = table.concat({
+		"cd " .. shellescape(root),
+		"mkdir -p " .. shellescape(out_dir),
+		"SRC=$(find " .. src_join .. " -type f -name '*.java' 2>/dev/null)",
+		"if [ -z \"$SRC\" ]; then echo 'No Java sources found'; exit 1; fi",
+		shellescape(javac_bin) .. " -encoding UTF-8 -d " .. shellescape(out_dir) .. " -cp " .. shellescape(cp) .. " $SRC",
+		"&&",
+		shellescape(java_bin) .. " -cp " .. shellescape(cp) .. " " .. shellescape(main_class),
+	}, " ")
+
+	open_run_term(cmd)
+end
+
+local function run_current()
+	local ft = vim.bo.filetype
+	if ft == "python" then
+		return run_python()
+	elseif ft == "java" then
+		return run_java()
+	end
+	vim.notify("当前文件类型暂不支持 R 运行: " .. ft, vim.log.levels.INFO)
+end
+
+keymap("n", "R", run_current, { silent = true, desc = "Run current file" })
 
 -- vim.fn.getpos("'<")   to get the position of begining of Selected words
 -- vim.fn.getpos("'>")  to get the position of end of Selected words

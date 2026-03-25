@@ -69,7 +69,7 @@ Below tables list the most important custom shortcuts.
 
 | Mode | Key | Action                                             |
 | ---- | --- | -------------------------------------------------- |
-| n    | `R` | Run current Python file in a bottom terminal split |
+| n    | `R` | Run current file (Python/Java) in a bottom terminal split |
 
 ## Markdown
 
