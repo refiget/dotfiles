@@ -16,7 +16,6 @@ return {
         "yamlls",
         "ts_ls",
         "bashls",
-        "jdtls",
       },
       automatic_installation = true,
       automatic_enable = false,

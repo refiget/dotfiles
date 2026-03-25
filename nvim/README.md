@@ -69,7 +69,7 @@ Below tables list the most important custom shortcuts.
 
 | Mode | Key | Action                                             |
 | ---- | --- | -------------------------------------------------- |
-| n    | `R` | Run current file (Python/Java) in a bottom terminal split |
+| n    | `R` | Run current Python file in a bottom terminal split |
 
 ## Markdown
 
@@ -116,44 +116,3 @@ Below tables list the most important custom shortcuts.
 - **Stacks**: call stack / current frame
 - **Console**: program output + exceptions
 
-
-## Java (JDTLS + Project config)
-
-Project-level Java config file at project root: preferred `conf.json` (also compatible with `.nvim-java.json`).
-
-Example:
-
-```json
-{
-  "sourcePaths": ["src/main/java", "src/test/java"],
-  "testSourcePaths": ["src/test/java"],
-  "outputPath": "out",
-  "referencedLibraries": ["lib/**/*.jar"],
-  "mainClass": "com.example.Main",
-  "jdkHome": "~/jdks/temurin-17.jdk/Contents/Home"
-}
-```
-
-Commands (Java buffer):
-
-- `:JavaProjectInit` create/open project config template (`conf.json`)
-- `:JavaProjectInfo` show effective project config
-- `:JavaProjectReload` restart Java LSP
-
-Keymaps (Java buffer, localleader=`,`):
-
-- `,jc` create/edit project config (`conf.json`)
-- `,ji` show project config info
-- `,jl` reload Java LSP
-
-
-Notes for JDK:
-
-- If Java is installed via Homebrew (`brew install openjdk@17`), default global Java is usually enough; you can leave `jdkHome` unset in project config.
-- If you want to pin project JDK explicitly, use: `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home`.
-
-
-JDK notes for Java LSP:
-
-- `jdtls` process requires Java 21+ (launcher JVM).
-- Keep project target JDK in `jdkHome` (e.g. 17), and use `launchJdkHome` for jdtls startup (e.g. Homebrew openjdk@21).
