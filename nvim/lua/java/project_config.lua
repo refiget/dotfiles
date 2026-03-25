@@ -4,10 +4,10 @@ local M = {}
 M.filenames = { "conf.json", ".nvim-java.json" }
 
 M.defaults = {
-  sourcePaths = { "src/main/java", "src/test/java" },
-  testSourcePaths = { "src/test/java" },
+  sourcePaths = { "src", "tests" },
+  testSourcePaths = { "tests" },
   outputPath = "out",
-  referencedLibraries = { "lib/**/*.jar" },
+  referencedLibraries = { "~/libs/java/**/*.jar" },
   mainClass = nil,
   -- Optional: absolute/~/ path to JDK home, e.g. "~/jdks/temurin-21.jdk/Contents/Home"
   jdkHome = nil,
