@@ -149,7 +149,12 @@ end
 
 local function open_run_term(cmd)
 	vim.cmd("botright 10split")
-	vim.cmd("terminal " .. cmd)
+	if type(cmd) == "table" then
+		vim.fn.termopen(cmd)
+	else
+		vim.fn.termopen(cmd)
+	end
+	vim.cmd("startinsert")
 end
 
 local function detect_java_root()
@@ -165,7 +170,7 @@ end
 local function run_python()
 	vim.cmd("w")
 	local file = vim.fn.expand("%:p")
-	open_run_term("python3 " .. shellescape(file))
+	open_run_term({ "python3", file })
 end
 
 local function run_java()
@@ -223,7 +228,7 @@ local function run_java()
 		shellescape(java_bin) .. " -cp " .. shellescape(cp) .. " " .. shellescape(main_class),
 	}, "\n")
 
-	open_run_term("zsh -lc " .. shellescape(script))
+	open_run_term({ "zsh", "-lc", script })
 end
 
 local function run_current()
