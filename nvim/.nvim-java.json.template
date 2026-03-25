@@ -1,0 +1,14 @@
+{
+  "sourcePaths": [
+    "src/main/java",
+    "src/test/java"
+  ],
+  "testSourcePaths": [
+    "src/test/java"
+  ],
+  "outputPath": "out",
+  "referencedLibraries": [
+    "lib/**/*.jar"
+  ],
+  "mainClass": "com.example.Main"
+}
