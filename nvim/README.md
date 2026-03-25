@@ -119,7 +119,7 @@ Below tables list the most important custom shortcuts.
 
 ## Java (JDTLS + Project config)
 
-Project-level Java config file: `.nvim-java.json` at project root.
+Project-level Java config file at project root: preferred `conf.json` (also compatible with `.nvim-java.json`).
 
 Example:
 
@@ -129,18 +129,19 @@ Example:
   "testSourcePaths": ["src/test/java"],
   "outputPath": "out",
   "referencedLibraries": ["lib/**/*.jar"],
-  "mainClass": "com.example.Main"
+  "mainClass": "com.example.Main",
+  "jdkHome": "~/jdks/temurin-17.jdk/Contents/Home"
 }
 ```
 
 Commands (Java buffer):
 
-- `:JavaProjectInit` create/open project config template
+- `:JavaProjectInit` create/open project config template (`conf.json`)
 - `:JavaProjectInfo` show effective project config
 - `:JavaProjectReload` restart Java LSP
 
 Keymaps (Java buffer, localleader=`,`):
 
-- `,jc` create/edit `.nvim-java.json`
+- `,jc` create/edit project config (`conf.json`)
 - `,ji` show project config info
 - `,jl` reload Java LSP

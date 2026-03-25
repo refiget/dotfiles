@@ -53,12 +53,12 @@ vim.api.nvim_buf_create_user_command(0, "JavaProjectReload", function()
 end, {})
 
 vim.keymap.set("n", "<localleader>ji", show_project_info, { buffer = 0, desc = "Java project info" })
-vim.keymap.set("n", "<localleader>jc", init_project_config, { buffer = 0, desc = "Create/edit .nvim-java.json" })
+vim.keymap.set("n", "<localleader>jc", init_project_config, { buffer = 0, desc = "Create/edit Java project config" })
 vim.keymap.set("n", "<localleader>jl", "<cmd>JavaProjectReload<CR>", { buffer = 0, desc = "Reload Java LSP" })
 
 jdtls.start_or_attach({
   cmd = {
-    "java",
+    project_cfg.java_exec(cfg),
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
