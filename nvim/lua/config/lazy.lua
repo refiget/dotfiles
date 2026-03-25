@@ -44,5 +44,6 @@ require("lazy").setup({
 			return true
 		end,
 	},
+	git = { url_format = "https://github.com/%s.git" },
 	ui = { border = "rounded" },
 })
