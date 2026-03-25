@@ -214,17 +214,16 @@ local function run_java()
 	end
 	local src_join = table.concat(src_parts, " ")
 
-	local cmd = table.concat({
+	local find_cmd = "find " .. src_join .. " -type f -name '*.java'"
+	local script = table.concat({
 		"cd " .. shellescape(root),
 		"mkdir -p " .. shellescape(out_dir),
-		"SRC=$(find " .. src_join .. " -type f -name '*.java' 2>/dev/null)",
-		"if [ -z \"$SRC\" ]; then echo 'No Java sources found'; exit 1; fi",
-		shellescape(javac_bin) .. " -encoding UTF-8 -d " .. shellescape(out_dir) .. " -cp " .. shellescape(cp) .. " $SRC",
-		"&&",
+		"if ! " .. find_cmd .. " 2>/dev/null | grep -q .; then echo 'No Java sources found'; exit 1; fi",
+		find_cmd .. " -print0 2>/dev/null | xargs -0 " .. shellescape(javac_bin) .. " -encoding UTF-8 -d " .. shellescape(out_dir) .. " -cp " .. shellescape(cp),
 		shellescape(java_bin) .. " -cp " .. shellescape(cp) .. " " .. shellescape(main_class),
-	}, " ")
+	}, "\n")
 
-	open_run_term(cmd)
+	open_run_term("zsh -lc " .. shellescape(script))
 end
 
 local function run_current()
