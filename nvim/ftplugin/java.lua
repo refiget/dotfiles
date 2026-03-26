@@ -97,33 +97,5 @@ jdtls.start_or_attach({
 })
 
 
-vim.keymap.set("n", ",jm", function()
-  local ok_dap, jdtls_dap = pcall(require, "jdtls.dap")
-  local ok_core, dap = pcall(require, "dap")
-  if not (ok_dap and ok_core) then
-    vim.notify("jdtls.dap / nvim-dap not available", vim.log.levels.WARN)
-    return
-  end
-  jdtls_dap.setup_dap_main_class_configs({
-    verbose = true,
-    on_ready = function()
-      vim.schedule(function()
-        pcall(function()
-          require("dap").repl.open({}, "botright 10split")
-        end)
-        local cfgs = (dap.configurations and dap.configurations.java) or {}
-        local cfg = cfgs[1]
-        if not cfg then
-          vim.notify("No Java DAP config generated", vim.log.levels.ERROR)
-          return
-        end
-        cfg.console = "integratedTerminal"
-        dap.run(cfg)
-      end)
-    end,
-  })
-end, { buffer = 0, desc = "Java: run main (jdtls in bottom split)" })
-
-
 -- enable java dap adapter (required for main/test runners)
 jdtls.setup_dap({ hotcodereplace = "auto" })
