@@ -95,3 +95,15 @@ jdtls.start_or_attach({
     },
   },
 })
+
+
+vim.keymap.set("n", ",jm", function()
+  local ok_dap, jdtls_dap = pcall(require, "jdtls.dap")
+  local ok_core, dap = pcall(require, "dap")
+  if not (ok_dap and ok_core) then
+    vim.notify("jdtls.dap / nvim-dap not available", vim.log.levels.WARN)
+    return
+  end
+  jdtls_dap.setup_dap_main_class_configs({ verbose = false })
+  dap.continue()
+end, { buffer = 0, desc = "Java: run main (jdtls)" })
