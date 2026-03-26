@@ -111,7 +111,14 @@ vim.keymap.set("n", ",jm", function()
         pcall(function()
           require("dap").repl.open({}, "botright 10split")
         end)
-        dap.continue()
+        local cfgs = (dap.configurations and dap.configurations.java) or {}
+        local cfg = cfgs[1]
+        if not cfg then
+          vim.notify("No Java DAP config generated", vim.log.levels.ERROR)
+          return
+        end
+        cfg.console = "integratedTerminal"
+        dap.run(cfg)
       end)
     end,
   })
