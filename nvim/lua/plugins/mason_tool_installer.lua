@@ -23,6 +23,7 @@ return {
         "yaml-language-server",
         "typescript-language-server",
         "bash-language-server",
+        "jdtls",
 
         -- Formatters
         "black",
