@@ -44,10 +44,6 @@ return {
       local launcher = vim.fn.glob(mason .. "/plugins/org.eclipse.equinox.launcher_*.jar")
       local config = mason .. "/config_mac"
 
-      local project_dir = vim.fn.fnamemodify(vim.fn.getcwd(), ":p")
-      local project_name = vim.fn.fnamemodify(project_dir, ":t")
-      local project_key = vim.fn.sha256(project_dir):sub(1, 8)
-
       opts.servers.jdtls.cmd = {
         "/opt/homebrew/opt/openjdk@21/bin/java",
         "-Declipse.application=org.eclipse.jdt.ls.core.id1",
@@ -66,7 +62,7 @@ return {
         "-configuration",
         config,
         "-data",
-        vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name .. "-" .. project_key,
+        vim.fn.stdpath("data") .. "/jdtls-workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t"),
       }
     end,
   },
