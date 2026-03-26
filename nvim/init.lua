@@ -161,7 +161,110 @@ local function run_python()
 	open_run_term({ "python3", file })
 end
 
-keymap("n", "R", run_python, { silent = true, desc = "Run Python file" })
+local function java_find_root()
+	local here = vim.fn.expand("%:p:h")
+	local marker = vim.fs.find({ "conf.json", ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", "settings.gradle", "build.gradle.kts" }, { upward = true, path = here })[1]
+	if marker and marker ~= "" then
+		return vim.fs.dirname(marker)
+	end
+	return vim.fn.getcwd()
+end
+
+local function java_load_project_conf(root)
+	local cfg = {
+		sourcePaths = { "src", "tests" },
+		outputPath = "out",
+		referencedLibraries = {},
+	}
+	local conf = root .. "/conf.json"
+	if vim.fn.filereadable(conf) == 1 then
+		local raw = table.concat(vim.fn.readfile(conf), "\n")
+		local ok, data = pcall(vim.json.decode, raw)
+		if ok and type(data) == "table" then
+			if type(data.sourcePaths) == "table" then cfg.sourcePaths = data.sourcePaths end
+			if type(data.outputPath) == "string" and data.outputPath ~= "" then cfg.outputPath = data.outputPath end
+			if type(data.referencedLibraries) == "table" then cfg.referencedLibraries = data.referencedLibraries end
+		end
+	end
+	return cfg
+end
+
+local function java_current_class_name()
+	local file = vim.fn.expand("%:p")
+	local cls = vim.fn.fnamemodify(file, ":t:r")
+	local pkg
+	for _, l in ipairs(vim.api.nvim_buf_get_lines(0, 0, 120, false)) do
+		local m = l:match("^%s*package%s+([%w%._]+)%s*;")
+		if m then
+			pkg = m
+			break
+		end
+	end
+	return (pkg and pkg ~= "") and (pkg .. "." .. cls) or cls
+end
+
+local function java_has_main()
+	for _, l in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do
+		if l:match("public%s+static%s+void%s+main") then
+			return true
+		end
+	end
+	return false
+end
+
+local function run_java_main_only()
+	if not java_has_main() then
+		vim.notify("当前 Java 文件没有 public static void main，无法运行", vim.log.levels.INFO)
+		return
+	end
+
+	vim.cmd("w")
+	local root = java_find_root()
+	local cfg = java_load_project_conf(root)
+	local out_dir = root .. "/" .. cfg.outputPath
+
+	local cp_items = { out_dir }
+	for _, pattern in ipairs(cfg.referencedLibraries or {}) do
+		for _, jar in ipairs(vim.fn.glob(vim.fn.expand(pattern), true, true)) do
+			table.insert(cp_items, jar)
+		end
+	end
+	local cp = table.concat(cp_items, ":")
+
+	local src_parts = {}
+	for _, p in ipairs(cfg.sourcePaths or {}) do
+		table.insert(src_parts, vim.fn.shellescape(root .. "/" .. p))
+	end
+	local src_join = table.concat(src_parts, " ")
+	if src_join == "" then
+		vim.notify("conf.json sourcePaths 为空", vim.log.levels.WARN)
+		return
+	end
+
+	local main_class = java_current_class_name()
+	local javac_bin = "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/bin/javac"
+	local java_bin = "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/bin/java"
+
+	local script = table.concat({
+		"cd " .. vim.fn.shellescape(root),
+		"mkdir -p " .. vim.fn.shellescape(out_dir),
+		"find " .. src_join .. " -type f -name '*.java' -print0 2>/dev/null | xargs -0 " .. vim.fn.shellescape(javac_bin) .. " -encoding UTF-8 -d " .. vim.fn.shellescape(out_dir) .. " -cp " .. vim.fn.shellescape(cp),
+		vim.fn.shellescape(java_bin) .. " -cp " .. vim.fn.shellescape(cp) .. " " .. vim.fn.shellescape(main_class),
+	}, "\n")
+
+	open_run_term({ "zsh", "-lc", script })
+end
+
+local function run_current()
+	if vim.bo.filetype == "python" then
+		return run_python()
+	elseif vim.bo.filetype == "java" then
+		return run_java_main_only()
+	end
+	vim.notify("当前文件类型不支持 R 运行: " .. (vim.bo.filetype or ""), vim.log.levels.INFO)
+end
+
+keymap("n", "R", run_current, { silent = true, desc = "Run current file (Python/Java main only)" })
 
 -- vim.fn.getpos("'<")   to get the position of begining of Selected words
 -- vim.fn.getpos("'>")  to get the position of end of Selected words
