@@ -3,8 +3,16 @@ return {
     "rcarriga/nvim-dap-ui",
     opts = function(_, opts)
       opts = opts or {}
-      -- Keep only REPL at bottom; remove watches/console panels.
+      -- Show REPL + commonly needed debug panes.
       opts.layouts = {
+        {
+          position = "left",
+          size = 40,
+          elements = {
+            { id = "scopes", size = 0.7 },
+            { id = "breakpoints", size = 0.3 },
+          },
+        },
         {
           position = "bottom",
           size = 12,
