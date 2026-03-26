@@ -188,39 +188,6 @@ end
 
 map("n", "R", run_dispatch, { desc = "Run current file (Java/Python)" })
 
--- Java test runner (more robust than plugin defaults): nearest method, fallback class
-map("n", "<leader>tt", function()
-  if vim.bo.filetype ~= "java" then
-    vim.notify("<leader>tt is Java-only", vim.log.levels.INFO)
-    return
-  end
-
-  local ok, jdtls = pcall(require, "jdtls")
-  if not ok then
-    vim.notify("jdtls not loaded", vim.log.levels.WARN)
-    return
-  end
-
-  local attached = false
-  for _, c in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
-    if c.name == "jdtls" then
-      attached = true
-      break
-    end
-  end
-  if not attached then
-    vim.notify("jdtls not attached in this buffer", vim.log.levels.WARN)
-    return
-  end
-
-  local ok_near = pcall(jdtls.test_nearest_method)
-  if not ok_near then
-    vim.notify("Nearest test not found, fallback to test class", vim.log.levels.INFO)
-    pcall(jdtls.test_class)
-  end
-end, { desc = "Java: run nearest test (fallback class)" })
-
-
 -- Jump between failed test items in terminal / dap-repl output
 local function jump_test_mark(mark, forward)
   mark = mark or "✗"
