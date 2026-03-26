@@ -179,17 +179,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
         if ok_dap then
           vim.cmd("botright 12split")
           dap.repl.open()
-
-          -- jdtls+d ap init may auto-open full dap-ui; keep only REPL for <leader>tt flow
-          vim.defer_fn(function()
-            for _, win in ipairs(vim.api.nvim_list_wins()) do
-              local buf = vim.api.nvim_win_get_buf(win)
-              local ft = vim.bo[buf].filetype
-              if ft == "dapui_scopes" or ft == "dapui_breakpoints" then
-                pcall(vim.api.nvim_win_close, win, true)
-              end
-            end
-          end, 80)
         end
       end, { buffer = args.buf, desc = "Run All Test + open DAP REPL" })
     end, 80)
