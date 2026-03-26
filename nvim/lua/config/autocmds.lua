@@ -150,3 +150,37 @@ vim.api.nvim_create_user_command("JavaIndexClean", function()
     end, 1200)
   end, 300)
 end, { desc = "Clean jdtls workspace cache for current project and re-index" })
+
+
+-- Java: after <leader>tt (test_class), also open DAP REPL like <leader>dr
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if not client or client.name ~= "jdtls" then
+      return
+    end
+
+    -- defer to override buffer-local mapping set by LazyVim java extra
+    vim.defer_fn(function()
+      if not vim.api.nvim_buf_is_valid(args.buf) then
+        return
+      end
+
+      vim.keymap.set("n", "<leader>tt", function()
+        local ok_jdtls, jdtls_dap = pcall(require, "jdtls.dap")
+        if not ok_jdtls then
+          vim.notify("jdtls.dap not available", vim.log.levels.WARN)
+          return
+        end
+
+        jdtls_dap.test_class()
+
+        local ok_dap, dap = pcall(require, "dap")
+        if ok_dap then
+          vim.cmd("botright 12split")
+          dap.repl.open()
+        end
+      end, { buffer = args.buf, desc = "Run All Test + open DAP REPL" })
+    end, 80)
+  end,
+})
