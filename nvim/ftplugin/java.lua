@@ -104,6 +104,16 @@ vim.keymap.set("n", ",jm", function()
     vim.notify("jdtls.dap / nvim-dap not available", vim.log.levels.WARN)
     return
   end
-  jdtls_dap.setup_dap_main_class_configs({ verbose = false })
-  dap.continue()
+  jdtls_dap.setup_dap_main_class_configs({
+    verbose = true,
+    on_ready = function()
+      vim.schedule(function()
+        dap.continue()
+      end)
+    end,
+  })
 end, { buffer = 0, desc = "Java: run main (jdtls)" })
+
+
+-- enable java dap adapter (required for main/test runners)
+jdtls.setup_dap({ hotcodereplace = "auto" })
