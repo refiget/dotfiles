@@ -215,3 +215,24 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 		end
 	end,
 })
+
+
+-- One-shot install for all configured LSP servers via Mason.
+local lsp_pkgs = {
+  "pyright",
+  "lua-language-server",
+  "json-lsp",
+  "yaml-language-server",
+  "typescript-language-server",
+  "bash-language-server",
+  "jdtls",
+}
+
+vim.api.nvim_create_user_command("MasonInsallLsp", function()
+  vim.cmd("MasonInstall " .. table.concat(lsp_pkgs, " "))
+end, { desc = "Install all configured LSP servers via Mason" })
+
+-- Alias with correct spelling too.
+vim.api.nvim_create_user_command("MasonInstallLsp", function()
+  vim.cmd("MasonInsallLsp")
+end, { desc = "Alias of MasonInsallLsp" })
