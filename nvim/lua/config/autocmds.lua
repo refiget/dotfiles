@@ -116,3 +116,37 @@ vim.api.nvim_create_autocmd({ "User" }, {
     end, 120)
   end,
 })
+
+
+-- Clean jdtls index/cache for current project and restart LSP
+vim.api.nvim_create_user_command("JavaIndexClean", function()
+  local data = vim.fn.stdpath("data")
+  local root = vim.fn.getcwd()
+  local ws = data .. "/jdtls-workspace/" .. vim.fn.fnamemodify(root, ":p:h:t")
+
+  -- stop jdtls clients first (release files)
+  for _, c in ipairs(vim.lsp.get_clients()) do
+    if c.name == "jdtls" then
+      pcall(vim.lsp.stop_client, c.id, true)
+    end
+  end
+
+  -- clear warm-index memo for this root
+  vim.g._cs61b_indexed_roots = vim.g._cs61b_indexed_roots or {}
+  vim.g._cs61b_indexed_roots[root] = nil
+
+  if vim.fn.isdirectory(ws) == 1 then
+    vim.fn.delete(ws, "rf")
+    vim.notify("Java index cache cleaned: " .. ws, vim.log.levels.INFO)
+  else
+    vim.notify("No Java index cache dir: " .. ws, vim.log.levels.INFO)
+  end
+
+  -- restart lsp so jdtls re-imports project
+  vim.defer_fn(function()
+    pcall(vim.cmd, "LspStart jdtls")
+    vim.defer_fn(function()
+      pcall(vim.cmd, "Cs61bIndex")
+    end, 1200)
+  end, 300)
+end, { desc = "Clean jdtls workspace cache for current project and re-index" })
