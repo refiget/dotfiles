@@ -32,8 +32,12 @@ return {
       dap.listeners.before.event_terminated["dapui_config"] = nil
       dap.listeners.before.event_exited["dapui_config"] = nil
 
-      -- Keep auto-open.
+      -- Keep auto-open (unless explicitly suppressed for one run).
       dap.listeners.after.event_initialized["dapui_config"] = function()
+        if vim.g._dapui_suppress_next_open then
+          vim.g._dapui_suppress_next_open = false
+          return
+        end
         dapui.open()
       end
     end,

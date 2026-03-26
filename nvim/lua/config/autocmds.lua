@@ -150,3 +150,25 @@ vim.api.nvim_create_user_command("JavaIndexClean", function()
     end, 1200)
   end, 300)
 end, { desc = "Clean jdtls workspace cache for current project and re-index" })
+
+
+-- Java tests without opening DAP UI (REPL/UI stays closed)
+vim.api.nvim_create_user_command("JavaTestClassNoUI", function()
+  local ok, jdtls_dap = pcall(require, "jdtls.dap")
+  if not ok then
+    vim.notify("jdtls.dap not available", vim.log.levels.WARN)
+    return
+  end
+  vim.g._dapui_suppress_next_open = true
+  jdtls_dap.test_class()
+end, { desc = "Run Java test class without opening dap-ui" })
+
+vim.api.nvim_create_user_command("JavaTestNearestNoUI", function()
+  local ok, jdtls_dap = pcall(require, "jdtls.dap")
+  if not ok then
+    vim.notify("jdtls.dap not available", vim.log.levels.WARN)
+    return
+  end
+  vim.g._dapui_suppress_next_open = true
+  jdtls_dap.test_nearest_method()
+end, { desc = "Run nearest Java test without opening dap-ui" })
