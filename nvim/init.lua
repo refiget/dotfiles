@@ -189,6 +189,29 @@ local function java_load_project_conf(root)
 	return cfg
 end
 
+local function java_collect_jars(patterns)
+	local jars = {}
+	local seen = {}
+	local function add(v)
+		if v and v ~= "" and not seen[v] then
+			seen[v] = true
+			table.insert(jars, v)
+		end
+	end
+	for _, pattern in ipairs(patterns or {}) do
+		for _, j in ipairs(vim.fn.glob(pattern, true, true)) do
+			add(j)
+		end
+		if #jars == 0 and pattern:match("/.%*%*/%*%.jar$") then
+			local dir = pattern:gsub("/%*%*/%*%.jar$", "")
+			for _, j in ipairs(vim.fn.globpath(dir, "**/*.jar", true, true)) do
+				add(j)
+			end
+		end
+	end
+	return jars
+end
+
 local function java_current_class_name()
 	local file = vim.fn.expand("%:p")
 	local cls = vim.fn.fnamemodify(file, ":t:r")
@@ -224,16 +247,24 @@ local function run_java_main_only()
 	local out_dir = root .. "/" .. cfg.outputPath
 
 	local cp_items = { out_dir }
+	local expanded_patterns = {}
 	for _, pattern in ipairs(cfg.referencedLibraries or {}) do
-		for _, jar in ipairs(vim.fn.glob(vim.fn.expand(pattern), true, true)) do
-			table.insert(cp_items, jar)
-		end
+		table.insert(expanded_patterns, vim.fn.expand(pattern))
+	end
+	local jars = java_collect_jars(expanded_patterns)
+	for _, jar in ipairs(jars) do
+		table.insert(cp_items, jar)
 	end
 	local cp = table.concat(cp_items, ":")
 
 	local src_parts = {}
 	for _, p in ipairs(cfg.sourcePaths or {}) do
-		table.insert(src_parts, vim.fn.shellescape(root .. "/" .. p))
+		if not p:match("test") then
+			table.insert(src_parts, vim.fn.shellescape(root .. "/" .. p))
+		end
+	end
+	if #src_parts == 0 then
+		table.insert(src_parts, vim.fn.shellescape(root .. "/src"))
 	end
 	local src_join = table.concat(src_parts, " ")
 	if src_join == "" then
@@ -246,6 +277,7 @@ local function run_java_main_only()
 	local java_bin = "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/bin/java"
 
 	local script = table.concat({
+		"set -e",
 		"cd " .. vim.fn.shellescape(root),
 		"mkdir -p " .. vim.fn.shellescape(out_dir),
 		"find " .. src_join .. " -type f -name '*.java' -print0 2>/dev/null | xargs -0 " .. vim.fn.shellescape(javac_bin) .. " -encoding UTF-8 -d " .. vim.fn.shellescape(out_dir) .. " -cp " .. vim.fn.shellescape(cp),
