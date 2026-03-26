@@ -295,3 +295,15 @@ end, { desc = "Next test (✓/✗)" })
 map({ "n", "i", "t" }, "<leader>tp", function()
   jump_any_test_from_any_mode(false)
 end, { desc = "Prev test (✓/✗)" })
+
+
+-- Keep <leader>dr REPL height aligned with dap-ui bottom REPL (12 lines)
+map("n", "<leader>dr", function()
+  local ok, dap = pcall(require, "dap")
+  if not ok then
+    vim.notify("nvim-dap not available", vim.log.levels.WARN)
+    return
+  end
+  vim.cmd("botright 12split")
+  dap.repl.open()
+end, { desc = "DAP REPL (12 lines)" })
