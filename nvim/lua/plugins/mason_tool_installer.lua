@@ -24,6 +24,8 @@ return {
         "typescript-language-server",
         "bash-language-server",
         "jdtls",
+        "java-debug-adapter",
+        "java-test",
 
         -- Formatters
         "black",

@@ -3,11 +3,43 @@ if not ok then
   return
 end
 
-local root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", "settings.gradle", "build.gradle.kts" })
-if not root_dir or root_dir == "" then
-  root_dir = vim.fn.getcwd()
+local function find_root()
+  local root = require("jdtls.setup").find_root({ ".git", "conf.json", "mvnw", "gradlew", "pom.xml", "build.gradle", "settings.gradle", "build.gradle.kts" })
+  return (root and root ~= "") and root or vim.fn.getcwd()
 end
 
+local function load_project_cfg(root_dir)
+  local cfg = {
+    sourcePaths = { "src", "tests" },
+    outputPath = "out",
+    referencedLibraries = { "lib/**/*.jar" },
+  }
+
+  local conf = root_dir .. "/conf.json"
+  if vim.fn.filereadable(conf) == 1 then
+    local raw = table.concat(vim.fn.readfile(conf), "\n")
+    local ok_json, data = pcall(vim.json.decode, raw)
+    if ok_json and type(data) == "table" then
+      if type(data.sourcePaths) == "table" then cfg.sourcePaths = data.sourcePaths end
+      if type(data.outputPath) == "string" and data.outputPath ~= "" then cfg.outputPath = data.outputPath end
+      if type(data.referencedLibraries) == "table" then cfg.referencedLibraries = data.referencedLibraries end
+    end
+  end
+
+  return cfg
+end
+
+local function collect_bundles()
+  local bundles = {}
+  local paths = vim.fn.glob(vim.fn.stdpath("data") .. "/mason/packages/java-test/extension/server/*.jar", true, true)
+  vim.list_extend(bundles, paths)
+
+  local debug = vim.fn.glob(vim.fn.stdpath("data") .. "/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar", true, true)
+  vim.list_extend(bundles, debug)
+  return bundles
+end
+
+local root_dir = find_root()
 local project_name = vim.fn.fnamemodify(root_dir, ":p:h:t")
 local workspace_dir = vim.fn.stdpath("cache") .. "/jdtls-workspace/" .. project_name
 
@@ -17,6 +49,21 @@ if launcher == "" then
   vim.notify("jdtls not installed. Run :MasonInstall jdtls", vim.log.levels.WARN)
   return
 end
+
+local cfg = load_project_cfg(root_dir)
+
+vim.api.nvim_buf_create_user_command(0, "JavaProjectInit", function()
+  local conf = root_dir .. "/conf.json"
+  if vim.fn.filereadable(conf) == 0 then
+    local tpl = vim.json.encode({
+      sourcePaths = { "src", "tests" },
+      outputPath = "out",
+      referencedLibraries = { "/absolute/path/to/lib/**/*.jar" },
+    })
+    vim.fn.writefile(vim.split(tpl, "\n", { plain = true }), conf)
+  end
+  vim.cmd("edit " .. conf)
+end, { desc = "Create/open Java project conf.json" })
 
 jdtls.start_or_attach({
   cmd = {
@@ -35,4 +82,16 @@ jdtls.start_or_attach({
     "-data", workspace_dir,
   },
   root_dir = root_dir,
+  init_options = {
+    bundles = collect_bundles(),
+  },
+  settings = {
+    java = {
+      project = {
+        sourcePaths = cfg.sourcePaths,
+        outputPath = cfg.outputPath,
+        referencedLibraries = cfg.referencedLibraries,
+      },
+    },
+  },
 })
