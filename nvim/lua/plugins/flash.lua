@@ -1,16 +1,12 @@
 return {
-  "folke/flash.nvim",
-  vscode = true,
-  event = "VeryLazy",
-  opts = {},
-  keys = {
-    {
-      "s",
-      mode = { "n", "x", "o" },
-      function()
-        require("flash").jump()
-      end,
-      desc = "Flash",
+  {
+    "folke/flash.nvim",
+    opts = {
+      modes = {
+        char = {
+          keys = { "f", "F" },
+        },
+      },
     },
   },
 }
