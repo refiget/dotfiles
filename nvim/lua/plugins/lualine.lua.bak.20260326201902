@@ -1,0 +1,33 @@
+return {
+  {
+    "nvim-lualine/lualine.nvim",
+    opts = function(_, opts)
+      local function is_time_component(comp)
+        if type(comp) == "string" then
+          return comp:find("%%R") or comp:find("%%T") or comp:lower():find("time")
+        end
+
+        if type(comp) == "table" then
+          local first = comp[1]
+          if type(first) == "string" then
+            return first:find("%%R") or first:find("%%T") or first:lower():find("time")
+          end
+        end
+
+        return false
+      end
+
+      for section_name, section in pairs(opts.sections or {}) do
+        if type(section) == "table" then
+          local filtered = {}
+          for _, comp in ipairs(section) do
+            if not is_time_component(comp) then
+              table.insert(filtered, comp)
+            end
+          end
+          opts.sections[section_name] = filtered
+        end
+      end
+    end,
+  },
+}
