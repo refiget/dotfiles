@@ -31,7 +31,7 @@ return {
       end)
 
       -- command: install all mason-managed tools in this config (lsp + mason tools)
-      vim.api.nvim_create_user_command("MasonInstallLsp", function()
+      vim.api.nvim_create_user_command("InstallApp", function()
         local set = {}
 
         -- 1) mason tools
@@ -66,6 +66,10 @@ return {
           vim.notify("Mason installing: " .. table.concat(list, ", "))
         end)
       end, { desc = "Install all mason-managed tools from current config" })
+
+      vim.api.nvim_create_user_command("MasonInstallAll", function()
+        vim.cmd("InstallApp")
+      end, { desc = "Alias: install all missing Mason tools" })
     end,
   },
 }
