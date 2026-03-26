@@ -1,0 +1,10 @@
+{
+  "sourcePaths": [
+    "src",
+    "tests"
+  ],
+  "outputPath": "out",
+  "referencedLibraries": [
+    "/absolute/path/to/lib/**/*.jar"
+  ]
+}
