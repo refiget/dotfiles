@@ -307,3 +307,13 @@ map("n", "<leader>dr", function()
   vim.cmd("botright 12split")
   dap.repl.open()
 end, { desc = "DAP REPL (12 lines)" })
+
+
+-- Java: run test class without dap-ui, then open REPL
+map("n", "<leader>tj", function()
+  vim.cmd("JavaTestClassNoUI")
+  vim.defer_fn(function()
+    local keys = vim.api.nvim_replace_termcodes("<leader>dr", true, false, true)
+    vim.api.nvim_feedkeys(keys, "m", false)
+  end, 80)
+end, { desc = "JavaTestClassNoUI + DAP REPL" })
