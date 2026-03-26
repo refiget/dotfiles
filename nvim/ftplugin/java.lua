@@ -108,11 +108,14 @@ vim.keymap.set("n", ",jm", function()
     verbose = true,
     on_ready = function()
       vim.schedule(function()
+        pcall(function()
+          require("dap").repl.open({}, "botright 10split")
+        end)
         dap.continue()
       end)
     end,
   })
-end, { buffer = 0, desc = "Java: run main (jdtls)" })
+end, { buffer = 0, desc = "Java: run main (jdtls in bottom split)" })
 
 
 -- enable java dap adapter (required for main/test runners)
