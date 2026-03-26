@@ -148,6 +148,19 @@ function M.setup()
 		vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#ef9f76", bg = "NONE", italic = true })
 		vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#85c1dc", bg = "NONE", italic = true })
 		vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#81c8be", bg = "NONE", italic = true })
+
+		-- Indent guides / scope lines (indent-blankline / ibl)
+		vim.api.nvim_set_hl(0, "IblIndent", { fg = "#545c69", nocombine = true })
+		vim.api.nvim_set_hl(0, "IblScope", { fg = "#7a8393", nocombine = true })
+		vim.api.nvim_set_hl(0, "IblWhitespace", { fg = "#404754", nocombine = true })
+		vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#545c69", nocombine = true })
+		vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#7a8393", nocombine = true })
+
+		-- Message area / LSP run hints
+		vim.api.nvim_set_hl(0, "MsgArea", { fg = "#b9c0cc", bg = base_bg })
+		vim.api.nvim_set_hl(0, "MoreMsg", { fg = "#b9c0cc", bg = base_bg })
+		vim.api.nvim_set_hl(0, "ModeMsg", { fg = "#b9c0cc", bg = base_bg })
+		vim.api.nvim_set_hl(0, "Question", { fg = "#b9c0cc", bg = base_bg })
 	end
 
 	vim.opt.fillchars:append({

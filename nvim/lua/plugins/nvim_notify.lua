@@ -17,6 +17,10 @@ return {
 
     local function apply_notify_hl()
       vim.api.nvim_set_hl(0, "NotifyBackground", { bg = bg })
+      vim.api.nvim_set_hl(0, "NotifyINFOBody", { fg = "#c7ceda", bg = bg })
+      vim.api.nvim_set_hl(0, "NotifyINFOTitle", { fg = "#c7ceda", bg = bg, bold = true })
+      vim.api.nvim_set_hl(0, "NotifyWARNBody", { fg = "#d9c7a3", bg = bg })
+      vim.api.nvim_set_hl(0, "NotifyERRORBody", { fg = "#e0a6a6", bg = bg })
     end
 
     apply_notify_hl()
