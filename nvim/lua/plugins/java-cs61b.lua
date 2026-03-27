@@ -7,19 +7,30 @@ return {
 
       local util = require("lspconfig.util")
 
-      opts.servers.jdtls.root_dir = util.root_pattern(".cs61b-root", ".project", ".git")
+      -- Prefer lightweight project markers so we don't force IntelliJ/Eclipse import behavior
+      opts.servers.jdtls.root_dir = util.root_pattern(".cs61b-root", ".git")
 
       opts.servers.jdtls.settings = opts.servers.jdtls.settings or {}
       opts.servers.jdtls.settings.java = opts.servers.jdtls.settings.java or {}
+
+      local cs61b_root = vim.fn.expand("~/Desktop/cs61b")
+      local lib_dir = cs61b_root .. "/library-sp24"
+      local referenced_libraries = {}
+      if vim.fn.isdirectory(lib_dir) == 1 then
+        referenced_libraries = vim.fn.glob(lib_dir .. "/*.jar", false, true)
+      end
+
       opts.servers.jdtls.settings.java.project = {
         sourcePaths = { "src", "tests" },
         outputPath = "out",
-        referencedLibraries = { vim.fn.expand("~/Desktop/cs61b/library-sp24/*.jar") },
+        referencedLibraries = referenced_libraries,
       }
 
 
       opts.servers.jdtls.handlers = opts.servers.jdtls.handlers or {}
       local default_publish = vim.lsp.handlers["textDocument/publishDiagnostics"]
+      local diag_timers = vim.g._jdtls_diag_timers or {}
+      vim.g._jdtls_diag_timers = diag_timers
       opts.servers.jdtls.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
         if result and result.diagnostics then
           local filtered = {}
@@ -36,7 +47,30 @@ return {
           end
           result.diagnostics = filtered
         end
-        return default_publish(err, result, ctx, config)
+
+        local uri = result and result.uri or nil
+        if not uri then
+          return default_publish(err, result, ctx, config)
+        end
+
+        local existing = diag_timers[uri]
+        if existing then
+          existing:stop()
+          existing:close()
+          diag_timers[uri] = nil
+        end
+
+        local timer = vim.loop.new_timer()
+        diag_timers[uri] = timer
+        timer:start(350, 0, vim.schedule_wrap(function()
+          local current = diag_timers[uri]
+          if current then
+            current:stop()
+            current:close()
+            diag_timers[uri] = nil
+          end
+          default_publish(err, result, ctx, config)
+        end))
       end
 
       -- Force jdtls to run on JDK 21 (independent of your shell JAVA_HOME)

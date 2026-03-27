@@ -3,15 +3,18 @@ return {
     "nvim-lua/plenary.nvim",
     ft = "java",
     config = function()
-      local sign_name = "JavaTestRunSign"
-      local sign_group = "JavaTestRunSignGroup"
+      local test_sign_name = "JavaTestRunSign"
+      local main_sign_name = "JavaMainRunSign"
+      local sign_group = "JavaRunSignGroup"
 
-      vim.fn.sign_define(sign_name, {
-        text = "",
-        texthl = "DiagnosticSignHint",
-        linehl = "",
-        numhl = "",
-      })
+      for _, sign_name in ipairs({ test_sign_name, main_sign_name }) do
+        vim.fn.sign_define(sign_name, {
+          text = "",
+          texthl = "DiagnosticSignHint",
+          linehl = "",
+          numhl = "",
+        })
+      end
       vim.api.nvim_set_hl(0, "DiagnosticSignHint", { fg = "#a6e3a1" })
 
       local function next_method_line(lines, from)
@@ -26,7 +29,12 @@ return {
         return nil
       end
 
-      local function refresh_java_test_signs(bufnr)
+      local function is_main_method_line(line)
+        return line:match("public%s+static%s+void%s+main%s*%(")
+          or line:match("static%s+public%s+void%s+main%s*%(")
+      end
+
+      local function refresh_java_run_signs(bufnr)
         if not vim.api.nvim_buf_is_valid(bufnr) then
           return
         end
@@ -43,24 +51,29 @@ return {
           if line:match("^%s*@Test%s*$") or line:match("^%s*@Test%f[%W]") then
             local target = next_method_line(lines, i)
             if target then
-              vim.fn.sign_place(id, sign_group, sign_name, bufnr, { lnum = target, priority = 10 })
+              vim.fn.sign_place(id, sign_group, test_sign_name, bufnr, { lnum = target, priority = 10 })
               id = id + 1
             end
+          end
+
+          if is_main_method_line(line) then
+            vim.fn.sign_place(id, sign_group, main_sign_name, bufnr, { lnum = i, priority = 10 })
+            id = id + 1
           end
         end
       end
 
       vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "TextChanged", "TextChangedI" }, {
-        group = vim.api.nvim_create_augroup("JavaTestRunSignAutocmd", { clear = true }),
+        group = vim.api.nvim_create_augroup("JavaRunSignAutocmd", { clear = true }),
         pattern = "*.java",
         callback = function(args)
-          refresh_java_test_signs(args.buf)
+          refresh_java_run_signs(args.buf)
         end,
       })
 
       for _, b in ipairs(vim.api.nvim_list_bufs()) do
         if vim.api.nvim_buf_is_loaded(b) and vim.bo[b].filetype == "java" then
-          refresh_java_test_signs(b)
+          refresh_java_run_signs(b)
         end
       end
     end,
