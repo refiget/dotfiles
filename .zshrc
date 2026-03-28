@@ -36,3 +36,6 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
+# OpenClaw Completion
+source "/Users/mac/.openclaw/completions/openclaw.zsh"
