@@ -1,18 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# iPad/remote friendly tmux mode:
-# - disable rainbarf
-# - optionally hide status-right
-# - increase status-interval to reduce flicker
+# iPad/remote friendly tmux mode (persistent + runtime)
+#
+# off (default):
+#   - persist TMUX_RAINBARF=0 in 08_toggle_theme.conf
+#   - runtime: TMUX_RAINBARF=0, status-right='', status-interval=60
+#   - reload tmux config
+# on:
+#   - persist TMUX_RAINBARF=1 in 08_toggle_theme.conf
+#   - runtime: restore previous status-right/status-interval/rainbarf
+#   - reload tmux config
 #
 # Usage:
-#   tmux_ipad_mode.sh off      # enable low-flicker mode
-#   tmux_ipad_mode.sh on       # restore previous settings
-#   tmux_ipad_mode.sh toggle   # toggle by marker
-#   tmux_ipad_mode.sh status   # print current values
+#   tmux_ipad_mode.sh off      # enable low-flicker iPad mode
+#   tmux_ipad_mode.sh on       # restore
+#   tmux_ipad_mode.sh toggle
+#   tmux_ipad_mode.sh status
 
 cmd="${1:-off}"
+
+CONF_FILE="${TMUX_THEME_CONF:-$HOME/dotfiles/tmux/conf.d/08_toggle_theme.conf}"
+TMUX_MAIN_CONF="${TMUX_MAIN_CONF:-$HOME/.config/tmux/tmux.conf}"
 
 if ! command -v tmux >/dev/null 2>&1; then
   echo "tmux not found" >&2
@@ -24,9 +33,33 @@ if ! tmux info >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ ! -f "$CONF_FILE" ]]; then
+  echo "Config not found: $CONF_FILE" >&2
+  exit 1
+fi
+
 key_prefix="@ipad_mode_prev"
 
+set_persistent_rainbarf() {
+  local target="$1"
+  if rg -n '^set-environment -g TMUX_RAINBARF ' "$CONF_FILE" >/dev/null 2>&1; then
+    sed -i '' -E "s|^set-environment -g TMUX_RAINBARF .*|set-environment -g TMUX_RAINBARF ${target}|" "$CONF_FILE"
+  else
+    printf '\nset-environment -g TMUX_RAINBARF %s\n' "$target" >> "$CONF_FILE"
+  fi
+}
+
+reload_tmux_conf() {
+  if [[ -f "$TMUX_MAIN_CONF" ]]; then
+    tmux source-file "$TMUX_MAIN_CONF"
+  else
+    # fallback: apply minimal runtime refresh
+    tmux refresh-client -S
+  fi
+}
+
 show_status() {
+  echo "conf_rainbarf=$(sed -n 's/^set-environment -g TMUX_RAINBARF //p' "$CONF_FILE" | tail -n1)"
   echo "status-interval=$(tmux show -gqv status-interval)"
   echo "status-right=$(tmux show -gqv status-right)"
   echo "TMUX_RAINBARF=$(tmux show-environment -g 2>/dev/null | sed -n 's/^TMUX_RAINBARF=//p')"
@@ -34,19 +67,22 @@ show_status() {
 }
 
 enable_off_mode() {
-  # save current values once
+  # save current values once for restore
   if [[ "$(tmux show -gqv @ipad_mode_enabled)" != "1" ]]; then
     tmux set -gq "${key_prefix}_status_interval" "$(tmux show -gqv status-interval)"
     tmux set -gq "${key_prefix}_status_right" "$(tmux show -gqv status-right)"
     tmux set -gq "${key_prefix}_rainbarf" "$(tmux show-environment -g 2>/dev/null | sed -n 's/^TMUX_RAINBARF=//p')"
   fi
 
+  set_persistent_rainbarf 0
   tmux set-environment -g TMUX_RAINBARF 0
   tmux set -g status-interval 60
   tmux set -g status-right ""
   tmux set -gq @ipad_mode_enabled 1
+
+  reload_tmux_conf
   tmux refresh-client -S
-  echo "iPad mode ON: rainbarf=0, status-right='', status-interval=60"
+  echo "iPad mode ON: persisted TMUX_RAINBARF=0, status-right='', status-interval=60"
 }
 
 restore_on_mode() {
@@ -55,21 +91,25 @@ restore_on_mode() {
   prev_right="$(tmux show -gqv "${key_prefix}_status_right")"
   prev_rainbarf="$(tmux show -gqv "${key_prefix}_rainbarf")"
 
-  [[ -n "$prev_interval" ]] && tmux set -g status-interval "$prev_interval"
-  tmux set -g status-right "$prev_right"
+  set_persistent_rainbarf 1
+
+  [[ -n "$prev_interval" ]] && tmux set -g status-interval "$prev_interval" || tmux set -g status-interval 15
+  tmux set -g status-right "${prev_right:-#(~/.config/tmux/tmux-status/right.sh)}"
 
   if [[ -n "$prev_rainbarf" ]]; then
     tmux set-environment -g TMUX_RAINBARF "$prev_rainbarf"
   else
-    tmux set-environment -gu TMUX_RAINBARF
+    tmux set-environment -g TMUX_RAINBARF 1
   fi
 
   tmux set -gu "${key_prefix}_status_interval" || true
   tmux set -gu "${key_prefix}_status_right" || true
   tmux set -gu "${key_prefix}_rainbarf" || true
   tmux set -gu @ipad_mode_enabled || true
+
+  reload_tmux_conf
   tmux refresh-client -S
-  echo "iPad mode OFF: restored previous tmux values"
+  echo "iPad mode OFF: persisted TMUX_RAINBARF=1 and restored runtime bar/interval"
 }
 
 case "$cmd" in
