@@ -8,8 +8,9 @@ if [[ ! -d "$ZSH_CONF_DIR" ]]; then
   return
 fi
 
-# 1) Core env must load first
-[[ -f "$ZSH_CONF_DIR/01_env_path.conf" ]] && source "$ZSH_CONF_DIR/01_env_path.conf"
+# 1) Core shell basics + path/env must load first
+[[ -f "$ZSH_CONF_DIR/01_shell_basics.conf" ]] && source "$ZSH_CONF_DIR/01_shell_basics.conf"
+[[ -f "$ZSH_CONF_DIR/02_path_env.conf" ]] && source "$ZSH_CONF_DIR/02_path_env.conf"
 
 # 2) Non-interactive shells stop here
 [[ -o interactive ]] || return
@@ -25,15 +26,7 @@ fi
 # 4) Load remaining modules
 setopt local_options null_glob
 for conf_file in "$ZSH_CONF_DIR"/*.conf; do
-  [[ "$conf_file" == "$ZSH_CONF_DIR/01_env_path.conf" ]] && continue
+  [[ "$conf_file" == "$ZSH_CONF_DIR/01_shell_basics.conf" ]] && continue
+  [[ "$conf_file" == "$ZSH_CONF_DIR/02_path_env.conf" ]] && continue
   source "$conf_file"
 done
-
-# pnpm
-export PNPM_HOME="/Users/bob/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-
