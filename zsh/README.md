@@ -15,3 +15,12 @@ This directory contains the zsh configuration.
 - prefer `path=( ... $path )` over repeated raw `export PATH=...:$PATH`
 
 For an overview, see the repo-level **README-zsh.md**.
+
+## Current structure
+
+- `10_aliases_core.conf` → safe/default aliases
+- `11_aliases_workflow.conf` → personal workflow shortcuts
+- `20_tools_navigation.conf` → yazi / zoxide / fzf
+- `21_tools_runtime.conf` → lazy nvm
+- `22_tools_history.conf` → atuin
+- `11_venv_wrapper.conf` → Python virtualenv helpers
