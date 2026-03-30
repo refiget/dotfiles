@@ -3,7 +3,7 @@ set -euo pipefail
 
 read_clipboard() {
   if command -v pbpaste >/dev/null 2>&1; then
-    pbpaste
+    env LANG="${LANG:-en_US.UTF-8}" LC_CTYPE="${LC_CTYPE:-en_US.UTF-8}" pbpaste
     return 0
   fi
   if command -v wl-paste >/dev/null 2>&1; then
