@@ -34,9 +34,11 @@ tmux list-keys
 
 ### Clipboard behavior
 
-- Copy to system clipboard uses `copy_to_clipboard.sh`
+- System clipboard writes are unified through tmux `copy-command` → `copy_to_clipboard.sh`
 - Paste uses `paste_from_clipboard.sh`
-- Both sanitize trailing newlines for safety.
+- Keyboard copy, Enter copy, mouse drag copy, double-click, and triple-click should all resolve to the same clipboard backend
+- Clipboard scripts sanitize trailing newlines for safety
+- This avoids intermittent behavior where different copy actions silently use different clipboard paths
 
 ## Status bar conventions
 
