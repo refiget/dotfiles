@@ -37,5 +37,3 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# OpenClaw Completion
-source "/Users/mac/.openclaw/completions/openclaw.zsh"
