@@ -72,7 +72,7 @@ copy_via_tmux() {
 # Platform clip helpers (local sessions)
 copy_via_host() {
   if have pbcopy; then
-    if env LANG="${LANG:-en_US.UTF-8}" LC_CTYPE="${LC_CTYPE:-en_US.UTF-8}" pbcopy <<<"$content"; then
+    if printf '%s' "$content" | env LANG="${LANG:-en_US.UTF-8}" LC_CTYPE="${LC_CTYPE:-en_US.UTF-8}" pbcopy; then
       return 0
     fi
   fi
