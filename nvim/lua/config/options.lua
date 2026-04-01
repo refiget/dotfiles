@@ -7,3 +7,6 @@ vim.env.PATH = vim.env.JAVA_HOME .. "/bin:" .. (vim.env.PATH or "")
 
 -- Keep delete/change/yank in Neovim registers unless explicitly using "+
 vim.opt.clipboard = ""
+
+-- Faster CursorHold for diagnostic hover
+vim.o.updatetime = 300

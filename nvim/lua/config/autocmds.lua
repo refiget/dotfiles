@@ -172,3 +172,18 @@ vim.api.nvim_create_user_command("JavaTestNearestNoUI", function()
   vim.g._dapui_suppress_next_open = true
   jdtls_dap.test_nearest_method()
 end, { desc = "Run nearest Java test without opening dap-ui" })
+
+-- Auto-show diagnostics float on hover, normal mode only
+vim.api.nvim_create_autocmd("CursorHold", {
+  callback = function()
+    if vim.api.nvim_get_mode().mode ~= "n" then
+      return
+    end
+    vim.diagnostic.open_float(nil, {
+      focus = false,
+      scope = "cursor",
+      close_events = { "CursorMoved", "CursorMovedI", "BufHidden", "InsertEnter", "WinLeave" },
+    })
+  end,
+})
+
