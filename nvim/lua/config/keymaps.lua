@@ -20,9 +20,6 @@ map("n", "<leader>(", "bi(<esc>ea)<esc>", opts)
 map("n", "<leader>[", "bi[<esc>ea]<esc>", opts)
 map("n", "<leader>{", "bi{<esc>ea}<esc>", opts)
 
-map("n", "s", "<nop>")
-
-
 
 map("n", "<leader>h", "<c-w>h", opts)
 map("n", "<leader>j", "<c-w>j", opts)
