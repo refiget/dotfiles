@@ -28,8 +28,18 @@ return {
           return nil
         end
 
+        local query_parse = vim.treesitter.query and vim.treesitter.query.parse
+        if type(query_parse) == "table" and type(getmetatable(query_parse) and getmetatable(query_parse).__call) == "function" then
+          query_parse = function(lang, q)
+            return vim.treesitter.query.parse(lang, q)
+          end
+        end
+        if type(query_parse) ~= "function" then
+          return nil
+        end
+
         local ok_query, query = pcall(
-          vim.treesitter.query.parse,
+          query_parse,
           "java",
           [[
             (method_declaration
