@@ -27,3 +27,4 @@ coc/lists
 
 # Zsh compiled files
 *.zwc
+zsh/conf.d/*.bak
