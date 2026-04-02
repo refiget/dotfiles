@@ -14,18 +14,28 @@ have() {
   command -v "$1" >/dev/null 2>&1
 }
 
-# Return 0 if tty belongs to an SSH login (has sshd in process ancestry), else 1.
-is_ssh_tty() {
+# On macOS, `who` includes remote host in parentheses for SSH sessions.
+# Example: "mac ttys012 Apr 2 04:35 (127.0.0.1)"
+is_ssh_tty_via_who() {
+  local tty="${1:-}" short
+  [[ -n "$tty" ]] || return 1
+  short="${tty#/dev/}"
+
+  # shellcheck disable=SC2016
+  who | awk -v t="$short" '$2==t && $0 ~ /\(.*\)$/ {found=1} END{exit found?0:1}'
+}
+
+# Fallback: check process ancestry for sshd
+is_ssh_tty_via_ps() {
   local tty="${1:-}"
   [[ -n "$tty" ]] || return 1
 
   local pids pid cur ppid comm
-  pids=$(ps -t "$tty" -o pid= 2>/dev/null | tr -s ' ' '\n' | sed '/^$/d' || true)
+  pids=$(ps -t "${tty#/dev/}" -o pid= 2>/dev/null | tr -s ' ' '\n' | sed '/^$/d' || true)
   [[ -n "$pids" ]] || return 1
 
   for pid in $pids; do
     cur="$pid"
-    # walk process tree up to init
     while [[ -n "$cur" && "$cur" != "0" ]]; do
       comm=$(ps -p "$cur" -o comm= 2>/dev/null | awk '{print $1}' || true)
       if [[ "$comm" == "sshd" ]]; then
@@ -36,8 +46,12 @@ is_ssh_tty() {
       cur="$ppid"
     done
   done
-
   return 1
+}
+
+is_ssh_tty() {
+  local tty="${1:-}"
+  is_ssh_tty_via_who "$tty" || is_ssh_tty_via_ps "$tty"
 }
 
 has_any_ssh_client() {
