@@ -3,6 +3,7 @@
 
 [general]
 live_config_reload = true
+working_directory = "None"
 import = [
   "~/.config/alacritty/current-theme.toml",
 ]
@@ -17,14 +18,17 @@ dynamic_title = true
 padding = { x = 10, y = 10 }
 dimensions = { columns = 140, lines = 36 }
 option_as_alt = "Both"
+opacity = 0.94
+blur = true
 
 [scrolling]
 history = 10000
 multiplier = 5
 
 [font]
-size = 18.0
+size = 18.5
 builtin_box_drawing = true
+offset = { x = 0, y = 1 }
 
 [font.normal]
 family = "JetBrainsMono Nerd Font"
@@ -47,6 +51,9 @@ style = "Bold"
 style = { shape = "Beam", blinking = "On" }
 blink_interval = 450
 
+[selection]
+save_to_clipboard = true
+
 [bell]
 animation = "EaseOutExpo"
 duration = 0
@@ -55,3 +62,39 @@ duration = 0
 # - kitty symbol_map (CJK/Emoji fine-grained mapping): no 1:1 equivalent in Alacritty.
 # - kitty cursor_trail animation: no equivalent.
 # - kitty tabs: intentionally omitted (tmux manages sessions/windows).
+
+# Key bindings tuned for macOS + tmux/nvim
+[[keyboard.bindings]]
+key = "V"
+mods = "Control|Shift"
+action = "Paste"
+
+[[keyboard.bindings]]
+key = "C"
+mods = "Control|Shift"
+action = "Copy"
+
+[[keyboard.bindings]]
+key = "Back"
+mods = "Alt"
+chars = "\u0017"
+
+[[keyboard.bindings]]
+key = "H"
+mods = "Alt"
+chars = "\u001bh"
+
+[[keyboard.bindings]]
+key = "J"
+mods = "Alt"
+chars = "\u001bj"
+
+[[keyboard.bindings]]
+key = "K"
+mods = "Alt"
+chars = "\u001bk"
+
+[[keyboard.bindings]]
+key = "L"
+mods = "Alt"
+chars = "\u001bl"
