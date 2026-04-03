@@ -8,7 +8,7 @@ import = [
 ]
 
 [env]
-TERM = "alacritty"
+TERM = "xterm-256color"
 
 [window]
 # kitty: hide_window_decorations titlebar-only (closest on macOS is Transparent)
@@ -27,20 +27,20 @@ size = 18.0
 builtin_box_drawing = true
 
 [font.normal]
-family = "TX-02"
+family = "JetBrainsMono Nerd Font"
 style = "Regular"
 
 [font.bold]
-family = "TX-02"
+family = "JetBrainsMono Nerd Font"
 style = "Bold"
 
 # kitty disabled italic styles; match with Regular/Bold fallback.
 [font.italic]
-family = "TX-02"
+family = "JetBrainsMono Nerd Font"
 style = "Regular"
 
 [font.bold_italic]
-family = "TX-02"
+family = "JetBrainsMono Nerd Font"
 style = "Bold"
 
 [cursor]
