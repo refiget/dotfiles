@@ -1,0 +1,57 @@
+# Alacritty config (migrated from kitty profile)
+# Strategy: migrate all compatible settings; keep tmux as primary multiplexer UI.
+
+[general]
+live_config_reload = true
+import = [
+  "~/.config/alacritty/current-theme.toml",
+]
+
+[env]
+TERM = "alacritty"
+
+[window]
+# kitty: hide_window_decorations titlebar-only (closest on macOS is Transparent)
+decorations = "Transparent"
+dynamic_title = true
+padding = { x = 10, y = 10 }
+dimensions = { columns = 140, lines = 36 }
+option_as_alt = "Both"
+
+[scrolling]
+history = 10000
+multiplier = 5
+
+[font]
+size = 18.0
+builtin_box_drawing = true
+
+[font.normal]
+family = "TX-02"
+style = "Regular"
+
+[font.bold]
+family = "TX-02"
+style = "Bold"
+
+# kitty disabled italic styles; match with Regular/Bold fallback.
+[font.italic]
+family = "TX-02"
+style = "Regular"
+
+[font.bold_italic]
+family = "TX-02"
+style = "Bold"
+
+[cursor]
+style = { shape = "Beam", blinking = "On" }
+blink_interval = 450
+
+[bell]
+animation = "EaseOutExpo"
+duration = 0
+
+# Compatibility notes:
+# - kitty symbol_map (CJK/Emoji fine-grained mapping): no 1:1 equivalent in Alacritty.
+# - kitty cursor_trail animation: no equivalent.
+# - kitty tabs: intentionally omitted (tmux manages sessions/windows).

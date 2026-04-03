@@ -111,6 +111,7 @@ link_file "$DOTFILES_DIR/karabiner"    "$CONFIG_DIR/karabiner"
 # Jupyter default config path is ~/.jupyter
 link_file "$DOTFILES_DIR/jupyter/jupyter.json" "$HOME/.jupyter/jupyter.json"
 link_file "$DOTFILES_DIR/kitty"         "$CONFIG_DIR/kitty"
+link_file "$DOTFILES_DIR/alacritty"     "$CONFIG_DIR/alacritty"
 link_file "$DOTFILES_DIR/starship/starship-tmux.toml" "$CONFIG_DIR/starship-tmux.toml"
 link_file "$DOTFILES_DIR/starship/starship-tmux-inactive.toml" "$CONFIG_DIR/starship-tmux-inactive.toml"
 link_file "$DOTFILES_DIR/scripts"       "$HOME/scripts"
