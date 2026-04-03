@@ -47,7 +47,7 @@ family = "JetBrainsMono Nerd Font"
 style = "Bold"
 
 [cursor]
-style = { shape = "Beam", blinking = "On" }
+style = { shape = "Beam", blinking = "Off" }
 blink_interval = 450
 
 [selection]
