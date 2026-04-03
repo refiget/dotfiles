@@ -3,11 +3,11 @@ set -euo pipefail
 
 # Re-arrange target apps into fixed spaces and enforce layouts/features.
 # Default policy:
-# - Only relocate 3 apps: kitty, ChatGPT, WeChat
+# - Only relocate 3 app groups: terminal(kitty/Alacritty), ChatGPT, WeChat
 # - Unify Space 3 window features (float/sub-layer/sticky policy)
 #
 # Mapping:
-# - space1: kitty (bsp)
+# - space1: terminal(kitty/Alacritty) (bsp)
 # - space2: ChatGPT (bsp)
 # - space3: WeChat + any other window in this space (float + unified features)
 
@@ -26,7 +26,7 @@ SPACE_TERM="${SPACE_TERM:-1}"
 SPACE_CHATGPT="${SPACE_CHATGPT:-2}"
 SPACE_WECHAT="${SPACE_WECHAT:-3}"
 
-APP_TERM_RE='^kitty$'
+APP_TERM_RE='^(kitty|Alacritty)$'
 APP_CHATGPT_RE='^(ChatGPT|ChatGPT Desktop)$'
 APP_WECHAT_RE='^(WeChat|微信)$'
 
@@ -129,7 +129,7 @@ main() {
     run_yabai space --focus "$original_space"
   fi
 
-  echo "yabai rerange done: only moved kitty/ChatGPT/WeChat, unified space3 features"
+  echo "yabai rerange done: only moved terminal(kitty/Alacritty)/ChatGPT/WeChat, unified space3 features"
 }
 
 main "$@"

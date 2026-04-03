@@ -35,8 +35,6 @@ For an overview, see the repo-level **README-zsh.md**.
 - `34_tools_runtime.conf` → lazy nvm
 - `35_tools_history.conf` → atuin
 - `40_keybindings.conf` → vi mode and readline-style bindings
-- `41_cursor.conf` → cursor-shape hooks
-- `42_zle_application_mode_fix.conf` → ZLE recursion hardening
 - `50_python_venv.conf` → Python virtualenv helpers
 - `80_local_overrides.conf` → machine-local overrides
 - `90_dep_checks.conf` → soft startup checks
