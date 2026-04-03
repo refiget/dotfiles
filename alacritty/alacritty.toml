@@ -13,13 +13,11 @@ TERM = "xterm-256color"
 
 [window]
 # kitty: hide_window_decorations titlebar-only (closest on macOS is Transparent)
-decorations = "Transparent"
+decorations = "Full"
 dynamic_title = true
 padding = { x = 10, y = 10 }
 dimensions = { columns = 140, lines = 36 }
 option_as_alt = "Both"
-opacity = 0.94
-blur = true
 
 [scrolling]
 history = 10000
@@ -31,20 +29,20 @@ builtin_box_drawing = true
 offset = { x = 0, y = 1 }
 
 [font.normal]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Regular"
 
 [font.bold]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Bold"
 
 # kitty disabled italic styles; match with Regular/Bold fallback.
 [font.italic]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Regular"
 
 [font.bold_italic]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Bold"
 
 [cursor]
