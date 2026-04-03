@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# iPad/remote friendly tmux mode (persistent + runtime)
+## iPad/remote friendly tmux mode (runtime-first, no dotfile mutation by default)
 #
 # off (default):
-#   - persist TMUX_RAINBARF=0 in 08_toggle_theme.conf
 #   - runtime: TMUX_RAINBARF=0, status-right='', status-interval=60
 #   - reload tmux config
 # on:
-#   - persist TMUX_RAINBARF=1 in 08_toggle_theme.conf
 #   - runtime: restore previous status-right/status-interval/rainbarf
 #   - reload tmux config
 #
@@ -40,8 +38,13 @@ fi
 
 key_prefix="@ipad_mode_prev"
 
+# By default, NEVER write back to tracked dotfiles.
+# Opt-in persistence: TMUX_IPAD_MODE_PERSIST=1 tmux_ipad_mode.sh <off|on|toggle>
+persist_mode="${TMUX_IPAD_MODE_PERSIST:-0}"
+
 set_persistent_rainbarf() {
   local target="$1"
+  [[ "$persist_mode" == "1" ]] || return 0
   if rg -n '^set-environment -g TMUX_RAINBARF ' "$CONF_FILE" >/dev/null 2>&1; then
     sed -i '' -E "s|^set-environment -g TMUX_RAINBARF .*|set-environment -g TMUX_RAINBARF ${target}|" "$CONF_FILE"
   else
@@ -60,6 +63,7 @@ reload_tmux_conf() {
 
 show_status() {
   echo "conf_rainbarf=$(sed -n 's/^set-environment -g TMUX_RAINBARF //p' "$CONF_FILE" | tail -n1)"
+  echo "persist_mode=$persist_mode"
   echo "status-interval=$(tmux show -gqv status-interval)"
   echo "status-right=$(tmux show -gqv status-right)"
   echo "TMUX_RAINBARF=$(tmux show-environment -g 2>/dev/null | sed -n 's/^TMUX_RAINBARF=//p')"
@@ -82,7 +86,7 @@ enable_off_mode() {
 
   reload_tmux_conf
   tmux refresh-client -S
-  echo "iPad mode ON: persisted TMUX_RAINBARF=0, status-right='', status-interval=60"
+  echo "iPad mode ON: runtime TMUX_RAINBARF=0, status-right='', status-interval=60"
 }
 
 restore_on_mode() {
@@ -109,7 +113,7 @@ restore_on_mode() {
 
   reload_tmux_conf
   tmux refresh-client -S
-  echo "iPad mode OFF: persisted TMUX_RAINBARF=1 and restored runtime bar/interval"
+  echo "iPad mode OFF: restored runtime bar/interval"
 }
 
 case "$cmd" in
