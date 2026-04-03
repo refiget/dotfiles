@@ -131,6 +131,21 @@ copy_via_tmux || true
 force_osc52=${TMUX_CLIPBOARD_FORCE_OSC52:-0}
 
 prefer_osc52=0
+# Over SSH (e.g., iPad clients), prefer OSC52 so clipboard reaches the client device.
+# Keep manual override via TMUX_CLIPBOARD_FORCE_OSC52=1.
+if [[ -n "${SSH_CONNECTION:-}" || -n "${SSH_TTY:-}" ]]; then
+  prefer_osc52=1
+fi
+# When tmux server env doesn't carry SSH vars, inspect attached client tty via who(1).
+if [[ $prefer_osc52 -eq 0 ]] && have tmux; then
+  client_tty=$(tmux display-message -p '#{client_tty}' 2>/dev/null || true)
+  if [[ -n "$client_tty" ]]; then
+    short_tty="${client_tty#/dev/}"
+    if who | awk -v t="$short_tty" '$2==t && $0 ~ /\(.*\)$/ {found=1} END{exit found?0:1}'; then
+      prefer_osc52=1
+    fi
+  fi
+fi
 if [[ "$force_osc52" == "1" ]]; then
   prefer_osc52=1
 fi
