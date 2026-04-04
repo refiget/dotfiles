@@ -14,8 +14,8 @@ return {
         end
         local s = vim.api.nvim_get_hl(0, { name = "StatusLine", link = false })
         local snc = vim.api.nvim_get_hl(0, { name = "StatusLineNC", link = false })
-        vim.api.nvim_set_hl(0, "StatusLine", { fg = s and s.fg or nil, bg = n.bg, bold = s and s.bold or false })
-        vim.api.nvim_set_hl(0, "StatusLineNC", { fg = snc and snc.fg or nil, bg = n.bg })
+        vim.api.nvim_set_hl(0, "StatusLine", { fg = s and s.fg or nil, bg = "#ffffff", bold = s and s.bold or false })
+        vim.api.nvim_set_hl(0, "StatusLineNC", { fg = snc and snc.fg or nil, bg = "#ffffff" })
       end)
     end,
   },
