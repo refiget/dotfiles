@@ -2,21 +2,30 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
-      -- remove clock section
-      opts.sections = opts.sections or {}
-      opts.sections.lualine_z = {}
+      -- 获取编辑区背景（Normal）
+      local normal_bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg
+      normal_bg = normal_bg and string.format("#%06x", normal_bg)
 
-      -- only change the long statusline bar background (StatusLine), not lualine section colors
-      vim.schedule(function()
-        local n = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
-        if not (n and n.bg) then
-          return
-        end
-        local s = vim.api.nvim_get_hl(0, { name = "StatusLine", link = false })
-        local snc = vim.api.nvim_get_hl(0, { name = "StatusLineNC", link = false })
-        vim.api.nvim_set_hl(0, "StatusLine", { fg = s and s.fg or nil, bg = n.bg, bold = s and s.bold or false })
-        vim.api.nvim_set_hl(0, "StatusLineNC", { fg = snc and snc.fg or nil, bg = n.bg })
-      end)
+      -- 自定义 theme（核心）
+      local my_theme = {
+        normal = {
+          a = { bg = normal_bg, fg = "#7aa2f7" },
+          b = { bg = normal_bg, fg = "#c0caf5" },
+          c = { bg = normal_bg, fg = "#a9b1d6" },
+        },
+        insert = {
+          a = { bg = normal_bg, fg = "#9ece6a" },
+        },
+        visual = {
+          a = { bg = normal_bg, fg = "#bb9af7" },
+        },
+        replace = {
+          a = { bg = normal_bg, fg = "#f7768e" },
+        },
+      }
+
+      opts.options = opts.options or {}
+      opts.options.theme = my_theme
     end,
   },
 }
