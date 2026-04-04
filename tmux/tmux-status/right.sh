@@ -161,19 +161,21 @@ if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
   fi
 fi
 
-now=$(date +"$time_fmt")
-# Pad to a stable width to keep status layout visually stable.
-# "HH:MM · MM-DD" is 13 chars.
-now_padded=$(printf '%-13s' "$now")
-time_text=" ${now_padded}"
+# Split time/date into separate filled segments so each can use its own color.
+time_value=$(date +"${TMUX_TIME_ONLY_FMT:-%H:%M}")
+date_value=$(date +"${TMUX_DATE_ONLY_FMT:-%m-%d}")
 
-# UI: avoid bold for time; keep it as a calm anchor on the right.
-host_prefix=$(printf '#[fg=%s,bg=%s]%s#[fg=%s,bg=%s]' \
-  "$host_fg" "$host_bg" "$time_text" \
-  "$host_bg" "$status_bg")
+time_fg=$(tmux show -gqv '@time_fg')
+[[ -z "$time_fg" ]] && time_fg="$host_fg"
+time_bg=$(tmux show -gqv '@time_bg')
+[[ -z "$time_bg" ]] && time_bg="$status_bg"
 
-printf '%s%s%s%s' \
-  "$session_segment" \
-  "$rainbarf_segment" \
-  "$host_prefix" \
-  "$right_cap"
+date_fg=$(tmux show -gqv '@date_fg')
+[[ -z "$date_fg" ]] && date_fg="$host_fg"
+date_bg=$(tmux show -gqv '@date_bg')
+[[ -z "$date_bg" ]] && date_bg="$status_bg"
+
+time_segment=$(printf '#[fg=%s,bg=%s] %s #[default]' "$time_fg" "$time_bg" "$time_value")
+date_segment=$(printf '#[fg=%s,bg=%s] %s #[default]' "$date_fg" "$date_bg" "$date_value")
+
+printf '%s%s%s%s%s'   "$session_segment"   "$rainbarf_segment"   "$time_segment"   "$date_segment"   "$right_cap"
