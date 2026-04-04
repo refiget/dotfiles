@@ -30,20 +30,20 @@ builtin_box_drawing = true
 offset = { x = 0, y = 1 }
 
 [font.normal]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Regular"
 
 [font.bold]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Bold"
 
 # kitty disabled italic styles; match with Regular/Bold fallback.
 [font.italic]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Regular"
 
 [font.bold_italic]
-family = "JetBrainsMono Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Bold"
 
 [cursor]
