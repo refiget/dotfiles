@@ -1,0 +1,43 @@
+# Ghostty config (migrated from kitty preferences)
+
+# Shell
+command = /bin/zsh
+
+# Font stack
+font-family = MonoLisa
+font-family = Maple Mono NF CN
+font-family = Apple Color Emoji
+font-family = Symbols Nerd Font Mono
+font-size = 18
+
+# Codepoint-specific fallback (similar to kitty symbol_map)
+font-codepoint-map = U+2E80-U+9FFF,U+F900-U+FAFF,U+20000-U+2FA1F=Maple Mono NF CN
+font-codepoint-map = U+1F000-U+1FAFF,U+2600-U+26FF,U+2705,U+FE0F=Apple Color Emoji
+font-codepoint-map = U+E000-U+F8FF=Symbols Nerd Font Mono
+
+# Keep ligatures on (default in Ghostty; explicit for clarity)
+font-feature = calt
+
+# macOS keyboard behavior like kitty
+macos-option-as-alt = true
+
+# Window style
+window-padding-x = 10
+window-padding-y = 10
+window-decoration = auto
+macos-titlebar-style = transparent
+
+# Cursor
+cursor-style = bar
+cursor-style-blink = true
+
+# Scrollback and bells
+scrollback-limit = 10000
+bell-features = no-system,no-audio
+
+# Clipboard behavior
+clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = true
+
+# Theme
+theme = TokyoNight Moon
