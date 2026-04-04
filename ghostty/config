@@ -19,6 +19,7 @@ font-codepoint-map = U+2600-U+26FF=Apple Color Emoji
 font-codepoint-map = U+2705=Apple Color Emoji
 font-codepoint-map = U+FE0F=Apple Color Emoji
 font-codepoint-map = U+E000-U+F8FF=Symbols Nerd Font Mono
+font-codepoint-map = U+0020-U+007E=MonoLisa
 
 # Keep ligatures on (default in Ghostty; explicit for clarity)
 font-feature = calt
@@ -46,3 +47,6 @@ clipboard-paste-protection = true
 
 # Theme
 theme = TokyoNight Storm
+
+# Better compatibility for CJK cell width in terminal apps
+grapheme-width-method = legacy
