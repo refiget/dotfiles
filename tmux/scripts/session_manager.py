@@ -157,12 +157,19 @@ def apply_names(sessions: List[Dict[str, object]]) -> None:
             rename_session(session, target)
 
 
+def current_target_args() -> List[str]:
+    pane_id = os.environ.get("TMUX_PANE", "").strip()
+    if pane_id:
+        return ["-t", pane_id]
+    return []
+
+
 def current_session_id() -> str:
-    return run_tmux(["display-message", "-p", "#{session_id}"], capture=True)
+    return run_tmux(["display-message", *current_target_args(), "-p", "#{session_id}"], capture=True)
 
 
 def current_window_id() -> str:
-    return run_tmux(["display-message", "-p", "#{window_id}"], capture=True)
+    return run_tmux(["display-message", *current_target_args(), "-p", "#{window_id}"], capture=True)
 
 
 def command_switch(index_str: str) -> None:
@@ -243,6 +250,32 @@ def command_move_window_to_session(index_str: str) -> None:
     run_tmux(["switch-client", "-t", target_session_id], check=False)
 
 
+def command_clean() -> None:
+    current_id = current_session_id()
+    if not current_id:
+        return
+
+    sessions = normalize_sessions()
+    current = next((session for session in sessions if session["id"] == current_id), None)
+    if not current:
+        return
+
+    run_tmux(["set-option", "-gq", "@session_manager_suspended", "1"], check=False)
+    try:
+        for session in sessions:
+            if session["id"] == current_id:
+                continue
+            run_tmux(["kill-session", "-t", session["id"]], check=False)
+
+        current["index"] = 1
+        current["label"] = cleanup_label(1, str(current.get("label") or DEFAULT_LABEL))
+        rename_session(current, build_session_name(1, str(current["label"])))
+    finally:
+        run_tmux(["set-option", "-gu", "@session_manager_suspended"], check=False)
+
+    run_tmux(["switch-client", "-t", current_id], check=False)
+
+
 def main(argv: List[str]) -> None:
     if len(argv) < 2:
         return
@@ -259,6 +292,8 @@ def main(argv: List[str]) -> None:
         command_created()
     elif command == "move-window-to" and len(argv) >= 3:
         command_move_window_to_session(argv[2])
+    elif command == "clean":
+        command_clean()
 
 
 if __name__ == "__main__":
