@@ -92,6 +92,7 @@ link_file "$DOTFILES_DIR/.tmux.conf"  "$HOME/.tmux.conf"
 link_file "$DOTFILES_DIR/.gitconfig"  "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/.ignore"     "$HOME/.ignore"
 link_file "$DOTFILES_DIR/.ideavimrc"  "$HOME/.ideavimrc"
+link_file "$DOTFILES_DIR/.shellfishrc" "$HOME/.shellfishrc"
 
 # --- .config 目录下的文件夹 ---
 link_file "$DOTFILES_DIR/nvim"          "$CONFIG_DIR/nvim"
