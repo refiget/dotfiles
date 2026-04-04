@@ -4,11 +4,14 @@
 command = /bin/zsh
 
 # Font stack
+font-family = ""
 font-family = MonoLisa
 font-family = Maple Mono NF CN
 font-family = Apple Color Emoji
 font-family = Symbols Nerd Font Mono
 font-size = 18
+
+font-codepoint-map = ""
 
 ## Force Chinese + CJK punctuation to Maple Mono NF CN
 font-codepoint-map = U+2E80-U+9FFF=Maple Mono NF CN
