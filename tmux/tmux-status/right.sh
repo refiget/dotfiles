@@ -31,7 +31,8 @@ segment_fg=$(tmux show -gqv '@status_fg')
 
 # Time segment: keep static, calm color (mode accent is reserved for the session pill)
 host_bg="$status_bg"
-host_fg="$subtext0"
+host_fg=$(tmux show -gqv "@time_fg")
+[[ -z "$host_fg" ]] && host_fg="$subtext0"
 # Time format (C): HH:MM · MM-DD
 # Keep this short and consistent to reduce visual jitter.
 time_fmt="${TMUX_TIME_FMT:-%H:%M · %m-%d}"
@@ -99,12 +100,17 @@ if (( show_session == 1 )); then
 
   session_fg=$(tmux show -gqv '@session_label_fg')
   [[ -z "$session_fg" ]] && session_fg="$subtext0"
+  session_bg=$(tmux show -gqv '@session_label_bg')
   # Truncate to keep right bar stable.
   max_slen=${TMUX_SESSION_RIGHT_MAXLEN:-12}
   if (( ${#session_name_clean} > max_slen )); then
     session_name_clean="${session_name_clean:0:max_slen-1}…"
   fi
-  session_segment=$(printf '#[fg=%s] %s %s #[default]' "$session_fg" "$session_icon" "$session_name_clean")
+  if [[ -n "$session_bg" ]]; then
+    session_segment=$(printf '#[fg=%s,bg=%s] %s %s #[default]' "$session_fg" "$session_bg" "$session_icon" "$session_name_clean")
+  else
+    session_segment=$(printf '#[fg=%s] %s %s #[default]' "$session_fg" "$session_icon" "$session_name_clean")
+  fi
 fi
 
 if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
