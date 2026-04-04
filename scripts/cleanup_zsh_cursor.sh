@@ -1,1 +1,0 @@
-../zsh/scripts/cleanup_zsh_cursor.sh
