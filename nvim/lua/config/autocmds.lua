@@ -178,6 +178,10 @@ local java_test_panel = {
 vim.api.nvim_set_hl(0, "JavaTestPass", { fg = "#22c55e", bold = true })
 vim.api.nvim_set_hl(0, "JavaTestFail", { fg = "#ef4444", bold = true })
 vim.api.nvim_set_hl(0, "JavaTestTraceLine", { fg = "#ef4444", underline = true })
+vim.api.nvim_set_hl(0, "JavaTestTitle", { fg = "#7aa2f7", bold = true })
+vim.api.nvim_set_hl(0, "JavaTestKey", { fg = "#9d7cd8", bold = true })
+vim.api.nvim_set_hl(0, "JavaTestStatusPass", { fg = "#9ece6a", bold = true })
+vim.api.nvim_set_hl(0, "JavaTestStatusFail", { fg = "#f7768e", bold = true, underline = true })
 
 local function panel_is_alive()
   return java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)
@@ -218,11 +222,29 @@ local function render_right(test)
   end
   vim.api.nvim_buf_set_lines(java_test_panel.right_buf, 0, -1, false, lines)
 
-  -- Highlight stacktrace lines in right panel (for easier <leader>gj targeting)
+  -- Highlight right-panel structure + stacktrace lines (TokyoNight tuned)
   local rns = vim.api.nvim_create_namespace("java-test-panel-right")
   vim.api.nvim_buf_clear_namespace(java_test_panel.right_buf, rns, 0, -1)
+
   for i, l in ipairs(lines) do
-    if l:match("^%s*at%s+[%w_%.%$]+%.[%w_%$<>]+%([^:]+:%d+%)") then
+    if l:match("^Test:%s") then
+      vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestTitle", i - 1, 0, -1)
+      vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestKey", i - 1, 0, 5)
+    elseif l:match("^Class:%s") then
+      vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestTitle", i - 1, 0, -1)
+      vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestKey", i - 1, 0, 6)
+    elseif l:match("^Status:%s") then
+      vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestTitle", i - 1, 0, -1)
+      vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestKey", i - 1, 0, 7)
+      local status = l:match("^Status:%s+(%w+)")
+      if status == "FAILED" then
+        local col = l:find("FAILED", 1, true)
+        if col then vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestStatusFail", i - 1, col - 1, col - 1 + #"FAILED") end
+      elseif status == "PASSED" then
+        local col = l:find("PASSED", 1, true)
+        if col then vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestStatusPass", i - 1, col - 1, col - 1 + #"PASSED") end
+      end
+    elseif l:match("^%s*at%s+[%w_%.%$]+%.[%w_%$<>]+%([^:]+:%d+%)") then
       vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestTraceLine", i - 1, 0, -1)
     end
   end
