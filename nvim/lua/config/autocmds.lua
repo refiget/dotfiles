@@ -272,6 +272,13 @@ local function render_left_and_bind(tests)
     string.rep("─", width),
   }
 
+  -- Resize left pane to just fit summary line + 3 cols, so right error pane stays wider.
+  if java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win) then
+    local summary_w = vim.fn.strdisplaywidth(lines[1])
+    local target_w = math.max(24, summary_w + 3)
+    pcall(vim.api.nvim_win_set_width, java_test_panel.left_win, target_w)
+  end
+
   java_test_panel.tests_by_line = {}
   for _, t in ipairs(tests or {}) do
     local mark = t.failed and "✗" or "✓"
@@ -371,7 +378,7 @@ local function ensure_panel()
   vim.api.nvim_win_set_buf(java_test_panel.right_win, java_test_panel.right_buf)
   set_scratch(java_test_panel.right_buf)
 
-  local target = math.max(26, math.floor(vim.o.columns * 0.30) - 6)
+  local target = math.max(24, math.floor(vim.o.columns * 0.26) - 8)
   pcall(vim.api.nvim_win_set_width, java_test_panel.left_win, target)
 
   -- panel windows: cleaner look (no line numbers/signcolumn)
