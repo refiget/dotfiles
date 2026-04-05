@@ -294,8 +294,27 @@ map({ "n", "i", "t" }, "<leader>tp", function()
 end, { desc = "Prev test (✓/✗)" })
 
 
--- Keep <leader>dr REPL height aligned with dap-ui bottom REPL (12 lines)
+-- <leader>dr: focus Java test panel right pane when present; fallback to DAP REPL.
 map("n", "<leader>dr", function()
+  local wins = vim.api.nvim_tabpage_list_wins(0)
+  local right_win = nil
+
+  for _, w in ipairs(wins) do
+    local b = vim.api.nvim_win_get_buf(w)
+    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "java-test-panel" then
+      local first = (vim.api.nvim_buf_get_lines(b, 0, 1, false)[1] or "")
+      if vim.startswith(first, "Test:") or vim.startswith(first, "No test selected") then
+        right_win = w
+        break
+      end
+    end
+  end
+
+  if right_win and vim.api.nvim_win_is_valid(right_win) then
+    vim.api.nvim_set_current_win(right_win)
+    return
+  end
+
   local ok, dap = pcall(require, "dap")
   if not ok then
     vim.notify("nvim-dap not available", vim.log.levels.WARN)
@@ -303,7 +322,7 @@ map("n", "<leader>dr", function()
   end
   vim.cmd("botright 12split")
   dap.repl.open()
-end, { desc = "DAP REPL (12 lines)" })
+end, { desc = "Focus test details pane / DAP REPL fallback" })
 
 
 -- Java: run test class and open bottom summary panel (uses jdtls after_test API)
