@@ -294,10 +294,6 @@ map({ "n", "i", "t" }, "<leader>tp", function()
 end, { desc = "Prev test (✓/✗)" })
 
 
--- <leader>dr: toggle the existing <leader>tj panel windows (without re-running tests)
-map("n", "<leader>dr", function()
-  vim.cmd("JavaTestPanelToggle")
-end, { desc = "Toggle existing Java test panel windows" })
 
 
 -- Java: run test class and open bottom summary panel (uses jdtls after_test API)
