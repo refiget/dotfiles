@@ -1,6 +1,7 @@
 return {
   {
     "mason-org/mason.nvim",
+    cmd = { "Mason", "MasonInstall", "MasonUpdate", "MasonInstallAll", "InstallApp" },
     opts = function(_, opts)
       local common = require("lsp.common")
       opts.ensure_installed = common.mason_ensure_installed()
@@ -31,8 +32,9 @@ return {
         local ok_map, mappings = pcall(require, "mason-lspconfig.mappings")
         if ok_map then
           local lsp_to_pkg = mappings.get_mason_map().lspconfig_to_package or {}
-          local lsp_opts = require("lazy.core.config").plugins["nvim-lspconfig"]
-          local servers = (((lsp_opts or {}).opts or {}).servers or {})
+          local servers = require("lsp.common").base_servers()
+          require("lsp.python").setup(servers)
+          require("lsp.java").setup(servers)
           for name, _ in pairs(servers) do
             local pkg = lsp_to_pkg[name]
             if pkg then
