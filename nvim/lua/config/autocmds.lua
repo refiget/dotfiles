@@ -175,9 +175,6 @@ local java_test_panel = {
   tests_by_line = {},
 }
 
-vim.api.nvim_set_hl(0, "JavaTestPass", { link = "DiagnosticOk" })
-vim.api.nvim_set_hl(0, "JavaTestFail", { link = "DiagnosticError" })
-
 local function panel_is_alive()
   return java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)
     and java_test_panel.right_win and vim.api.nvim_win_is_valid(java_test_panel.right_win)
@@ -245,19 +242,6 @@ local function render_left_and_bind(tests)
   vim.bo[java_test_panel.left_buf].modifiable = true
   vim.api.nvim_buf_set_lines(java_test_panel.left_buf, 0, -1, false, lines)
   vim.bo[java_test_panel.left_buf].modifiable = false
-
-  -- Colorize status symbol in left summary panel
-  local ns = vim.api.nvim_create_namespace("java-test-panel")
-  vim.api.nvim_buf_clear_namespace(java_test_panel.left_buf, ns, 0, -1)
-  for lnum = 3, #lines do
-    local line = lines[lnum] or ""
-    local first = line:sub(1, 1)
-    if first == "✓" then
-      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestPass", lnum - 1, 0, 1)
-    elseif first == "✗" then
-      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestFail", lnum - 1, 0, 1)
-    end
-  end
 
   local function sync_from_cursor()
     if not (java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)) then
