@@ -373,7 +373,16 @@ local function ensure_panel()
 
   local target = math.max(26, math.floor(vim.o.columns * 0.30) - 6)
   pcall(vim.api.nvim_win_set_width, java_test_panel.left_win, target)
+
+  -- panel windows: cleaner look (no line numbers/signcolumn)
+  vim.wo[java_test_panel.left_win].number = false
+  vim.wo[java_test_panel.left_win].relativenumber = false
+  vim.wo[java_test_panel.left_win].signcolumn = "no"
   vim.wo[java_test_panel.left_win].cursorline = true
+
+  vim.wo[java_test_panel.right_win].number = false
+  vim.wo[java_test_panel.right_win].relativenumber = false
+  vim.wo[java_test_panel.right_win].signcolumn = "no"
 
   vim.api.nvim_set_current_win(java_test_panel.left_win)
 end
