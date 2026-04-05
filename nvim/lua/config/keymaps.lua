@@ -306,11 +306,7 @@ map("n", "<leader>dr", function()
 end, { desc = "DAP REPL (12 lines)" })
 
 
--- Java: run test class without dap-ui, then open REPL
+-- Java: run test class and open bottom summary panel (uses jdtls after_test API)
 map("n", "<leader>tj", function()
-  vim.cmd("JavaTestClassNoUI")
-  vim.defer_fn(function()
-    local keys = vim.api.nvim_replace_termcodes("<leader>dr", true, false, true)
-    vim.api.nvim_feedkeys(keys, "m", false)
-  end, 80)
-end, { desc = "JavaTestClassNoUI + DAP REPL" })
+  vim.cmd("JavaTestClassPanel")
+end, { desc = "Java test class panel" })
