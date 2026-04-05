@@ -409,8 +409,29 @@ vim.api.nvim_create_user_command("JavaTestClassPanel", function()
     return
   end
 
+  -- Guard: run tests only from a real java file buffer (avoid file:// invalid URI from panel buffers)
+  local target_buf = nil
+  local cur = vim.api.nvim_get_current_buf()
+  local cur_name = vim.api.nvim_buf_get_name(cur)
+  if vim.bo[cur].filetype == "java" and cur_name ~= "" then
+    target_buf = cur
+  else
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(b) and vim.bo[b].filetype == "java" and vim.api.nvim_buf_get_name(b) ~= "" then
+        target_buf = b
+        break
+      end
+    end
+  end
+
+  if not target_buf then
+    vim.notify("JavaTestClassPanel: open a real .java file first", vim.log.levels.WARN)
+    return
+  end
+
   vim.g._dapui_suppress_next_open = true
   jdtls_dap.test_class({
+    bufnr = target_buf,
     after_test = function(_, tests)
       vim.schedule(function()
         ensure_panel()
