@@ -182,6 +182,10 @@ vim.api.nvim_set_hl(0, "JavaTestTitle", { fg = "#7aa2f7", bold = true })
 vim.api.nvim_set_hl(0, "JavaTestKey", { fg = "#9d7cd8", bold = true })
 vim.api.nvim_set_hl(0, "JavaTestStatusPass", { fg = "#9ece6a", bold = true })
 vim.api.nvim_set_hl(0, "JavaTestStatusFail", { fg = "#f7768e", bold = true, underline = true })
+vim.api.nvim_set_hl(0, "JavaTestSummary", { fg = "#7aa2f7", bold = true })
+vim.api.nvim_set_hl(0, "JavaTestDivider", { fg = "#565f89" })
+vim.api.nvim_set_hl(0, "JavaTestRowPass", { fg = "#9ece6a" })
+vim.api.nvim_set_hl(0, "JavaTestRowFail", { fg = "#f7768e" })
 
 local function panel_is_alive()
   return java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)
@@ -279,15 +283,34 @@ local function render_left_and_bind(tests)
   vim.api.nvim_buf_set_lines(java_test_panel.left_buf, 0, -1, false, lines)
   vim.bo[java_test_panel.left_buf].modifiable = false
 
-  -- Hardcoded color highlights for ✓ / ✗ symbols
+  -- Left panel highlights (summary + rows)
   local ns = vim.api.nvim_create_namespace("java-test-panel")
   vim.api.nvim_buf_clear_namespace(java_test_panel.left_buf, ns, 0, -1)
+
+  -- line 1 summary
+  vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestSummary", 0, 0, -1)
+  local summary = lines[1] or ""
+  local function hi_token(tok, group)
+    local c = summary:find(tok, 1, true)
+    if c then
+      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, group, 0, c - 1, c - 1 + #tok)
+    end
+  end
+  hi_token("pass:" .. tostring(passed), "JavaTestStatusPass")
+  hi_token("fail:" .. tostring(failed), "JavaTestStatusFail")
+
+  -- line 2 divider
+  vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestDivider", 1, 0, -1)
+
+  -- test rows
   for lnum = 3, #lines do
     local line = lines[lnum] or ""
     if vim.startswith(line, "✓") then
       vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestPass", lnum - 1, 0, 3)
+      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestRowPass", lnum - 1, 4, -1)
     elseif vim.startswith(line, "✗") then
       vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestFail", lnum - 1, 0, 3)
+      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestRowFail", lnum - 1, 4, -1)
     end
   end
 
@@ -350,6 +373,7 @@ local function ensure_panel()
 
   local target = math.max(32, math.floor(vim.o.columns * 0.30))
   pcall(vim.api.nvim_win_set_width, java_test_panel.left_win, target)
+  vim.wo[java_test_panel.left_win].cursorline = true
 
   vim.api.nvim_set_current_win(java_test_panel.left_win)
 end
