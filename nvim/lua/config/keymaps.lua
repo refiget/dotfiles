@@ -294,27 +294,10 @@ map({ "n", "i", "t" }, "<leader>tp", function()
 end, { desc = "Prev test (✓/✗)" })
 
 
--- <leader>dr: toggle Java test panel windows (close/open). No DAP REPL behavior.
+-- <leader>dr: toggle the existing <leader>tj panel windows (without re-running tests)
 map("n", "<leader>dr", function()
-  local panel_wins = {}
-  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    local b = vim.api.nvim_win_get_buf(w)
-    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "java-test-panel" then
-      table.insert(panel_wins, w)
-    end
-  end
-
-  if #panel_wins > 0 then
-    for _, w in ipairs(panel_wins) do
-      if vim.api.nvim_win_is_valid(w) then
-        pcall(vim.api.nvim_win_close, w, true)
-      end
-    end
-    return
-  end
-
-  vim.cmd("JavaTestClassPanel")
-end, { desc = "Toggle Java test panel windows" })
+  vim.cmd("JavaTestPanelToggle")
+end, { desc = "Toggle existing Java test panel windows" })
 
 
 -- Java: run test class and open bottom summary panel (uses jdtls after_test API)

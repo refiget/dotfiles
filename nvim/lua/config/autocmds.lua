@@ -196,7 +196,7 @@ end
 
 local function set_scratch(buf)
   vim.bo[buf].buftype = "nofile"
-  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].bufhidden = "hide"
   vim.bo[buf].swapfile = false
   vim.bo[buf].modifiable = false
   vim.bo[buf].filetype = "java-test-panel"
@@ -368,15 +368,23 @@ local function ensure_panel()
   vim.cmd("botright 12split")
   java_test_panel.left_win = vim.api.nvim_get_current_win()
 
-  java_test_panel.left_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_win_set_buf(java_test_panel.left_win, java_test_panel.left_buf)
-  set_scratch(java_test_panel.left_buf)
+  if java_test_panel.left_buf and vim.api.nvim_buf_is_valid(java_test_panel.left_buf) then
+    vim.api.nvim_win_set_buf(java_test_panel.left_win, java_test_panel.left_buf)
+  else
+    java_test_panel.left_buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_win_set_buf(java_test_panel.left_win, java_test_panel.left_buf)
+    set_scratch(java_test_panel.left_buf)
+  end
 
   vim.cmd("vsplit")
   java_test_panel.right_win = vim.api.nvim_get_current_win()
-  java_test_panel.right_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_win_set_buf(java_test_panel.right_win, java_test_panel.right_buf)
-  set_scratch(java_test_panel.right_buf)
+  if java_test_panel.right_buf and vim.api.nvim_buf_is_valid(java_test_panel.right_buf) then
+    vim.api.nvim_win_set_buf(java_test_panel.right_win, java_test_panel.right_buf)
+  else
+    java_test_panel.right_buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_win_set_buf(java_test_panel.right_win, java_test_panel.right_buf)
+    set_scratch(java_test_panel.right_buf)
+  end
 
   local target = math.max(24, math.floor(vim.o.columns * 0.26) - 8)
   pcall(vim.api.nvim_win_set_width, java_test_panel.left_win, target)
@@ -393,6 +401,32 @@ local function ensure_panel()
 
   vim.api.nvim_set_current_win(java_test_panel.left_win)
 end
+
+vim.api.nvim_create_user_command("JavaTestPanelToggle", function()
+  local wins = {}
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local b = vim.api.nvim_win_get_buf(w)
+    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "java-test-panel" then
+      table.insert(wins, w)
+    end
+  end
+
+  if #wins > 0 then
+    for _, w in ipairs(wins) do
+      if vim.api.nvim_win_is_valid(w) then
+        pcall(vim.api.nvim_win_close, w, true)
+      end
+    end
+    return
+  end
+
+  if java_test_panel.left_buf and vim.api.nvim_buf_is_valid(java_test_panel.left_buf)
+    and java_test_panel.right_buf and vim.api.nvim_buf_is_valid(java_test_panel.right_buf) then
+    ensure_panel()
+  else
+    vim.notify("No existing Java test panel. Run <leader>tj first.", vim.log.levels.INFO)
+  end
+end, { desc = "Toggle existing Java test panel windows" })
 
 vim.api.nvim_create_user_command("JavaTestClassPanel", function()
   local ok, jdtls_dap = pcall(require, "jdtls.dap")
