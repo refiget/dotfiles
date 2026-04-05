@@ -3,6 +3,9 @@ return {
     "nvim-lua/plenary.nvim",
     event = "VeryLazy",
     init = function()
+      local ns = vim.api.nvim_create_namespace("java-trace-jump")
+      vim.api.nvim_set_hl(0, "JavaTraceJumpLine", { underline = true, sp = "#ef4444", bold = true })
+
       local function get_src_roots(project_root)
         local roots = {}
         local classpath = project_root .. "/.classpath"
@@ -75,6 +78,16 @@ return {
         local row = math.max(1, math.min(lineno, max_line))
         pcall(vim.api.nvim_win_set_cursor, 0, { row, 0 })
         vim.cmd("normal! zz")
+
+        -- red underline hint on jumped line
+        local bufnr = vim.api.nvim_get_current_buf()
+        vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+        vim.api.nvim_buf_set_extmark(bufnr, ns, row - 1, 0, {
+          end_row = row,
+          end_col = 0,
+          hl_group = "JavaTraceJumpLine",
+          hl_eol = true,
+        })
       end
 
       vim.api.nvim_create_user_command("JavaTraceJump", java_trace_jump, {
