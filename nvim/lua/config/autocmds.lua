@@ -251,9 +251,10 @@ local function render_left_and_bind(tests)
   vim.api.nvim_buf_clear_namespace(java_test_panel.left_buf, ns, 0, -1)
   for lnum = 3, #lines do
     local line = lines[lnum] or ""
-    if vim.startswith(line, "✓") then
+    local first = line:sub(1, 1)
+    if first == "✓" then
       vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestPass", lnum - 1, 0, 3)
-    elseif vim.startswith(line, "✗") then
+    elseif first == "✗" then
       vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestFail", lnum - 1, 0, 3)
     end
   end
