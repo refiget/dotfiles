@@ -402,32 +402,6 @@ local function ensure_panel()
   vim.api.nvim_set_current_win(java_test_panel.left_win)
 end
 
-vim.api.nvim_create_user_command("JavaTestPanelToggle", function()
-  local wins = {}
-  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    local b = vim.api.nvim_win_get_buf(w)
-    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "java-test-panel" then
-      table.insert(wins, w)
-    end
-  end
-
-  if #wins > 0 then
-    for _, w in ipairs(wins) do
-      if vim.api.nvim_win_is_valid(w) then
-        pcall(vim.api.nvim_win_close, w, true)
-      end
-    end
-    return
-  end
-
-  if java_test_panel.left_buf and vim.api.nvim_buf_is_valid(java_test_panel.left_buf)
-    and java_test_panel.right_buf and vim.api.nvim_buf_is_valid(java_test_panel.right_buf) then
-    ensure_panel()
-  else
-    vim.notify("No existing Java test panel. Run <leader>tj first.", vim.log.levels.INFO)
-  end
-end, { desc = "Toggle existing Java test panel windows" })
-
 vim.api.nvim_create_user_command("JavaTestClassPanel", function()
   local ok, jdtls_dap = pcall(require, "jdtls.dap")
   if not ok then
