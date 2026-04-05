@@ -371,7 +371,7 @@ local function ensure_panel()
   vim.api.nvim_win_set_buf(java_test_panel.right_win, java_test_panel.right_buf)
   set_scratch(java_test_panel.right_buf)
 
-  local target = math.max(32, math.floor(vim.o.columns * 0.30))
+  local target = math.max(29, math.floor(vim.o.columns * 0.30) - 3)
   pcall(vim.api.nvim_win_set_width, java_test_panel.left_win, target)
   vim.wo[java_test_panel.left_win].cursorline = true
 
