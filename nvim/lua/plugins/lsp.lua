@@ -54,6 +54,9 @@ return {
             install_pkg(pkg)
           end
           vim.notify("Mason installing: " .. table.concat(list, ", "))
+          vim.schedule(function()
+            pcall(vim.cmd, "Mason")
+          end)
         end)
       end, { desc = "Install all mason-managed tools from current config" })
 
