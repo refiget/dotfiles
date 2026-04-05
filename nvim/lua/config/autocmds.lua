@@ -175,8 +175,8 @@ local java_test_panel = {
   tests_by_line = {},
 }
 
-vim.api.nvim_set_hl(0, "JavaTestPass", { link = "DiagnosticOk" })
-vim.api.nvim_set_hl(0, "JavaTestFail", { link = "DiagnosticError" })
+vim.api.nvim_set_hl(0, "JavaTestPass", { fg = "#22c55e", bold = true })
+vim.api.nvim_set_hl(0, "JavaTestFail", { fg = "#ef4444", bold = true })
 
 local function panel_is_alive()
   return java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)
@@ -253,9 +253,9 @@ local function render_left_and_bind(tests)
     local line = lines[lnum] or ""
     local first = line:sub(1, 1)
     if first == "✓" then
-      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestPass", lnum - 1, 0, 1)
+      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestPass", lnum - 1, 0, 3)
     elseif first == "✗" then
-      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestFail", lnum - 1, 0, 1)
+      vim.api.nvim_buf_add_highlight(java_test_panel.left_buf, ns, "JavaTestFail", lnum - 1, 0, 3)
     end
   end
 
