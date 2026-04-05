@@ -1,17 +1,10 @@
 return {
   {
     "mason-org/mason.nvim",
-    opts = {
-      ensure_installed = {
-        "lua-language-server",
-        "pyright",
-        "typescript-language-server",
-        "json-lsp",
-        "yaml-language-server",
-        "bash-language-server",
-        "jdtls",
-      },
-    },
+    opts = function(_, opts)
+      local common = require("lsp.common")
+      opts.ensure_installed = common.mason_ensure_installed()
+    end,
     config = function(_, opts)
       require("mason").setup(opts)
 
@@ -23,23 +16,19 @@ return {
         end
       end
 
-      -- auto install all tools declared in ensure_installed
       mr.refresh(function()
         for _, tool in ipairs(opts.ensure_installed or {}) do
           install_pkg(tool)
         end
       end)
 
-      -- command: install all mason-managed tools in this config (lsp + mason tools)
       vim.api.nvim_create_user_command("InstallApp", function()
         local set = {}
 
-        -- 1) mason tools
         for _, tool in ipairs((opts.ensure_installed or {})) do
           set[tool] = true
         end
 
-        -- 2) lsp servers -> mason packages
         local ok_map, mappings = pcall(require, "mason-lspconfig.mappings")
         if ok_map then
           local lsp_to_pkg = mappings.get_mason_map().lspconfig_to_package or {}
