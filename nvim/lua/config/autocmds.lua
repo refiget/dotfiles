@@ -177,6 +177,7 @@ local java_test_panel = {
 
 vim.api.nvim_set_hl(0, "JavaTestPass", { fg = "#22c55e", bold = true })
 vim.api.nvim_set_hl(0, "JavaTestFail", { fg = "#ef4444", bold = true })
+vim.api.nvim_set_hl(0, "JavaTestTraceLine", { fg = "#ef4444", underline = true })
 
 local function panel_is_alive()
   return java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)
@@ -216,6 +217,16 @@ local function render_right(test)
     end
   end
   vim.api.nvim_buf_set_lines(java_test_panel.right_buf, 0, -1, false, lines)
+
+  -- Highlight stacktrace lines in right panel (for easier <leader>gj targeting)
+  local rns = vim.api.nvim_create_namespace("java-test-panel-right")
+  vim.api.nvim_buf_clear_namespace(java_test_panel.right_buf, rns, 0, -1)
+  for i, l in ipairs(lines) do
+    if l:match("^%s*at%s+[%w_%.%$]+%.[%w_%$<>]+%([^:]+:%d+%)") then
+      vim.api.nvim_buf_add_highlight(java_test_panel.right_buf, rns, "JavaTestTraceLine", i - 1, 0, -1)
+    end
+  end
+
   vim.bo[java_test_panel.right_buf].modifiable = false
 end
 
