@@ -33,8 +33,11 @@ fi
 # normalize CRLF -> LF
 content=$(printf '%s' "$content" | tr -d '\r')
 
-# Paste path should be transparent: do not mutate trailing newlines here.
-# If we need safety, do it at copy time (copy_to_clipboard.sh).
+# Prevent accidental "Enter" after paste if clipboard ends with newlines
+# (keep internal newlines; strip only trailing ones)
+while [[ "$content" == *$'\n' ]]; do
+  content="${content%$'\n'}"
+done
 
 tmux set-buffer -- "$content"
 tmux paste-buffer -p -d
