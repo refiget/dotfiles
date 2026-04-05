@@ -152,27 +152,6 @@ vim.api.nvim_create_user_command("JavaIndexClean", function()
 end, { desc = "Clean jdtls workspace cache for current project and re-index" })
 
 
--- Java tests without opening DAP UI (REPL/UI stays closed)
-vim.api.nvim_create_user_command("JavaTestClassNoUI", function()
-  local ok, jdtls_dap = pcall(require, "jdtls.dap")
-  if not ok then
-    vim.notify("jdtls.dap not available", vim.log.levels.WARN)
-    return
-  end
-  vim.g._dapui_suppress_next_open = true
-  jdtls_dap.test_class()
-end, { desc = "Run Java test class without opening dap-ui" })
-
-vim.api.nvim_create_user_command("JavaTestNearestNoUI", function()
-  local ok, jdtls_dap = pcall(require, "jdtls.dap")
-  if not ok then
-    vim.notify("jdtls.dap not available", vim.log.levels.WARN)
-    return
-  end
-  vim.g._dapui_suppress_next_open = true
-  jdtls_dap.test_nearest_method()
-end, { desc = "Run nearest Java test without opening dap-ui" })
-
 -- Auto-show diagnostics float on hover, normal mode only
 vim.api.nvim_create_autocmd("CursorHold", {
   callback = function()
@@ -188,6 +167,145 @@ vim.api.nvim_create_autocmd("CursorHold", {
 })
 
 -- Java tests: run class and show bottom 12-line split panel (left summary, right details)
+local java_test_panel = {
+  left_buf = nil,
+  right_buf = nil,
+  left_win = nil,
+  right_win = nil,
+  tests_by_line = {},
+}
+
+local function panel_is_alive()
+  return java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)
+    and java_test_panel.right_win and vim.api.nvim_win_is_valid(java_test_panel.right_win)
+    and java_test_panel.left_buf and vim.api.nvim_buf_is_valid(java_test_panel.left_buf)
+    and java_test_panel.right_buf and vim.api.nvim_buf_is_valid(java_test_panel.right_buf)
+end
+
+local function set_scratch(buf)
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].swapfile = false
+  vim.bo[buf].modifiable = false
+  vim.bo[buf].filetype = "java-test-panel"
+end
+
+local function render_right(test)
+  if not (java_test_panel.right_buf and vim.api.nvim_buf_is_valid(java_test_panel.right_buf)) then
+    return
+  end
+
+  vim.bo[java_test_panel.right_buf].modifiable = true
+  local lines = {}
+  if not test then
+    lines = { "No test selected." }
+  else
+    table.insert(lines, string.format("Test: %s", test.method or "<unknown>"))
+    table.insert(lines, string.format("Class: %s", test.fq_class or "<unknown>"))
+    table.insert(lines, string.format("Status: %s", test.failed and "FAILED" or "PASSED"))
+    table.insert(lines, "")
+    if test.failed and test.traces and #test.traces > 0 then
+      vim.list_extend(lines, test.traces)
+    elseif test.failed then
+      table.insert(lines, "(No trace available)")
+    else
+      table.insert(lines, "No error. Test passed.")
+    end
+  end
+  vim.api.nvim_buf_set_lines(java_test_panel.right_buf, 0, -1, false, lines)
+  vim.bo[java_test_panel.right_buf].modifiable = false
+end
+
+local function render_left_and_bind(tests)
+  local passed, failed = 0, 0
+  for _, t in ipairs(tests or {}) do
+    if t.failed then failed = failed + 1 else passed = passed + 1 end
+  end
+
+  local width = 60
+  if java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win) then
+    width = math.max(20, vim.api.nvim_win_get_width(java_test_panel.left_win) - 2)
+  end
+
+  local lines = {
+    string.format("Java Tests  total:%d  pass:%d  fail:%d", #(tests or {}), passed, failed),
+    string.rep("─", width),
+  }
+
+  java_test_panel.tests_by_line = {}
+  for _, t in ipairs(tests or {}) do
+    local mark = t.failed and "✗" or "✓"
+    table.insert(lines, string.format("%s %s", mark, t.method or (t.fq_class or "<unknown>")))
+    java_test_panel.tests_by_line[#lines] = t
+  end
+
+  vim.bo[java_test_panel.left_buf].modifiable = true
+  vim.api.nvim_buf_set_lines(java_test_panel.left_buf, 0, -1, false, lines)
+  vim.bo[java_test_panel.left_buf].modifiable = false
+
+  local function sync_from_cursor()
+    if not (java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win)) then
+      return
+    end
+    local lnum = vim.api.nvim_win_get_cursor(java_test_panel.left_win)[1]
+    render_right(java_test_panel.tests_by_line[lnum])
+  end
+
+  vim.keymap.set("n", "<CR>", sync_from_cursor, {
+    buffer = java_test_panel.left_buf,
+    silent = true,
+    desc = "Show selected test detail",
+  })
+
+  vim.api.nvim_create_autocmd("CursorMoved", {
+    buffer = java_test_panel.left_buf,
+    callback = sync_from_cursor,
+  })
+
+  vim.keymap.set("n", "q", function()
+    if java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win) then
+      pcall(vim.api.nvim_win_close, java_test_panel.left_win, true)
+    end
+    if java_test_panel.right_win and vim.api.nvim_win_is_valid(java_test_panel.right_win) then
+      pcall(vim.api.nvim_win_close, java_test_panel.right_win, true)
+    end
+  end, { buffer = java_test_panel.left_buf, silent = true, desc = "Close test panel" })
+
+  local first_line = 3
+  if java_test_panel.tests_by_line[first_line] then
+    vim.api.nvim_set_current_win(java_test_panel.left_win)
+    vim.api.nvim_win_set_cursor(java_test_panel.left_win, { first_line, 0 })
+    sync_from_cursor()
+  else
+    render_right(nil)
+  end
+end
+
+local function ensure_panel()
+  if panel_is_alive() then
+    vim.api.nvim_set_current_win(java_test_panel.left_win)
+    return
+  end
+
+  vim.cmd("botright 12split")
+  java_test_panel.left_win = vim.api.nvim_get_current_win()
+
+  java_test_panel.left_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_win_set_buf(java_test_panel.left_win, java_test_panel.left_buf)
+  set_scratch(java_test_panel.left_buf)
+
+  vim.cmd("vsplit")
+  java_test_panel.right_win = vim.api.nvim_get_current_win()
+  java_test_panel.right_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_win_set_buf(java_test_panel.right_win, java_test_panel.right_buf)
+  set_scratch(java_test_panel.right_buf)
+
+  local target = math.max(32, math.floor(vim.o.columns * 0.30))
+  pcall(vim.api.nvim_win_set_width, java_test_panel.left_win, target)
+
+  vim.api.nvim_set_current_win(java_test_panel.left_win)
+end
+
 vim.api.nvim_create_user_command("JavaTestClassPanel", function()
   local ok, jdtls_dap = pcall(require, "jdtls.dap")
   if not ok then
@@ -195,115 +313,13 @@ vim.api.nvim_create_user_command("JavaTestClassPanel", function()
     return
   end
 
-  local state = {
-    left_buf = nil,
-    right_buf = nil,
-    left_win = nil,
-    right_win = nil,
-    tests_by_line = {},
-  }
-
-  local function set_scratch(buf)
-    vim.bo[buf].buftype = "nofile"
-    vim.bo[buf].bufhidden = "wipe"
-    vim.bo[buf].swapfile = false
-    vim.bo[buf].modifiable = false
-    vim.bo[buf].filetype = "java-test-panel"
-  end
-
-  local function render_right(test)
-    if not (state.right_buf and vim.api.nvim_buf_is_valid(state.right_buf)) then
-      return
-    end
-    vim.bo[state.right_buf].modifiable = true
-    local lines = {}
-    if not test then
-      lines = { "No test selected." }
-    else
-      table.insert(lines, string.format("Test: %s", test.method or "<unknown>"))
-      table.insert(lines, string.format("Class: %s", test.fq_class or "<unknown>"))
-      table.insert(lines, string.format("Status: %s", test.failed and "FAILED" or "PASSED"))
-      table.insert(lines, "")
-      if test.failed and test.traces and #test.traces > 0 then
-        vim.list_extend(lines, test.traces)
-      elseif test.failed then
-        table.insert(lines, "(No trace available)")
-      else
-        table.insert(lines, "No error. Test passed.")
-      end
-    end
-    vim.api.nvim_buf_set_lines(state.right_buf, 0, -1, false, lines)
-    vim.bo[state.right_buf].modifiable = false
-  end
-
-  local function open_panel(tests)
-    vim.cmd("botright 12split")
-    state.left_win = vim.api.nvim_get_current_win()
-
-    state.left_buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_win_set_buf(state.left_win, state.left_buf)
-    set_scratch(state.left_buf)
-
-    vim.cmd("vsplit")
-    state.right_win = vim.api.nvim_get_current_win()
-    state.right_buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_win_set_buf(state.right_win, state.right_buf)
-    set_scratch(state.right_buf)
-
-    if vim.api.nvim_win_is_valid(state.left_win) then
-      local target = math.max(32, math.floor(vim.o.columns * 0.30))
-      pcall(vim.api.nvim_win_set_width, state.left_win, target)
-    end
-
-    local passed, failed = 0, 0
-    for _, t in ipairs(tests or {}) do
-      if t.failed then failed = failed + 1 else passed = passed + 1 end
-    end
-
-    local lines = {
-      string.format("Java Tests  total:%d  pass:%d  fail:%d", #(tests or {}), passed, failed),
-      string.rep("─", 60),
-    }
-
-    state.tests_by_line = {}
-    for _, t in ipairs(tests or {}) do
-      local mark = t.failed and "✗" or "✓"
-      table.insert(lines, string.format("%s %s", mark, t.method or (t.fq_class or "<unknown>")))
-      state.tests_by_line[#lines] = t
-    end
-
-    vim.bo[state.left_buf].modifiable = true
-    vim.api.nvim_buf_set_lines(state.left_buf, 0, -1, false, lines)
-    vim.bo[state.left_buf].modifiable = false
-
-    vim.keymap.set("n", "<CR>", function()
-      local lnum = vim.api.nvim_win_get_cursor(state.left_win)[1]
-      render_right(state.tests_by_line[lnum])
-    end, { buffer = state.left_buf, silent = true, desc = "Show selected test detail" })
-
-    vim.keymap.set("n", "q", function()
-      if state.left_win and vim.api.nvim_win_is_valid(state.left_win) then pcall(vim.api.nvim_win_close, state.left_win, true) end
-      if state.right_win and vim.api.nvim_win_is_valid(state.right_win) then pcall(vim.api.nvim_win_close, state.right_win, true) end
-    end, { buffer = state.left_buf, silent = true, desc = "Close test panel" })
-
-    local first_line = 3
-    if state.tests_by_line[first_line] then
-      vim.api.nvim_set_current_win(state.left_win)
-      vim.api.nvim_win_set_cursor(state.left_win, { first_line, 0 })
-      render_right(state.tests_by_line[first_line])
-      vim.api.nvim_set_current_win(state.left_win)
-    else
-      render_right(nil)
-    end
-  end
-
   vim.g._dapui_suppress_next_open = true
   jdtls_dap.test_class({
     after_test = function(_, tests)
       vim.schedule(function()
-        open_panel(tests or {})
+        ensure_panel()
+        render_left_and_bind(tests or {})
       end)
     end,
   })
 end, { desc = "Run Java test class and open bottom summary panel" })
-
