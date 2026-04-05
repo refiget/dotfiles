@@ -10,6 +10,8 @@ function M.mason_ensure_installed()
     "yaml-language-server",
     "bash-language-server",
     "jdtls",
+    "java-test",
+    "java-debug-adapter",
   }
 end
 

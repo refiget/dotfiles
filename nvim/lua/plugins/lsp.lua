@@ -9,20 +9,6 @@ return {
     config = function(_, opts)
       require("mason").setup(opts)
 
-      local mr = require("mason-registry")
-      local function install_pkg(pkg)
-        local ok, p = pcall(mr.get_package, pkg)
-        if ok and p and not p:is_installed() then
-          p:install()
-        end
-      end
-
-      mr.refresh(function()
-        for _, tool in ipairs(opts.ensure_installed or {}) do
-          install_pkg(tool)
-        end
-      end)
-
       vim.api.nvim_create_user_command("InstallApp", function()
         local set = {}
         for _, tool in ipairs((opts.ensure_installed or {})) do
@@ -49,14 +35,16 @@ return {
         end
         table.sort(list)
 
-        mr.refresh(function()
-          for _, pkg in ipairs(list) do
-            install_pkg(pkg)
-          end
-          vim.notify("Mason installing: " .. table.concat(list, ", "))
-          vim.schedule(function()
-            pcall(vim.cmd, "Mason")
-          end)
+        if #list == 0 then
+          vim.notify("No Mason packages to install", vim.log.levels.INFO)
+          return
+        end
+
+        local cmd = "MasonInstall " .. table.concat(list, " ")
+        vim.notify("Running: :" .. cmd, vim.log.levels.INFO)
+        vim.cmd(cmd)
+        vim.schedule(function()
+          pcall(vim.cmd, "Mason")
         end)
       end, { desc = "Install all mason-managed tools from current config" })
 
