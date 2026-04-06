@@ -329,10 +329,40 @@ local function render_left_and_bind(tests)
     render_right(java_test_panel.tests_by_line[lnum])
   end
 
-  vim.keymap.set("n", "<CR>", sync_from_cursor, {
+  vim.keymap.set("n", "<CR>", function()
+    sync_from_cursor()
+
+    if vim.fn.exists(":JavaTraceJump") ~= 2 then
+      vim.notify("JavaTraceJump is not available yet", vim.log.levels.WARN)
+      return
+    end
+
+    if not (java_test_panel.right_win and vim.api.nvim_win_is_valid(java_test_panel.right_win)) then
+      vim.notify("Right test panel is not available", vim.log.levels.WARN)
+      return
+    end
+
+    local lines = vim.api.nvim_buf_get_lines(java_test_panel.right_buf, 0, -1, false)
+    local trace_lnum = nil
+    for i, l in ipairs(lines) do
+      if l:match("at%s+[%w_%.%$]+%.[%w_%$<>]+%([^:]+:%d+%)") then
+        trace_lnum = i
+        break
+      end
+    end
+
+    if not trace_lnum then
+      vim.notify("No stacktrace line found for selected test", vim.log.levels.INFO)
+      return
+    end
+
+    vim.api.nvim_set_current_win(java_test_panel.right_win)
+    vim.api.nvim_win_set_cursor(java_test_panel.right_win, { trace_lnum, 0 })
+    vim.cmd("JavaTraceJump")
+  end, {
     buffer = java_test_panel.left_buf,
     silent = true,
-    desc = "Show selected test detail",
+    desc = "Jump to selected test failure location",
   })
 
   vim.api.nvim_create_autocmd("CursorMoved", {
