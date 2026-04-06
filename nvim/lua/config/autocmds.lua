@@ -402,6 +402,15 @@ local function ensure_panel()
   vim.api.nvim_set_current_win(java_test_panel.left_win)
 end
 
+vim.api.nvim_create_user_command("JavaTestPanelClose", function()
+  if java_test_panel.left_win and vim.api.nvim_win_is_valid(java_test_panel.left_win) then
+    pcall(vim.api.nvim_win_close, java_test_panel.left_win, true)
+  end
+  if java_test_panel.right_win and vim.api.nvim_win_is_valid(java_test_panel.right_win) then
+    pcall(vim.api.nvim_win_close, java_test_panel.right_win, true)
+  end
+end, { desc = "Close Java test panel" })
+
 vim.api.nvim_create_user_command("JavaTestClassPanel", function()
   local ok, jdtls_dap = pcall(require, "jdtls.dap")
   if not ok then

@@ -300,3 +300,7 @@ end, { desc = "Prev test (✓/✗)" })
 map("n", "<leader>tj", function()
   vim.cmd("JavaTestClassPanel")
 end, { desc = "Java test class panel" })
+
+map("n", "<leader>tc", function()
+  vim.cmd("JavaTestPanelClose")
+end, { desc = "Close Java test panel" })
