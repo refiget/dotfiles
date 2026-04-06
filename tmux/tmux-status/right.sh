@@ -77,13 +77,13 @@ if (( show_session == 1 )); then
   fi
   session_name_clean=${session_name_clean:-$current_session_name}
 
-  # Icon mapping by session index (0-based):
-  # TMUX_SESSION_ICONS="i0,i1,i2,..."
-  # If session name has no numeric prefix, use index 0.
+  # Icon mapping by session index (1-based):
+  # TMUX_SESSION_ICONS="i1,i2,i3,..."
+  # If session name has no numeric prefix, use index 1.
 
   session_icons_csv="${TMUX_SESSION_ICONS:-}"
-  session_icon="0"
-  display_idx="0"
+  session_icon="1"
+  display_idx="1"
 
   if [[ -n "$session_idx" && "$session_idx" =~ ^[0-9]+$ ]]; then
     display_idx="$session_idx"
@@ -94,7 +94,9 @@ if (( show_session == 1 )); then
 
     arr_index=0
     if [[ -n "$session_idx" && "$session_idx" =~ ^[0-9]+$ ]]; then
-      arr_index=$session_idx
+      if (( session_idx >= 1 )); then
+        arr_index=$((session_idx - 1))
+      fi
     fi
 
     if (( arr_index < ${#session_icons_arr[@]} )); then
