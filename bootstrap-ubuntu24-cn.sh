@@ -5,6 +5,7 @@ set -Eeuo pipefail
 #
 # Features:
 # - apt install with retry/timeouts
+# - non-interactive sudo support (SUDO_PASSWORD env)
 # - GitHub SSH auth verification (incl. ssh.github.com:443 fallback)
 # - clone/update dotfiles repo
 # - run deploy.sh
@@ -27,6 +28,8 @@ SKIP_GITHUB_CHECK=0
 SKIP_ZIMFW=0
 SKIP_NVIM_LAZY=0
 
+SUDO_PASSWORD="${SUDO_PASSWORD:-}"
+
 log()  { printf '\033[1;34m[INFO]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[WARN]\033[0m %s\n' "$*"; }
 err()  { printf '\033[1;31m[ERR ]\033[0m %s\n' "$*" >&2; }
@@ -46,9 +49,12 @@ Options:
   --skip-nvim-lazy          Skip nvim lazy sync
   -h, --help                Show this help
 
+Env:
+  SUDO_PASSWORD             Optional sudo password for non-interactive runs
+
 Examples:
   bash bootstrap-ubuntu24-cn.sh
-  bash bootstrap-ubuntu24-cn.sh --repo git@github.com:<you>/dotfiles.git --deploy-force
+  SUDO_PASSWORD='***' bash bootstrap-ubuntu24-cn.sh --deploy-force
 USAGE_EOF
 }
 
@@ -83,11 +89,6 @@ if [[ -r /etc/os-release ]]; then
   fi
 fi
 
-SUDO=""
-if [[ $EUID -ne 0 ]]; then
-  SUDO="sudo"
-fi
-
 retry() {
   local max_attempts="$1"; shift
   local delay="$1"; shift
@@ -103,33 +104,152 @@ retry() {
   done
 }
 
+run_root() {
+  if [[ $EUID -eq 0 ]]; then
+    "$@"
+    return $?
+  fi
+
+  if [[ -n "$SUDO_PASSWORD" ]]; then
+    printf '%s\n' "$SUDO_PASSWORD" | sudo -S -p '' "$@"
+  else
+    sudo "$@"
+  fi
+}
+
+require_sudo_ready() {
+  if [[ $EUID -eq 0 ]]; then
+    return 0
+  fi
+
+  if [[ -n "$SUDO_PASSWORD" ]]; then
+    if ! printf '%s\n' "$SUDO_PASSWORD" | sudo -S -k -v >/dev/null 2>&1; then
+      err "sudo validation failed with provided SUDO_PASSWORD"
+      return 1
+    fi
+    log "sudo auth validated via SUDO_PASSWORD"
+    return 0
+  fi
+
+  if sudo -n true >/dev/null 2>&1; then
+    log "sudo available without password prompt"
+    return 0
+  fi
+
+  err "sudo requires interactive password. Re-run with SUDO_PASSWORD env or configure NOPASSWD."
+  return 1
+}
+
 apt_update_retry() {
-  retry 4 2 $SUDO apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20
+  retry 4 2 run_root apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20
 }
 
 apt_install_retry() {
-  retry 3 2 $SUDO apt-get install -y --no-install-recommends "$@"
+  retry 3 2 run_root apt-get install -y --no-install-recommends "$@"
+}
+
+install_pkg_list() {
+  local label="$1"; shift
+  local pkgs=("$@")
+  local missing=()
+  local p
+
+  for p in "${pkgs[@]}"; do
+    if dpkg -s "$p" >/dev/null 2>&1; then
+      continue
+    fi
+    missing+=("$p")
+  done
+
+  if (( ${#missing[@]} == 0 )); then
+    log "$label packages already installed"
+    return 0
+  fi
+
+  log "Installing $label packages: ${missing[*]}"
+  apt_install_retry "${missing[@]}"
 }
 
 ensure_base_packages() {
   log "Installing base packages..."
+  require_sudo_ready
   apt_update_retry
 
-  # Core tools used by deploy + shell/tmux/nvim workflow
-  apt_install_retry \
-    ca-certificates curl wget git openssh-client gnupg lsb-release \
-    zsh tmux neovim ripgrep fzf fd-find bat jq unzip xclip xsel \
-    build-essential python3 python3-venv python3-pip
+  local required_pkgs=(
+    ca-certificates curl wget git openssh-client gnupg lsb-release
+    zsh tmux neovim ripgrep fzf fd-find bat jq unzip xclip xsel
+    build-essential python3 python3-venv python3-pip software-properties-common
+  )
+  install_pkg_list "required" "${required_pkgs[@]}"
+
+  local optional_pkgs=(yazi lazygit)
+  local p
+  for p in "${optional_pkgs[@]}"; do
+    if dpkg -s "$p" >/dev/null 2>&1; then
+      continue
+    fi
+    if apt-cache policy "$p" 2>/dev/null | grep -q 'Candidate:' && ! apt-cache policy "$p" 2>/dev/null | grep -q 'Candidate: (none)'; then
+      log "Installing optional package: $p"
+      apt_install_retry "$p" || warn "Optional package install failed: $p"
+    else
+      warn "Optional package unavailable in current apt sources: $p"
+    fi
+  done
 
   mkdir -p "$HOME/.local/bin"
-  # Ubuntu package is fdfind; provide fd for cross-platform config compatibility.
   if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
     ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
   fi
+  if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+    ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
+  fi
 
-  # Optional useful tools (best effort)
-  if ! command -v lazygit >/dev/null 2>&1; then
-    warn "lazygit not found in current apt set. Skip (install manually if needed)."
+  ensure_nvim_compatible
+}
+
+
+ensure_nvim_compatible() {
+  command -v nvim >/dev/null 2>&1 || return 0
+
+  local cur req
+  req="0.11.2"
+  cur="$(nvim --version 2>/dev/null | awk 'NR==1{print $2}' | sed 's/^v//')"
+  if [[ -z "$cur" ]]; then
+    warn "Cannot detect Neovim version; skip version enforcement"
+    return 0
+  fi
+
+  if [[ "$(printf '%s
+' "$req" "$cur" | sort -V | head -n1)" == "$req" ]]; then
+    log "Neovim version OK: $cur"
+    return 0
+  fi
+
+  warn "Neovim $cur is older than required $req; trying upgrade from PPA"
+  set +e
+  run_root add-apt-repository -y ppa:neovim-ppa/unstable >/dev/null 2>&1
+  local ppa_rc=$?
+  set -e
+  if (( ppa_rc != 0 )); then
+    warn "Failed to add neovim PPA; will skip LazyVim sync"
+    SKIP_NVIM_LAZY=1
+    return 0
+  fi
+
+  apt_update_retry
+  if ! apt_install_retry neovim; then
+    warn "Failed to upgrade Neovim; will skip LazyVim sync"
+    SKIP_NVIM_LAZY=1
+    return 0
+  fi
+
+  cur="$(nvim --version 2>/dev/null | awk 'NR==1{print $2}' | sed 's/^v//')"
+  if [[ "$(printf '%s
+' "$req" "$cur" | sort -V | head -n1)" != "$req" ]]; then
+    warn "Neovim still <$req after upgrade attempt ($cur); skip LazyVim sync"
+    SKIP_NVIM_LAZY=1
+  else
+    log "Neovim upgraded to $cur"
   fi
 }
 
@@ -149,11 +269,7 @@ github_ssh_ok_22() {
   out=$(ssh -T -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 git@github.com 2>&1)
   rc=$?
   set -e
-
-  # GitHub successful auth returns exit 1 with a success message.
-  if grep -qi "successfully authenticated" <<< "$out"; then
-    return 0
-  fi
+  grep -qi "successfully authenticated" <<< "$out" && return 0
   return $rc
 }
 
@@ -163,9 +279,7 @@ github_ssh_ok_443() {
   out=$(ssh -T -p 443 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 git@ssh.github.com 2>&1)
   rc=$?
   set -e
-  if grep -qi "successfully authenticated" <<< "$out"; then
-    return 0
-  fi
+  grep -qi "successfully authenticated" <<< "$out" && return 0
   return $rc
 }
 
@@ -234,9 +348,7 @@ clone_or_update_repo() {
 
 run_deploy() {
   local deploy_script="$TARGET_DIR/deploy.sh"
-  if [[ ! -x "$deploy_script" ]]; then
-    chmod +x "$deploy_script"
-  fi
+  [[ -x "$deploy_script" ]] || chmod +x "$deploy_script"
 
   log "Running deploy.sh"
   if (( DEPLOY_FORCE == 1 )); then
@@ -252,39 +364,28 @@ setup_zimfw() {
   log "Bootstrapping zimfw (best effort)"
 
   if [[ ! -f "$HOME/.zim/zimfw.zsh" ]]; then
-    warn "zimfw not found, trying installer mirrors..."
-    local installer_urls=(
-      "https://raw.githubusercontent.com/zimfw/install/master/install.zsh"
-      "https://cdn.jsdelivr.net/gh/zimfw/install@master/install.zsh"
-      "https://ghproxy.com/https://raw.githubusercontent.com/zimfw/install/master/install.zsh"
-    )
-    local ok=0
-    local url
-    for url in "${installer_urls[@]}"; do
-      if retry 2 2 bash -lc "curl -fsSL '$url' | zsh"; then
-        ok=1
-        break
-      fi
-      warn "zimfw installer failed via: $url"
-    done
-    if (( ok == 0 )); then
-      warn "zimfw installer failed on all mirrors; skip for now."
-      return 0
-    fi
+    warn "zimfw not found; skip auto-install to avoid interactive chsh prompts."
+    warn "Install later manually if needed: curl -fsSL https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh"
+    return 0
   fi
 
   set +e
   zsh -lc 'source ~/.zim/zimfw.zsh && zimfw install && zimfw update'
   local rc=$?
   set -e
-  if (( rc != 0 )); then
-    warn "zimfw install/update failed. You can retry later: zsh -lc 'source ~/.zim/zimfw.zsh && zimfw install && zimfw update'"
-  fi
+  (( rc == 0 )) || warn "zimfw install/update failed. Retry later with better network."
 }
 
 setup_nvim_lazy() {
   (( SKIP_NVIM_LAZY == 1 )) && return 0
-  if ! command -v nvim >/dev/null 2>&1; then
+  command -v nvim >/dev/null 2>&1 || return 0
+
+  local cur req
+  req="0.11.2"
+  cur="$(nvim --version 2>/dev/null | awk 'NR==1{print $2}' | sed 's/^v//')"
+  if [[ -n "$cur" ]] && [[ "$(printf '%s
+' "$req" "$cur" | sort -V | head -n1)" != "$req" ]]; then
+    warn "Skip Lazy sync: Neovim version $cur < $req"
     return 0
   fi
 
@@ -297,13 +398,8 @@ setup_nvim_lazy() {
 }
 
 main() {
-  if (( SKIP_INSTALL == 0 )); then
-    ensure_base_packages
-  fi
-
-  if (( SKIP_GITHUB_CHECK == 0 )); then
-    verify_github_ssh
-  fi
+  (( SKIP_INSTALL == 0 )) && ensure_base_packages
+  (( SKIP_GITHUB_CHECK == 0 )) && verify_github_ssh
 
   clone_or_update_repo
   run_deploy
