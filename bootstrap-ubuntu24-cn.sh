@@ -11,7 +11,7 @@ set -Eeuo pipefail
 # - optional zimfw/lazy.nvim bootstrap
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_URL_DEFAULT="git@github.com:Bob-zhangbo/dotfiles.git"
+REPO_URL_DEFAULT="git@github.com:refiget/dotfiles.git"
 TARGET_DIR_DEFAULT="$HOME/dotfiles"
 if [[ -f "$SCRIPT_DIR/deploy.sh" && -d "$SCRIPT_DIR/.git" ]]; then
   TARGET_DIR_DEFAULT="$SCRIPT_DIR"
@@ -36,7 +36,7 @@ usage() {
 Usage: bootstrap-ubuntu24-cn.sh [options]
 
 Options:
-  --repo <git-url>          Dotfiles repo URL (default: git@github.com:Bob-zhangbo/dotfiles.git)
+  --repo <git-url>          Dotfiles repo URL (default: git@github.com:refiget/dotfiles.git)
   --target <dir>            Clone target dir (default: ~/dotfiles)
   --branch <name>           Git branch (default: main)
   --deploy-force            Run deploy.sh with --force
