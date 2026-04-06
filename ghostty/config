@@ -22,3 +22,8 @@ cursor-style = bar
 cursor-style-blink = true
 grapheme-width-method = legacy
 macos-titlebar-style = transparent
+
+# Notify when long-running commands finish
+notify-on-command-finish = unfocused
+notify-on-command-finish-after = 8s
+notify-on-command-finish-action = notify
