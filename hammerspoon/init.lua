@@ -40,6 +40,22 @@ local function scratchpadFor(target)
   return target and SCRATCHPADS[string.lower(target)] or nil
 end
 
+local function showSwitchAlert(text)
+  if state.alertId then
+    hs.alert.closeSpecific(state.alertId)
+    state.alertId = nil
+  end
+
+  state.alertId = hs.alert.show(text, {
+    textSize = 18,
+    radius = 12,
+    atScreenEdge = 2,
+    fadeInDuration = 0.08,
+    fadeOutDuration = 0.12,
+    padding = 14,
+  }, hs.screen.mainScreen(), 0.8)
+end
+
 local function appByName(appName)
   return hs.application.get(appName)
 end
