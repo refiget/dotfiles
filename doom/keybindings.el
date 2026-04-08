@@ -63,21 +63,6 @@
       (crab/copy-to-system-clipboard text)
       (message "Copied selection")))
 
-  (defun crab/org-insert-created-timestamp ()
-    (interactive)
-    (let ((timestamp (format-time-string "[%Y-%m-%d %a %H:%M]")))
-      (if (derived-mode-p 'org-mode)
-          (save-excursion
-            (beginning-of-line)
-            (if (org-at-heading-p)
-                (progn
-                  (unless (org-entry-get nil "CREATED")
-                    (org-set-property "CREATED" timestamp))
-                  (org-back-to-heading t)
-                  (org-end-of-meta-data t))
-              (insert (format "CREATED: %s" timestamp))))
-        (insert (format "CREATED: %s" timestamp)))))
-
   ;; Ex commands
   (evil-ex-define-cmd "todo" #'org-todo-list)
   (evil-ex-define-cmd "agenda" (cmd! (org-agenda nil "a")))
@@ -109,6 +94,18 @@
         :n "Q" #'save-buffers-kill-emacs
         :v "Y" #'crab/copy-region-to-system-clipboard
         :n "J" (cmd! (evil-next-line 5))
+        :n "K" (cmd! (evil-previous-line 5))
+        :v "J" (cmd! (evil-next-line 5))
+        :v "K" (cmd! (evil-previous-line 5))
+        :n "C-g" #'what-cursor-position
+        :leader
+        :desc "Find file" "SPC" #'find-file
+        :desc "Clear search highlight" "RET" #'evil-ex-nohighlight
+        :desc "Window left"  "h" #'evil-window-left
+        :desc "Window down"  "j" #'evil-window-down
+        :desc "Window up"    "k" #'evil-window-up
+        :desc "Window right" "l" #'evil-window-right))
+md! (evil-next-line 5))
         :n "K" (cmd! (evil-previous-line 5))
         :v "J" (cmd! (evil-next-line 5))
         :v "K" (cmd! (evil-previous-line 5))
