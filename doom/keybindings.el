@@ -77,7 +77,6 @@
   (evil-ex-define-cmd "bold" #'crab/org-bold-region)
   (evil-ex-define-cmd "italic" #'crab/org-italic-region)
   (evil-ex-define-cmd "bai" #'crab/org-bold-italic-region)
-  (evil-ex-define-cmd "time" #'crab/org-insert-created-timestamp)
 
   (setq evil-ex-complete-emacs-commands nil)
 
@@ -94,18 +93,6 @@
         :n "Q" #'save-buffers-kill-emacs
         :v "Y" #'crab/copy-region-to-system-clipboard
         :n "J" (cmd! (evil-next-line 5))
-        :n "K" (cmd! (evil-previous-line 5))
-        :v "J" (cmd! (evil-next-line 5))
-        :v "K" (cmd! (evil-previous-line 5))
-        :n "C-g" #'what-cursor-position
-        :leader
-        :desc "Find file" "SPC" #'find-file
-        :desc "Clear search highlight" "RET" #'evil-ex-nohighlight
-        :desc "Window left"  "h" #'evil-window-left
-        :desc "Window down"  "j" #'evil-window-down
-        :desc "Window up"    "k" #'evil-window-up
-        :desc "Window right" "l" #'evil-window-right))
-md! (evil-next-line 5))
         :n "K" (cmd! (evil-previous-line 5))
         :v "J" (cmd! (evil-next-line 5))
         :v "K" (cmd! (evil-previous-line 5))
