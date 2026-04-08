@@ -7,3 +7,4 @@
 (package! org-timeblock)
 (package! vertico-posframe)
 (package! olivetti)
+(package! xenops)
