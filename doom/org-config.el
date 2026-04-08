@@ -114,11 +114,3 @@
 (use-package! org-timeblock
   :after org
   :commands (org-timeblock org-timeblock-weekly))
-
-(use-package! xenops
-  :after org
-  :hook (org-mode . xenops-mode)
-  :config
-  (setq xenops-reveal-on-entry t
-        xenops-math-image-scale-factor 1.6))
-
