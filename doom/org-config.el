@@ -30,12 +30,34 @@
           org-appear-autosubmarkers t
           org-appear-autoentities t))
 
+  (use-package! mixed-pitch
+    :hook (org-mode . mixed-pitch-mode)
+    :config
+    (setq mixed-pitch-set-height t))
+
   (use-package! olivetti
     :hook (org-mode . olivetti-mode)
     :config
     (setq olivetti-body-width 96
           olivetti-minimum-body-width 80
           olivetti-recall-visual-line-mode-entry-state t))
+
+  (set-face-attribute 'variable-pitch nil
+                      :family "SF Pro Text"
+                      :height 160)
+  (set-face-attribute 'fixed-pitch nil
+                      :family "MonoLisa"
+                      :height 130)
+
+  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-block nil :inherit '(fixed-pitch default))
+  (set-face-attribute 'org-block-begin-line nil :inherit '(fixed-pitch shadow))
+  (set-face-attribute 'org-block-end-line nil :inherit '(fixed-pitch shadow))
+  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
 
   (custom-set-faces!
     '(org-document-title :inherit variable-pitch :weight bold :height 1.55)
