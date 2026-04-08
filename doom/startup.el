@@ -32,3 +32,14 @@
 (after! org
   (set-popup-rule! "^\*Capture\*" :ignore t))
 
+;; Force org-capture to use current window (no bottom split/popup)
+(after! org
+  (set-popup-rule! "^\*Capture\*" :ignore t)
+  (set-popup-rule! "^\*Org Select\*" :ignore t)
+  (add-to-list 'display-buffer-alist
+               '("\*Capture\*"
+                 (display-buffer-same-window)))
+  (add-to-list 'display-buffer-alist
+               '("\*Org Select\*"
+                 (display-buffer-same-window))))
+
