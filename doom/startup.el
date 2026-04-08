@@ -22,8 +22,8 @@
 
 (setq org-capture-templates
       `(("t" "Todo" entry
-         (file ,crab/org-tasks-file)
+         (file+olp+datetree ,crab/org-tasks-file)
          "* TODO %?\n<%Y-%m-%d %a %H:%M>\n")
         ("n" "Notes" entry
-         (file ,crab/org-notes-file)
+         (file+olp+datetree ,crab/org-notes-file)
          "* %?\n<%Y-%m-%d %a %H:%M>\n")))
