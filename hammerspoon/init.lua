@@ -322,6 +322,8 @@ function toggleScratchpad(target)
 end
 
 local function cycleScratchpadTarget()
+  hideAllScratchpads()
+
   if state.currentTarget == "emacs" then
     state.currentTarget = "obsidian"
   else
@@ -359,3 +361,4 @@ hs.urlevent.bind("scratchpad", function(_, params, _)
 end)
 
 log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
++s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
