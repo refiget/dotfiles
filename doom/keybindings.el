@@ -63,27 +63,9 @@
       (crab/copy-to-system-clipboard text)
       (message "Copied selection")))
 
-  (defun crab/insert-current-time (&optional style)
+  (defun crab/insert-current-time ()
     (interactive)
-    (let* ((choices '(("inactive datetime [2026-04-08 Wed 20:46]" . inactive-datetime)
-                      ("active datetime <2026-04-08 Wed 20:46>" . active-datetime)
-                      ("inactive date [2026-04-08 Wed]" . inactive-date)
-                      ("active date <2026-04-08 Wed>" . active-date)
-                      ("plain datetime 2026-04-08 20:46" . plain-datetime)
-                      ("plain date 2026-04-08" . plain-date)))
-           (selected (or style
-                         (cdr (assoc (completing-read "Insert time: " choices nil t)
-                                     choices))))
-           (text
-            (pcase selected
-              ('inactive-datetime (format-time-string "[%Y-%m-%d %a %H:%M]"))
-              ('active-datetime (format-time-string "<%Y-%m-%d %a %H:%M>"))
-              ('inactive-date (format-time-string "[%Y-%m-%d %a]"))
-              ('active-date (format-time-string "<%Y-%m-%d %a>"))
-              ('plain-datetime (format-time-string "%Y-%m-%d %H:%M"))
-              ('plain-date (format-time-string "%Y-%m-%d"))
-              (_ (format-time-string "[%Y-%m-%d %a %H:%M]")))))
-      (insert text)))
+    (insert (format-time-string "CREATED: [%Y-%m-%d %a %H:%M]")))
 
   ;; Ex commands
   (evil-ex-define-cmd "todo" #'org-todo-list)
