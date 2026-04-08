@@ -66,7 +66,7 @@
 
   (defun crab/insert-current-time ()
     (interactive)
-    (insert (format-time-string "%Y-%m-%d %H:%M")))
+    (insert (format-time-string "<%Y-%m-%d %a %H:%M>")))
 
   ;; Ex commands
   (evil-ex-define-cmd "todo" #'org-todo-list)
