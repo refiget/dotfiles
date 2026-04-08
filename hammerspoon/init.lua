@@ -5,8 +5,10 @@ local log = hs.logger.new("scratchpad", "info")
 -- -----------------------------------------------------------------------------
 
 local YABAI_BIN = "/opt/homebrew/bin/yabai"
-local SELECTOR_MODS = { "alt", "shift" }
-local SELECTOR_KEY = "s"
+local TOGGLE_MODS = { "alt" }
+local TOGGLE_KEY = "s"
+local SWITCH_MODS = { "alt", "shift" }
+local SWITCH_KEY = "s"
 
 local SCRATCHPADS = {
   emacs = {
@@ -35,6 +37,7 @@ local SCRATCHPADS = {
 
 local state = {
   cachedWindowIds = {},
+  currentTarget = "emacs",
 }
 
 -- -----------------------------------------------------------------------------
@@ -318,40 +321,30 @@ function toggleScratchpad(target)
   return revealScratchpad(targetSpace, pad)
 end
 
-local function showScratchpadChooser()
-  local choices = {
-    {
-      text = "Emacs",
-      subText = "Open or toggle Emacs scratchpad",
-      target = "emacs",
-    },
-    {
-      text = "Obsidian",
-      subText = "Open or toggle Obsidian scratchpad",
-      target = "obsidian",
-    },
-  }
-
-  if not state.chooser then
-    state.chooser = hs.chooser.new(function(choice)
-      if choice and choice.target then
-        toggleScratchpad(choice.target)
-      end
-    end)
-    state.chooser:searchSubText(true)
-    state.chooser:placeholderText("Choose a scratchpad")
+local function cycleScratchpadTarget()
+  if state.currentTarget == "emacs" then
+    state.currentTarget = "obsidian"
+  else
+    state.currentTarget = "emacs"
   end
 
-  state.chooser:choices(choices)
-  hs.alert.show("Scratchpad chooser")
-  state.chooser:show()
+  local pad = scratchpadFor(state.currentTarget)
+  if pad then
+    hs.alert.show("Scratchpad: " .. pad.label)
+    log.i("Switched scratchpad target to " .. pad.key)
+  end
+end
+
+local function toggleCurrentScratchpad()
+  return toggleScratchpad(state.currentTarget)
 end
 
 -- -----------------------------------------------------------------------------
 -- Entrypoints
 -- -----------------------------------------------------------------------------
 
-hs.hotkey.bind(SELECTOR_MODS, SELECTOR_KEY, showScratchpadChooser)
+hs.hotkey.bind(TOGGLE_MODS, TOGGLE_KEY, toggleCurrentScratchpad)
+hs.hotkey.bind(SWITCH_MODS, SWITCH_KEY, cycleScratchpadTarget)
 
 hs.urlevent.bind("scratchpad", function(_, params, _)
   local target = params and (params.target or params.app)
@@ -361,7 +354,8 @@ hs.urlevent.bind("scratchpad", function(_, params, _)
     return
   end
 
+  state.currentTarget = string.lower(target)
   toggleScratchpad(target)
 end)
 
-log.i("Hammerspoon config loaded: alt+shift+s chooser, plus hammerspoon://scratchpad?target=emacs|obsidian")
+log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
