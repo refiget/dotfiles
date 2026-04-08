@@ -27,3 +27,8 @@
         ("n" "Notes" entry
          (file+olp+datetree ,crab/org-notes-file)
          "* %?\n<%Y-%m-%d %a %H:%M>\n")))
+
+;; Make org-capture open in current window (no split popup)
+(after! org
+  (set-popup-rule! "^\*Capture\*" :ignore t))
+
