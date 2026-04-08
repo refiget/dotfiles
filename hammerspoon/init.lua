@@ -353,7 +353,7 @@ local function cycleScratchpadTarget()
 
   local pad = scratchpadFor(state.currentTarget)
   if pad then
-    hs.alert.show("Scratchpad: " .. pad.label)
+    showSwitchAlert("Scratchpad: " .. pad.label)
     log.i("Switched scratchpad target to " .. pad.key)
   end
 end
@@ -377,3 +377,4 @@ hs.urlevent.bind("scratchpad", function(_, params, _)
 end)
 
 log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
+oon://scratchpad?target=emacs|obsidian")
