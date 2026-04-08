@@ -1,9 +1,5 @@
 local log = hs.logger.new("scratchpad", "info")
 
--- -----------------------------------------------------------------------------
--- Config
--- -----------------------------------------------------------------------------
-
 local YABAI_BIN = "/opt/homebrew/bin/yabai"
 local TOGGLE_MODS = { "alt" }
 local TOGGLE_KEY = "s"
@@ -40,10 +36,6 @@ local state = {
   currentTarget = "emacs",
 }
 
--- -----------------------------------------------------------------------------
--- Generic helpers
--- -----------------------------------------------------------------------------
-
 local function scratchpadFor(target)
   return target and SCRATCHPADS[string.lower(target)] or nil
 end
@@ -59,37 +51,25 @@ end
 
 local function decodeJson(output, label)
   if not output or output == "" then return nil end
-
   local cleaned = tostring(output):gsub("^%s+", ""):gsub("%s+$", "")
   local data = hs.json.decode(cleaned)
-
-  if type(data) == "table" then
-    return data
-  end
-
+  if type(data) == "table" then return data end
   log.e("Failed to decode " .. label .. " JSON. Raw output: " .. cleaned)
   return nil
 end
 
--- -----------------------------------------------------------------------------
--- yabai helpers
--- -----------------------------------------------------------------------------
-
 local function runYabai(args)
   local cmd = YABAI_BIN .. " -m " .. args
   local output, ok, _, rc = hs.execute(cmd)
-
   if not ok then
     log.e("yabai command failed (" .. tostring(rc) .. "): " .. cmd .. " :: " .. tostring(output))
   end
-
   return ok, output
 end
 
 local function currentSpaceIndex()
   local ok, output = runYabai("query --spaces --space")
   if not ok then return nil end
-
   local data = decodeJson(output, "space query")
   return data and data.index or nil
 end
@@ -97,24 +77,20 @@ end
 local function currentDisplayFrame()
   local ok, output = runYabai("query --displays --display")
   if not ok then return nil end
-
   local data = decodeJson(output, "display query")
   if not data or type(data.frame) ~= "table" then return nil end
-
   return data.frame
 end
 
 local function queryWindow(windowId)
   local ok, output = runYabai("query --windows --window " .. windowId)
   if not ok then return nil end
-
   return decodeJson(output, "window query")
 end
 
 local function queryAllWindows()
   local ok, output = runYabai("query --windows")
   if not ok then return nil end
-
   return decodeJson(output, "windows query")
 end
 
@@ -140,10 +116,6 @@ local function moveWindowToSpace(windowId, targetSpace)
   return false
 end
 
--- -----------------------------------------------------------------------------
--- Scratchpad window lookup/cache
--- -----------------------------------------------------------------------------
-
 local function findAppWindow(appName)
   local windows = queryAllWindows()
   if type(windows) ~= "table" then return nil end
@@ -162,18 +134,14 @@ local function cachedAppWindow(appName)
   local cachedWindowId = state.cachedWindowIds[appName]
   if cachedWindowId then
     local win = queryWindow(cachedWindowId)
-    if win and win.app == appName then
-      return win
-    end
+    if win and win.app == appName then return win end
     state.cachedWindowIds[appName] = nil
   end
-
   return findAppWindow(appName)
 end
 
 local function appWindowIsVisibleInSpace(win, targetSpace)
   if not win then return false end
-
   return tostring(win.space) == tostring(targetSpace)
     and not win["is-hidden"]
     and not win["is-minimized"]
@@ -186,23 +154,14 @@ local function withAppWindow(appName, retries, delaySeconds, callback)
       callback(win)
       return
     end
-
     if remaining <= 0 then
       callback(nil)
       return
     end
-
-    hs.timer.doAfter(delaySeconds, function()
-      attempt(remaining - 1)
-    end)
+    hs.timer.doAfter(delaySeconds, function() attempt(remaining - 1) end)
   end
-
   attempt(retries)
 end
-
--- -----------------------------------------------------------------------------
--- Scratchpad geometry/actions
--- -----------------------------------------------------------------------------
 
 local function applyScratchpadGeometry(windowId, geometry)
   local frame = currentDisplayFrame()
@@ -221,7 +180,6 @@ local function applyScratchpadGeometry(windowId, geometry)
   local displayY = math.floor(frame.y)
   local displayW = math.floor(frame.w)
   local displayH = math.floor(frame.h)
-
   local targetW = math.floor(displayW * geometry.widthRatio)
   local targetH = math.floor(displayH * geometry.heightRatio)
   local rightMargin = math.floor(displayW * geometry.rightMarginRatio)
@@ -236,18 +194,31 @@ local function applyScratchpadGeometry(windowId, geometry)
   runYabai("window " .. windowId .. " --grid 1:1:0:0:1:1")
   runYabai("window " .. windowId .. " --resize abs:" .. targetW .. ":" .. targetH)
   runYabai("window " .. windowId .. " --move abs:" .. targetX .. ":" .. targetY)
-
   log.i("Applied scratchpad geometry: " .. targetW .. "x" .. targetH .. " @ " .. targetX .. "," .. targetY)
   return true
 end
 
 local function hideApp(appName)
   local app = appByName(appName)
-  if not app then return false end
+  local win = cachedAppWindow(appName)
 
-  app:hide()
-  log.i("Hiding " .. appName)
-  return true
+  if win and not win["is-minimized"] then
+    runYabai("window --minimize " .. win.id)
+  end
+
+  if app then
+    app:hide()
+    log.i("Hiding " .. appName)
+    return true
+  end
+
+  return win ~= nil
+end
+
+local function hideAllScratchpads()
+  for _, pad in pairs(SCRATCHPADS) do
+    hideApp(pad.app)
+  end
 end
 
 local function revealScratchpad(targetSpace, pad)
@@ -255,11 +226,7 @@ local function revealScratchpad(targetSpace, pad)
 
   if not targetSpace then
     log.w("Could not determine current yabai space; falling back to app activate")
-    if app then
-      app:activate()
-    else
-      hs.application.launchOrFocus(pad.app)
-    end
+    if app then app:activate() else hs.application.launchOrFocus(pad.app) end
     return true
   end
 
@@ -276,6 +243,11 @@ local function revealScratchpad(targetSpace, pad)
       local launched = appByName(pad.app)
       if launched then launched:activate() end
       return
+    end
+
+    if win["is-minimized"] then
+      runYabai("window --deminimize " .. win.id)
+      hs.timer.usleep(50000)
     end
 
     if tostring(win.space) ~= tostring(targetSpace) then
@@ -323,7 +295,6 @@ end
 
 local function cycleScratchpadTarget()
   hideAllScratchpads()
-
   if state.currentTarget == "emacs" then
     state.currentTarget = "obsidian"
   else
@@ -341,10 +312,6 @@ local function toggleCurrentScratchpad()
   return toggleScratchpad(state.currentTarget)
 end
 
--- -----------------------------------------------------------------------------
--- Entrypoints
--- -----------------------------------------------------------------------------
-
 hs.hotkey.bind(TOGGLE_MODS, TOGGLE_KEY, toggleCurrentScratchpad)
 hs.hotkey.bind(SWITCH_MODS, SWITCH_KEY, cycleScratchpadTarget)
 
@@ -355,10 +322,8 @@ hs.urlevent.bind("scratchpad", function(_, params, _)
     log.w("scratchpad URL called without target/app parameter")
     return
   end
-
   state.currentTarget = string.lower(target)
   toggleScratchpad(target)
 end)
 
 log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
-+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
