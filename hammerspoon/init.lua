@@ -38,6 +38,7 @@ local state = {
   currentTarget = "emacs",
   switchHud = nil,
   switchHudTimer = nil,
+  switchHudAnimTimer = nil,
 }
 
 local function scratchpadFor(target)
@@ -53,6 +54,20 @@ local function appIsFrontmost(appName)
   return frontmostApp and frontmostApp:name() == appName
 end
 
+local function iconForApp(appName)
+  local app = hs.application.get(appName)
+  if app and app:path() then
+    return hs.image.imageFromAppBundle(app:path())
+  end
+
+  local found = hs.application.find(appName)
+  if found and found:path() then
+    return hs.image.imageFromAppBundle(found:path())
+  end
+
+  return nil
+end
+
 local function decodeJson(output, label)
   if not output or output == "" then return nil end
   local cleaned = tostring(output):gsub("^%s+", ""):gsub("%s+$", "")
@@ -66,11 +81,13 @@ local function ensureSwitchHud()
   if state.switchHud then return state.switchHud end
 
   local screenFrame = hs.screen.mainScreen():frame()
-  local width = 336
-  local height = 68
+  local width = 360
+  local height = 72
   local x = math.floor(screenFrame.x + (screenFrame.w - width) / 2)
   local y = math.floor(screenFrame.y + screenFrame.h - height - 96)
   local leftWidth = math.floor(width / 2)
+  local emacsIcon = iconForApp("Emacs")
+  local obsidianIcon = iconForApp("Obsidian")
 
   local canvas = hs.canvas.new({ x = x, y = y, w = width, h = height })
   canvas:level(hs.canvas.windowLevels.overlay)
@@ -84,35 +101,60 @@ local function ensureSwitchHud()
   }
   canvas[2] = {
     type = "rectangle",
+    action = "stroke",
+    roundedRectRadii = { xRadius = 20, yRadius = 20 },
+    strokeColor = { hex = "#7aa2f7", alpha = 0.18 },
+    strokeWidth = 1,
+  }
+  canvas[3] = {
+    type = "rectangle",
     action = "fill",
     roundedRectRadii = { xRadius = 16, yRadius = 16 },
     fillColor = { hex = "#7aa2f7", alpha = 0.95 },
     frame = { x = 8, y = 8, w = leftWidth - 12, h = height - 16 },
   }
-  canvas[3] = {
+  canvas[4] = {
     type = "rectangle",
     action = "stroke",
     strokeColor = { hex = "#565f89", alpha = 0.35 },
     strokeWidth = 1,
     frame = { x = leftWidth, y = 16, w = 1, h = height - 32 },
   }
-  canvas[4] = {
+  if emacsIcon then
+    canvas[5] = {
+      type = "image",
+      image = emacsIcon,
+      imageScaling = "scaleProportionally",
+      imageAlpha = 1,
+      frame = { x = 24, y = 23, w = 24, h = 24 },
+    }
+  end
+  canvas[6] = {
     type = "text",
     text = "Emacs",
-    textSize = 20,
+    textSize = 19,
     textFont = ".AppleSystemUIFontSemibold",
     textColor = { hex = "#1f2335", alpha = 1 },
-    textAlignment = "center",
-    frame = { x = 0, y = 19, w = leftWidth, h = 28 },
+    textAlignment = "left",
+    frame = { x = 58, y = 23, w = leftWidth - 68, h = 24 },
   }
-  canvas[5] = {
+  if obsidianIcon then
+    canvas[7] = {
+      type = "image",
+      image = obsidianIcon,
+      imageScaling = "scaleProportionally",
+      imageAlpha = 0.72,
+      frame = { x = leftWidth + 20, y = 23, w = 24, h = 24 },
+    }
+  end
+  canvas[8] = {
     type = "text",
     text = "Obsidian",
-    textSize = 20,
+    textSize = 19,
     textFont = ".AppleSystemUIFontSemibold",
-    textColor = { hex = "#c0caf5", alpha = 0.72 },
-    textAlignment = "center",
-    frame = { x = leftWidth, y = 19, w = width - leftWidth, h = 28 },
+    textColor = { hex = "#c0caf5", alpha = 0.62 },
+    textAlignment = "left",
+    frame = { x = leftWidth + 54, y = 23, w = leftWidth - 66, h = 24 },
   }
 
   canvas:alpha(0)
@@ -133,7 +175,7 @@ local function updateSwitchHud(target, animate)
   local height = hud:frame().h
   local leftWidth = math.floor(width / 2)
   local targetX = target == "obsidian" and leftWidth + 4 or 8
-  local currentFrame = hud[2].frame
+  local currentFrame = hud[3].frame
   local highlightWidth = leftWidth - 12
 
   stopSwitchHudAnimation()
@@ -146,14 +188,14 @@ local function updateSwitchHud(target, animate)
     state.switchHudAnimTimer = hs.timer.doEvery(0.016, function(timer)
       step = step + 1
       local nextX = (step >= steps) and targetX or math.floor(startX + delta * step + 0.5)
-      hud[2].frame = { x = nextX, y = 8, w = highlightWidth, h = height - 16 }
+      hud[3].frame = { x = nextX, y = 8, w = highlightWidth, h = height - 16 }
       if step >= steps then
         timer:stop()
         state.switchHudAnimTimer = nil
       end
     end)
   else
-    hud[2].frame = { x = targetX, y = 8, w = highlightWidth, h = height - 16 }
+    hud[3].frame = { x = targetX, y = 8, w = highlightWidth, h = height - 16 }
   end
 
   if target == "obsidian" then
@@ -451,29 +493,7 @@ hs.urlevent.bind("scratchpad", function(_, params, _)
     log.w("scratchpad URL called without target/app parameter")
     return
   end
-  state.currentTarget = string.lower(target)
-  showSwitchHud(state.currentTarget)
-  toggleScratchpad(target)
-end)
 
-log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
-("Switched scratchpad target to " .. state.currentTarget)
-end
-
-local function toggleCurrentScratchpad()
-  return toggleScratchpad(state.currentTarget)
-end
-
-hs.hotkey.bind(TOGGLE_MODS, TOGGLE_KEY, toggleCurrentScratchpad)
-hs.hotkey.bind(SWITCH_MODS, SWITCH_KEY, cycleScratchpadTarget)
-
-hs.urlevent.bind("scratchpad", function(_, params, _)
-  local target = params and (params.target or params.app)
-  if not target then
-    hs.alert.show("Missing scratchpad target")
-    log.w("scratchpad URL called without target/app parameter")
-    return
-  end
   state.currentTarget = string.lower(target)
   showSwitchHud(state.currentTarget)
   toggleScratchpad(target)
