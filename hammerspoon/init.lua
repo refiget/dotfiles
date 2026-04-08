@@ -55,14 +55,14 @@ local function appIsFrontmost(appName)
 end
 
 local function iconForApp(appName)
-  local app = hs.application.get(appName)
-  if app and app:path() then
-    return hs.image.imageFromAppBundle(app:path())
+  local app = hs.application.get(appName) or hs.application.find(appName)
+  if app and app:bundleID() then
+    return hs.image.imageFromAppBundle(app:bundleID())
   end
 
-  local found = hs.application.find(appName)
-  if found and found:path() then
-    return hs.image.imageFromAppBundle(found:path())
+  local info = hs.application.infoForBundlePath("/Applications/" .. appName .. ".app")
+  if info and info.CFBundleIdentifier then
+    return hs.image.imageFromAppBundle(info.CFBundleIdentifier)
   end
 
   return nil
