@@ -71,10 +71,12 @@
 
   (defun crab/capture-todo ()
     (interactive)
+    (delete-other-windows)
     (org-capture nil "t"))
 
   (defun crab/capture-note ()
     (interactive)
+    (delete-other-windows)
     (org-capture nil "n"))
 
   ;; Ex commands
