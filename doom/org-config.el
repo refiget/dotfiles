@@ -11,15 +11,6 @@
         org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "DOING(g)" "WAIT(w)" "|" "DONE(d)" "CANCELLED(c)")))
 
-  (defun crab/org-set-created-property ()
-    "Set a CREATED property with minute precision on current Org heading."
-    (when (and (derived-mode-p 'org-mode)
-               (org-get-todo-state)
-               (member (org-get-todo-state) org-not-done-keywords)
-               (not (org-entry-get nil "CREATED")))
-      (org-set-property "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
-
-  (add-hook 'org-after-todo-state-change-hook #'crab/org-set-created-property)
 
   (use-package! org-modern
     :hook ((org-mode . org-modern-mode)
