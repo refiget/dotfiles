@@ -185,7 +185,6 @@ ROOT_LINKS=(
 
 CONFIG_LINKS=(
   "$DOTFILES_DIR/nvim" "$CONFIG_DIR/nvim"
-  "$DOTFILES_DIR/doom" "$CONFIG_DIR/doom"
   "$DOTFILES_DIR/tmux" "$CONFIG_DIR/tmux"
   "$DOTFILES_DIR/yazi" "$CONFIG_DIR/yazi"
   "$DOTFILES_DIR/fastfetch" "$CONFIG_DIR/fastfetch"
