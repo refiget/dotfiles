@@ -68,6 +68,15 @@
     (interactive)
     (insert (format-time-string "<%Y-%m-%d %a %H:%M>")))
 
+
+  (defun crab/capture-todo ()
+    (interactive)
+    (org-capture nil "t"))
+
+  (defun crab/capture-note ()
+    (interactive)
+    (org-capture nil "n"))
+
   ;; Ex commands
   (evil-ex-define-cmd "todo" #'org-todo-list)
   (evil-ex-define-cmd "agenda" (cmd! (org-agenda nil "a")))
@@ -83,6 +92,8 @@
   (evil-ex-define-cmd "italic" #'crab/org-italic-region)
   (evil-ex-define-cmd "bai" #'crab/org-bold-italic-region)
   (evil-ex-define-cmd "time" #'crab/insert-current-time)
+  (evil-ex-define-cmd "t" #'crab/capture-todo)
+  (evil-ex-define-cmd "n" #'crab/capture-note)
 
   (setq evil-ex-complete-emacs-commands nil)
 

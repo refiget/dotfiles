@@ -18,3 +18,12 @@
     (find-file crab/org-inbox-file)))
 
 (add-hook 'emacs-startup-hook #'crab/open-default-notes-file)
+
+
+(setq org-capture-templates
+      `(("t" "Todo" entry
+         (file ,crab/org-tasks-file)
+         "* TODO %?\n<%Y-%m-%d %a %H:%M>\n")
+        ("n" "Notes" entry
+         (file ,crab/org-notes-file)
+         "* %?\n<%Y-%m-%d %a %H:%M>\n")))
