@@ -63,6 +63,11 @@
       (crab/copy-to-system-clipboard text)
       (message "Copied selection")))
 
+
+  (defun crab/insert-current-time ()
+    (interactive)
+    (insert (format-time-string "%Y-%m-%d %H:%M")))
+
   ;; Ex commands
   (evil-ex-define-cmd "todo" #'org-todo-list)
   (evil-ex-define-cmd "agenda" (cmd! (org-agenda nil "a")))
@@ -77,6 +82,7 @@
   (evil-ex-define-cmd "bold" #'crab/org-bold-region)
   (evil-ex-define-cmd "italic" #'crab/org-italic-region)
   (evil-ex-define-cmd "bai" #'crab/org-bold-italic-region)
+  (evil-ex-define-cmd "time" #'crab/insert-current-time)
 
   (setq evil-ex-complete-emacs-commands nil)
 
