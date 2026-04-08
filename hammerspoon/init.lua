@@ -157,11 +157,15 @@ local function updateSwitchHud(target, animate)
   end
 
   if target == "obsidian" then
-    hud[4].textColor = { hex = "#c0caf5", alpha = 0.62 }
-    hud[5].textColor = { hex = "#1f2335", alpha = 1 }
+    hud[6].textColor = { hex = "#c0caf5", alpha = 0.62 }
+    hud[8].textColor = { hex = "#1f2335", alpha = 1 }
+    if hud[5] then hud[5].imageAlpha = 0.72 end
+    if hud[7] then hud[7].imageAlpha = 1 end
   else
-    hud[4].textColor = { hex = "#1f2335", alpha = 1 }
-    hud[5].textColor = { hex = "#c0caf5", alpha = 0.62 }
+    hud[6].textColor = { hex = "#1f2335", alpha = 1 }
+    hud[8].textColor = { hex = "#c0caf5", alpha = 0.62 }
+    if hud[5] then hud[5].imageAlpha = 1 end
+    if hud[7] then hud[7].imageAlpha = 0.72 end
   end
 end
 
@@ -431,6 +435,29 @@ local function cycleScratchpadTarget()
 
   showSwitchHud(state.currentTarget)
   log.i("Switched scratchpad target to " .. state.currentTarget)
+end
+
+local function toggleCurrentScratchpad()
+  return toggleScratchpad(state.currentTarget)
+end
+
+hs.hotkey.bind(TOGGLE_MODS, TOGGLE_KEY, toggleCurrentScratchpad)
+hs.hotkey.bind(SWITCH_MODS, SWITCH_KEY, cycleScratchpadTarget)
+
+hs.urlevent.bind("scratchpad", function(_, params, _)
+  local target = params and (params.target or params.app)
+  if not target then
+    hs.alert.show("Missing scratchpad target")
+    log.w("scratchpad URL called without target/app parameter")
+    return
+  end
+  state.currentTarget = string.lower(target)
+  showSwitchHud(state.currentTarget)
+  toggleScratchpad(target)
+end)
+
+log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
+("Switched scratchpad target to " .. state.currentTarget)
 end
 
 local function toggleCurrentScratchpad()
