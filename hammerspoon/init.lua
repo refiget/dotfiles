@@ -66,8 +66,8 @@ local function ensureSwitchHud()
   if state.switchHud then return state.switchHud end
 
   local screenFrame = hs.screen.mainScreen():frame()
-  local width = 320
-  local height = 64
+  local width = 336
+  local height = 68
   local x = math.floor(screenFrame.x + (screenFrame.w - width) / 2)
   local y = math.floor(screenFrame.y + screenFrame.h - height - 96)
   local leftWidth = math.floor(width / 2)
@@ -79,31 +79,40 @@ local function ensureSwitchHud()
   canvas[1] = {
     type = "rectangle",
     action = "fill",
-    roundedRectRadii = { xRadius = 18, yRadius = 18 },
+    roundedRectRadii = { xRadius = 20, yRadius = 20 },
     fillColor = { hex = "#1f2335", alpha = 0.90 },
   }
   canvas[2] = {
     type = "rectangle",
     action = "fill",
-    roundedRectRadii = { xRadius = 14, yRadius = 14 },
+    roundedRectRadii = { xRadius = 16, yRadius = 16 },
     fillColor = { hex = "#7aa2f7", alpha = 0.95 },
     frame = { x = 8, y = 8, w = leftWidth - 12, h = height - 16 },
   }
   canvas[3] = {
-    type = "text",
-    text = "Emacs",
-    textSize = 20,
-    textColor = { hex = "#1f2335", alpha = 1 },
-    textAlignment = "center",
-    frame = { x = 0, y = 18, w = leftWidth, h = 28 },
+    type = "rectangle",
+    action = "stroke",
+    strokeColor = { hex = "#565f89", alpha = 0.35 },
+    strokeWidth = 1,
+    frame = { x = leftWidth, y = 16, w = 1, h = height - 32 },
   }
   canvas[4] = {
     type = "text",
+    text = "Emacs",
+    textSize = 20,
+    textFont = ".AppleSystemUIFontSemibold",
+    textColor = { hex = "#1f2335", alpha = 1 },
+    textAlignment = "center",
+    frame = { x = 0, y = 19, w = leftWidth, h = 28 },
+  }
+  canvas[5] = {
+    type = "text",
     text = "Obsidian",
     textSize = 20,
+    textFont = ".AppleSystemUIFontSemibold",
     textColor = { hex = "#c0caf5", alpha = 0.72 },
     textAlignment = "center",
-    frame = { x = leftWidth, y = 18, w = width - leftWidth, h = 28 },
+    frame = { x = leftWidth, y = 19, w = width - leftWidth, h = 28 },
   }
 
   canvas:alpha(0)
@@ -111,27 +120,55 @@ local function ensureSwitchHud()
   return canvas
 end
 
-local function updateSwitchHud(target)
+local function stopSwitchHudAnimation()
+  if state.switchHudAnimTimer then
+    state.switchHudAnimTimer:stop()
+    state.switchHudAnimTimer = nil
+  end
+end
+
+local function updateSwitchHud(target, animate)
   local hud = ensureSwitchHud()
   local width = hud:frame().w
   local height = hud:frame().h
   local leftWidth = math.floor(width / 2)
+  local targetX = target == "obsidian" and leftWidth + 4 or 8
+  local currentFrame = hud[2].frame
+  local highlightWidth = leftWidth - 12
 
-  local highlightX = target == "obsidian" and leftWidth + 4 or 8
-  hud[2].frame = { x = highlightX, y = 8, w = leftWidth - 12, h = height - 16 }
+  stopSwitchHudAnimation()
+
+  if animate and currentFrame and currentFrame.x then
+    local startX = currentFrame.x
+    local steps = 6
+    local delta = (targetX - startX) / steps
+    local step = 0
+    state.switchHudAnimTimer = hs.timer.doEvery(0.016, function(timer)
+      step = step + 1
+      local nextX = (step >= steps) and targetX or math.floor(startX + delta * step + 0.5)
+      hud[2].frame = { x = nextX, y = 8, w = highlightWidth, h = height - 16 }
+      if step >= steps then
+        timer:stop()
+        state.switchHudAnimTimer = nil
+      end
+    end)
+  else
+    hud[2].frame = { x = targetX, y = 8, w = highlightWidth, h = height - 16 }
+  end
 
   if target == "obsidian" then
-    hud[3].textColor = { hex = "#c0caf5", alpha = 0.72 }
-    hud[4].textColor = { hex = "#1f2335", alpha = 1 }
+    hud[4].textColor = { hex = "#c0caf5", alpha = 0.62 }
+    hud[5].textColor = { hex = "#1f2335", alpha = 1 }
   else
-    hud[3].textColor = { hex = "#1f2335", alpha = 1 }
-    hud[4].textColor = { hex = "#c0caf5", alpha = 0.72 }
+    hud[4].textColor = { hex = "#1f2335", alpha = 1 }
+    hud[5].textColor = { hex = "#c0caf5", alpha = 0.62 }
   end
 end
 
 local function showSwitchHud(target)
-  updateSwitchHud(target)
   local hud = ensureSwitchHud()
+  local animate = hud:isShowing()
+  updateSwitchHud(target, animate)
   hud:show()
   hud:alpha(1)
 
@@ -140,7 +177,8 @@ local function showSwitchHud(target)
     state.switchHudTimer = nil
   end
 
-  state.switchHudTimer = hs.timer.doAfter(0.75, function()
+  state.switchHudTimer = hs.timer.doAfter(0.80, function()
+    stopSwitchHudAnimation()
     if state.switchHud then
       state.switchHud:hide(0.15)
     end
