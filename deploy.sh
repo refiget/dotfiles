@@ -96,6 +96,7 @@ link_file "$DOTFILES_DIR/.shellfishrc" "$HOME/.shellfishrc"
 
 # --- .config 目录下的文件夹 ---
 link_file "$DOTFILES_DIR/nvim"          "$CONFIG_DIR/nvim"
+link_file "$DOTFILES_DIR/doom"          "$CONFIG_DIR/doom"
 link_file "$DOTFILES_DIR/tmux"          "$CONFIG_DIR/tmux"
 link_file "$DOTFILES_DIR/yazi"          "$CONFIG_DIR/yazi"
 link_file "$DOTFILES_DIR/fastfetch"     "$CONFIG_DIR/fastfetch"
@@ -114,6 +115,7 @@ link_file "$DOTFILES_DIR/jupyter/jupyter.json" "$HOME/.jupyter/jupyter.json"
 link_file "$DOTFILES_DIR/kitty"         "$CONFIG_DIR/kitty"
 link_file "$DOTFILES_DIR/alacritty"     "$CONFIG_DIR/alacritty"
 link_file "$DOTFILES_DIR/ghostty"       "$CONFIG_DIR/ghostty"
+link_file "$DOTFILES_DIR/hammerspoon"   "$HOME/.hammerspoon"
 
 # Ghostty on macOS reads: ~/Library/Application Support/com.mitchellh.ghostty/config.ghostty
 if [[ "$OS_NAME" == "Darwin" ]]; then
