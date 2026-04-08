@@ -1,7 +1,6 @@
 ;;; ui.el -*- lexical-binding: t; -*-
 
 (setq doom-font (font-spec :family "MonoLisa" :size 18)
-      doom-variable-pitch-font (font-spec :family "SF Pro Text" :size 16)
       doom-theme nil
       display-line-numbers-type 'relative)
 
