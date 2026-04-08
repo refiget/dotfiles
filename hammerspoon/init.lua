@@ -4,33 +4,54 @@ local log = hs.logger.new("scratchpad", "info")
 -- Config
 -- -----------------------------------------------------------------------------
 
-local EMACS_APP_NAME = "Emacs"
-local HOTKEY_MODS = { "alt" }
-local HOTKEY_KEY = "s"
 local YABAI_BIN = "/opt/homebrew/bin/yabai"
+local SELECTOR_MODS = { "alt", "shift" }
+local SELECTOR_KEY = "s"
 
-local GEOMETRY = {
-  widthRatio = 0.6528,
-  heightRatio = 0.5568,
-  rightMarginRatio = 0.0122,
-  bottomMarginRatio = 0.0251,
+local SCRATCHPADS = {
+  emacs = {
+    key = "emacs",
+    label = "Emacs",
+    app = "Emacs",
+    geometry = {
+      widthRatio = 0.6528,
+      heightRatio = 0.5568,
+      rightMarginRatio = 0.0122,
+      bottomMarginRatio = 0.0251,
+    },
+  },
+  obsidian = {
+    key = "obsidian",
+    label = "Obsidian",
+    app = "Obsidian",
+    geometry = {
+      widthRatio = 0.62,
+      heightRatio = 0.72,
+      rightMarginRatio = 0.02,
+      bottomMarginRatio = 0.03,
+    },
+  },
 }
 
 local state = {
-  cachedWindowId = nil,
+  cachedWindowIds = {},
 }
 
 -- -----------------------------------------------------------------------------
 -- Generic helpers
 -- -----------------------------------------------------------------------------
 
-local function emacsApp()
-  return hs.application.get(EMACS_APP_NAME)
+local function scratchpadFor(target)
+  return target and SCRATCHPADS[string.lower(target)] or nil
 end
 
-local function emacsIsFrontmost()
+local function appByName(appName)
+  return hs.application.get(appName)
+end
+
+local function appIsFrontmost(appName)
   local frontmostApp = hs.application.frontmostApplication()
-  return frontmostApp and frontmostApp:name() == EMACS_APP_NAME
+  return frontmostApp and frontmostApp:name() == appName
 end
 
 local function decodeJson(output, label)
@@ -84,13 +105,7 @@ local function queryWindow(windowId)
   local ok, output = runYabai("query --windows --window " .. windowId)
   if not ok then return nil end
 
-  local data = decodeJson(output, "window query")
-  if data and data.app == EMACS_APP_NAME then
-    state.cachedWindowId = data.id
-    return data
-  end
-
-  return nil
+  return decodeJson(output, "window query")
 end
 
 local function queryAllWindows()
@@ -112,7 +127,7 @@ local function moveWindowToSpace(windowId, targetSpace)
     hs.timer.usleep(40000)
     local data = queryWindow(windowId)
     if data and tostring(data.space) == tostring(targetSpace) then
-      log.i("Moved Emacs window " .. windowId .. " to space " .. targetSpace)
+      log.i("Moved window " .. windowId .. " to space " .. targetSpace)
       return true
     end
   end
@@ -123,16 +138,16 @@ local function moveWindowToSpace(windowId, targetSpace)
 end
 
 -- -----------------------------------------------------------------------------
--- Emacs window lookup/cache
+-- Scratchpad window lookup/cache
 -- -----------------------------------------------------------------------------
 
-local function findEmacsWindow()
+local function findAppWindow(appName)
   local windows = queryAllWindows()
   if type(windows) ~= "table" then return nil end
 
   for _, win in ipairs(windows) do
-    if win.app == EMACS_APP_NAME and not win["is-minimized"] then
-      state.cachedWindowId = win.id
+    if win.app == appName and not win["is-minimized"] then
+      state.cachedWindowIds[appName] = win.id
       return win
     end
   end
@@ -140,19 +155,20 @@ local function findEmacsWindow()
   return nil
 end
 
-local function cachedEmacsWindow()
-  if state.cachedWindowId then
-    local win = queryWindow(state.cachedWindowId)
-    if win then
+local function cachedAppWindow(appName)
+  local cachedWindowId = state.cachedWindowIds[appName]
+  if cachedWindowId then
+    local win = queryWindow(cachedWindowId)
+    if win and win.app == appName then
       return win
     end
-    state.cachedWindowId = nil
+    state.cachedWindowIds[appName] = nil
   end
 
-  return findEmacsWindow()
+  return findAppWindow(appName)
 end
 
-local function emacsWindowIsVisibleInSpace(win, targetSpace)
+local function appWindowIsVisibleInSpace(win, targetSpace)
   if not win then return false end
 
   return tostring(win.space) == tostring(targetSpace)
@@ -160,9 +176,9 @@ local function emacsWindowIsVisibleInSpace(win, targetSpace)
     and not win["is-minimized"]
 end
 
-local function withEmacsWindow(retries, delaySeconds, callback)
+local function withAppWindow(appName, retries, delaySeconds, callback)
   local function attempt(remaining)
-    local win = cachedEmacsWindow()
+    local win = cachedAppWindow(appName)
     if win then
       callback(win)
       return
@@ -185,7 +201,7 @@ end
 -- Scratchpad geometry/actions
 -- -----------------------------------------------------------------------------
 
-local function applyScratchpadGeometry(windowId)
+local function applyScratchpadGeometry(windowId, geometry)
   local frame = currentDisplayFrame()
   if not frame then
     log.w("Could not determine current display frame")
@@ -194,7 +210,7 @@ local function applyScratchpadGeometry(windowId)
 
   local win = queryWindow(windowId)
   if not win then
-    log.w("Could not query Emacs window before applying geometry")
+    log.w("Could not query window before applying geometry")
     return false
   end
 
@@ -203,10 +219,10 @@ local function applyScratchpadGeometry(windowId)
   local displayW = math.floor(frame.w)
   local displayH = math.floor(frame.h)
 
-  local targetW = math.floor(displayW * GEOMETRY.widthRatio)
-  local targetH = math.floor(displayH * GEOMETRY.heightRatio)
-  local rightMargin = math.floor(displayW * GEOMETRY.rightMarginRatio)
-  local bottomMargin = math.floor(displayH * GEOMETRY.bottomMarginRatio)
+  local targetW = math.floor(displayW * geometry.widthRatio)
+  local targetH = math.floor(displayH * geometry.heightRatio)
+  local rightMargin = math.floor(displayW * geometry.rightMarginRatio)
+  local bottomMargin = math.floor(displayH * geometry.bottomMarginRatio)
   local targetX = displayX + displayW - targetW - rightMargin
   local targetY = displayY + displayH - targetH - bottomMargin
 
@@ -222,39 +238,39 @@ local function applyScratchpadGeometry(windowId)
   return true
 end
 
-local function hideEmacs()
-  local app = emacsApp()
+local function hideApp(appName)
+  local app = appByName(appName)
   if not app then return false end
 
   app:hide()
-  log.i("Hiding Emacs")
+  log.i("Hiding " .. appName)
   return true
 end
 
-local function revealEmacsInSpace(targetSpace)
-  local app = emacsApp()
+local function revealScratchpad(targetSpace, pad)
+  local app = appByName(pad.app)
 
   if not targetSpace then
     log.w("Could not determine current yabai space; falling back to app activate")
     if app then
       app:activate()
     else
-      hs.application.launchOrFocus(EMACS_APP_NAME)
+      hs.application.launchOrFocus(pad.app)
     end
     return true
   end
 
   if not app then
-    hs.application.launchOrFocus(EMACS_APP_NAME)
-    log.i("Launching Emacs")
+    hs.application.launchOrFocus(pad.app)
+    log.i("Launching " .. pad.app)
   else
     app:unhide()
   end
 
-  withEmacsWindow(20, 0.1, function(win)
+  withAppWindow(pad.app, 20, 0.1, function(win)
     if not win then
-      log.w("yabai did not report an Emacs window")
-      local launched = emacsApp()
+      log.w("yabai did not report a window for " .. pad.app)
+      local launched = appByName(pad.app)
       if launched then launched:activate() end
       return
     end
@@ -262,47 +278,87 @@ local function revealEmacsInSpace(targetSpace)
     if tostring(win.space) ~= tostring(targetSpace) then
       local moved = moveWindowToSpace(win.id, targetSpace)
       if not moved then
-        local fallbackApp = emacsApp()
+        local fallbackApp = appByName(pad.app)
         if fallbackApp then fallbackApp:activate() end
         log.w("Move failed; fell back to app activate")
         return
       end
     end
 
-    applyScratchpadGeometry(win.id)
+    applyScratchpadGeometry(win.id, pad.geometry)
     focusWindow(win.id)
-    log.i("Moved and focused Emacs window")
+    log.i("Moved and focused " .. pad.app .. " window")
   end)
 
   return true
 end
 
-function toggleEmacsScratchpad()
-  log.i("toggleEmacsScratchpad() called")
+function toggleScratchpad(target)
+  local pad = scratchpadFor(target)
+  if not pad then
+    hs.alert.show("Unknown scratchpad: " .. tostring(target))
+    log.w("Unknown scratchpad target: " .. tostring(target))
+    return false
+  end
 
-  local app = emacsApp()
+  log.i("toggleScratchpad(" .. pad.key .. ") called")
+
+  local app = appByName(pad.app)
   local targetSpace = currentSpaceIndex()
-  local existingWin = cachedEmacsWindow()
+  local existingWin = cachedAppWindow(pad.app)
 
-  if targetSpace and existingWin and emacsWindowIsVisibleInSpace(existingWin, targetSpace) and app then
-    return hideEmacs()
+  if targetSpace and existingWin and appWindowIsVisibleInSpace(existingWin, targetSpace) and app then
+    return hideApp(pad.app)
   end
 
-  if emacsIsFrontmost() and app then
-    return hideEmacs()
+  if appIsFrontmost(pad.app) and app then
+    return hideApp(pad.app)
   end
 
-  return revealEmacsInSpace(targetSpace)
+  return revealScratchpad(targetSpace, pad)
+end
+
+local function showScratchpadChooser()
+  local choices = {
+    {
+      text = "Emacs",
+      subText = "Open or toggle Emacs scratchpad",
+      target = "emacs",
+    },
+    {
+      text = "Obsidian",
+      subText = "Open or toggle Obsidian scratchpad",
+      target = "obsidian",
+    },
+  }
+
+  local chooser = hs.chooser.new(function(choice)
+    if choice and choice.target then
+      toggleScratchpad(choice.target)
+    end
+  end)
+
+  chooser:choices(choices)
+  chooser:searchSubText(true)
+  chooser:placeholderText("Choose a scratchpad")
+  chooser:show()
 end
 
 -- -----------------------------------------------------------------------------
 -- Entrypoints
 -- -----------------------------------------------------------------------------
 
-hs.hotkey.bind(HOTKEY_MODS, HOTKEY_KEY, toggleEmacsScratchpad)
+hs.hotkey.bind(SELECTOR_MODS, SELECTOR_KEY, showScratchpadChooser)
 
-hs.urlevent.bind("toggle-emacs-scratchpad", function(_, _, _)
-  toggleEmacsScratchpad()
+hs.urlevent.bind("scratchpad", function(_, params, _)
+  local target = params and (params.target or params.app)
+  if not target then
+    hs.alert.show("Missing scratchpad target")
+    log.w("scratchpad URL called without target/app parameter")
+    return
+  end
+
+  toggleScratchpad(target)
 end)
 
-log.i("Hammerspoon config loaded: alt+s and hammerspoon://toggle-emacs-scratchpad are ready")
+log.i("Hammerspoon config loaded: alt+shift+s chooser, plus hammerspoon://scratchpad?target=emacs|obsidian")
