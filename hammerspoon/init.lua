@@ -133,10 +133,7 @@ local function showSwitchHud(target)
   updateSwitchHud(target)
   local hud = ensureSwitchHud()
   hud:show()
-
-  hs.timer.doAfter(0, function()
-    if state.switchHud then state.switchHud:alpha(1, 0.10) end
-  end)
+  hud:alpha(1)
 
   if state.switchHudTimer then
     state.switchHudTimer:stop()
