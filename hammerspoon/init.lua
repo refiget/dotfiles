@@ -332,16 +332,19 @@ local function showScratchpadChooser()
     },
   }
 
-  local chooser = hs.chooser.new(function(choice)
-    if choice and choice.target then
-      toggleScratchpad(choice.target)
-    end
-  end)
+  if not state.chooser then
+    state.chooser = hs.chooser.new(function(choice)
+      if choice and choice.target then
+        toggleScratchpad(choice.target)
+      end
+    end)
+    state.chooser:searchSubText(true)
+    state.chooser:placeholderText("Choose a scratchpad")
+  end
 
-  chooser:choices(choices)
-  chooser:searchSubText(true)
-  chooser:placeholderText("Choose a scratchpad")
-  chooser:show()
+  state.chooser:choices(choices)
+  hs.alert.show("Scratchpad chooser")
+  state.chooser:show()
 end
 
 -- -----------------------------------------------------------------------------
