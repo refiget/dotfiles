@@ -31,63 +31,17 @@ local SCRATCHPADS = {
   },
 }
 
+local TARGET_ORDER = { "emacs", "obsidian" }
+
 local state = {
   cachedWindowIds = {},
   currentTarget = "emacs",
+  switchHud = nil,
+  switchHudTimer = nil,
 }
 
 local function scratchpadFor(target)
   return target and SCRATCHPADS[string.lower(target)] or nil
-end
-
-local function ensureSwitchHud()
-  if state.switchHud then return state.switchHud end
-
-  local screenFrame = hs.screen.mainScreen():frame()
-  local width = 260
-  local height = 56
-  local x = math.floor(screenFrame.x + (screenFrame.w - width) / 2)
-  local y = math.floor(screenFrame.y + screenFrame.h - height - 90)
-
-  local canvas = hs.canvas.new({ x = x, y = y, w = width, h = height })
-  canvas:level(hs.canvas.windowLevels.overlay)
-  canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
-  canvas[1] = {
-    type = "rectangle",
-    action = "fill",
-    roundedRectRadii = { xRadius = 16, yRadius = 16 },
-    fillColor = { hex = "#1f2335", alpha = 0.92 },
-  }
-  canvas[2] = {
-    type = "text",
-    text = "Scratchpad: Emacs",
-    textSize = 20,
-    textColor = { hex = "#c0caf5", alpha = 1 },
-    textAlignment = "center",
-    frame = { x = 0, y = 14, w = width, h = 28 },
-  }
-  canvas:alpha(0)
-
-  state.switchHud = canvas
-  return canvas
-end
-
-local function showSwitchAlert(text)
-  local hud = ensureSwitchHud()
-  hud[2].text = text
-  hud:show()
-  hud:alpha(1)
-
-  if state.switchHudTimer then
-    state.switchHudTimer:stop()
-    state.switchHudTimer = nil
-  end
-
-  state.switchHudTimer = hs.timer.doAfter(0.7, function()
-    if state.switchHud then
-      state.switchHud:hide(0.12)
-    end
-  end)
 end
 
 local function appByName(appName)
@@ -106,6 +60,94 @@ local function decodeJson(output, label)
   if type(data) == "table" then return data end
   log.e("Failed to decode " .. label .. " JSON. Raw output: " .. cleaned)
   return nil
+end
+
+local function ensureSwitchHud()
+  if state.switchHud then return state.switchHud end
+
+  local screenFrame = hs.screen.mainScreen():frame()
+  local width = 320
+  local height = 64
+  local x = math.floor(screenFrame.x + (screenFrame.w - width) / 2)
+  local y = math.floor(screenFrame.y + screenFrame.h - height - 96)
+  local leftWidth = math.floor(width / 2)
+
+  local canvas = hs.canvas.new({ x = x, y = y, w = width, h = height })
+  canvas:level(hs.canvas.windowLevels.overlay)
+  canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
+
+  canvas[1] = {
+    type = "rectangle",
+    action = "fill",
+    roundedRectRadii = { xRadius = 18, yRadius = 18 },
+    fillColor = { hex = "#1f2335", alpha = 0.90 },
+  }
+  canvas[2] = {
+    type = "rectangle",
+    action = "fill",
+    roundedRectRadii = { xRadius = 14, yRadius = 14 },
+    fillColor = { hex = "#7aa2f7", alpha = 0.95 },
+    frame = { x = 8, y = 8, w = leftWidth - 12, h = height - 16 },
+  }
+  canvas[3] = {
+    type = "text",
+    text = "Emacs",
+    textSize = 20,
+    textColor = { hex = "#1f2335", alpha = 1 },
+    textAlignment = "center",
+    frame = { x = 0, y = 18, w = leftWidth, h = 28 },
+  }
+  canvas[4] = {
+    type = "text",
+    text = "Obsidian",
+    textSize = 20,
+    textColor = { hex = "#c0caf5", alpha = 0.72 },
+    textAlignment = "center",
+    frame = { x = leftWidth, y = 18, w = width - leftWidth, h = 28 },
+  }
+
+  canvas:alpha(0)
+  state.switchHud = canvas
+  return canvas
+end
+
+local function updateSwitchHud(target)
+  local hud = ensureSwitchHud()
+  local width = hud:frame().w
+  local height = hud:frame().h
+  local leftWidth = math.floor(width / 2)
+
+  local highlightX = target == "obsidian" and leftWidth + 4 or 8
+  hud[2].frame = { x = highlightX, y = 8, w = leftWidth - 12, h = height - 16 }
+
+  if target == "obsidian" then
+    hud[3].textColor = { hex = "#c0caf5", alpha = 0.72 }
+    hud[4].textColor = { hex = "#1f2335", alpha = 1 }
+  else
+    hud[3].textColor = { hex = "#1f2335", alpha = 1 }
+    hud[4].textColor = { hex = "#c0caf5", alpha = 0.72 }
+  end
+end
+
+local function showSwitchHud(target)
+  updateSwitchHud(target)
+  local hud = ensureSwitchHud()
+  hud:show()
+
+  hs.timer.doAfter(0, function()
+    if state.switchHud then state.switchHud:alpha(1, 0.10) end
+  end)
+
+  if state.switchHudTimer then
+    state.switchHudTimer:stop()
+    state.switchHudTimer = nil
+  end
+
+  state.switchHudTimer = hs.timer.doAfter(0.75, function()
+    if state.switchHud then
+      state.switchHud:hide(0.15)
+    end
+  end)
 end
 
 local function runYabai(args)
@@ -345,17 +387,15 @@ end
 
 local function cycleScratchpadTarget()
   hideAllScratchpads()
-  if state.currentTarget == "emacs" then
-    state.currentTarget = "obsidian"
+
+  if state.currentTarget == TARGET_ORDER[1] then
+    state.currentTarget = TARGET_ORDER[2]
   else
-    state.currentTarget = "emacs"
+    state.currentTarget = TARGET_ORDER[1]
   end
 
-  local pad = scratchpadFor(state.currentTarget)
-  if pad then
-    showSwitchAlert("Scratchpad: " .. pad.label)
-    log.i("Switched scratchpad target to " .. pad.key)
-  end
+  showSwitchHud(state.currentTarget)
+  log.i("Switched scratchpad target to " .. state.currentTarget)
 end
 
 local function toggleCurrentScratchpad()
@@ -373,8 +413,8 @@ hs.urlevent.bind("scratchpad", function(_, params, _)
     return
   end
   state.currentTarget = string.lower(target)
+  showSwitchHud(state.currentTarget)
   toggleScratchpad(target)
 end)
 
 log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
-oon://scratchpad?target=emacs|obsidian")
