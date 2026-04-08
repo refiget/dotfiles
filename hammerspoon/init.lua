@@ -40,20 +40,54 @@ local function scratchpadFor(target)
   return target and SCRATCHPADS[string.lower(target)] or nil
 end
 
+local function ensureSwitchHud()
+  if state.switchHud then return state.switchHud end
+
+  local screenFrame = hs.screen.mainScreen():frame()
+  local width = 260
+  local height = 56
+  local x = math.floor(screenFrame.x + (screenFrame.w - width) / 2)
+  local y = math.floor(screenFrame.y + screenFrame.h - height - 90)
+
+  local canvas = hs.canvas.new({ x = x, y = y, w = width, h = height })
+  canvas:level(hs.canvas.windowLevels.overlay)
+  canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
+  canvas[1] = {
+    type = "rectangle",
+    action = "fill",
+    roundedRectRadii = { xRadius = 16, yRadius = 16 },
+    fillColor = { hex = "#1f2335", alpha = 0.92 },
+  }
+  canvas[2] = {
+    type = "text",
+    text = "Scratchpad: Emacs",
+    textSize = 20,
+    textColor = { hex = "#c0caf5", alpha = 1 },
+    textAlignment = "center",
+    frame = { x = 0, y = 14, w = width, h = 28 },
+  }
+  canvas:alpha(0)
+
+  state.switchHud = canvas
+  return canvas
+end
+
 local function showSwitchAlert(text)
-  if state.alertId then
-    hs.alert.closeSpecific(state.alertId)
-    state.alertId = nil
+  local hud = ensureSwitchHud()
+  hud[2].text = text
+  hud:show()
+  hud:alpha(1)
+
+  if state.switchHudTimer then
+    state.switchHudTimer:stop()
+    state.switchHudTimer = nil
   end
 
-  state.alertId = hs.alert.show(text, {
-    textSize = 18,
-    radius = 12,
-    atScreenEdge = 2,
-    fadeInDuration = 0.08,
-    fadeOutDuration = 0.12,
-    padding = 14,
-  }, hs.screen.mainScreen(), 0.8)
+  state.switchHudTimer = hs.timer.doAfter(0.7, function()
+    if state.switchHud then
+      state.switchHud:hide(0.12)
+    end
+  end)
 end
 
 local function appByName(appName)
