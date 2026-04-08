@@ -30,6 +30,13 @@
           org-appear-autosubmarkers t
           org-appear-autoentities t))
 
+  (use-package! olivetti
+    :hook (org-mode . olivetti-mode)
+    :config
+    (setq olivetti-body-width 96
+          olivetti-minimum-body-width 80
+          olivetti-recall-visual-line-mode-entry-state t))
+
   (custom-set-faces!
     '(org-document-title :inherit variable-pitch :weight bold :height 1.55)
     '(org-level-1 :inherit variable-pitch :weight bold :height 1.42)

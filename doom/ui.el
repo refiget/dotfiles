@@ -94,8 +94,11 @@
   :when (display-graphic-p)
   :after vertico
   :config
-  (setq vertico-posframe-border-width 12
-        vertico-posframe-parameters '((left-fringe . 12)
-                                      (right-fringe . 12))
+  (setq vertico-posframe-border-width 10
+        vertico-posframe-parameters '((left-fringe . 10)
+                                      (right-fringe . 10)
+                                      (internal-border-width . 10))
+        vertico-posframe-size-function
+        (lambda (_) (list :height 14 :width 110 :min-height 14 :min-width 110))
         vertico-posframe-poshandler #'posframe-poshandler-frame-center)
   (vertico-posframe-mode 1))
