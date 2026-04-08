@@ -52,6 +52,7 @@
     '(org-block-end-line :background "#1f2335" :foreground "#565f89" :extend t)
     '(org-code :foreground "#7dcfff")
     '(org-verbatim :foreground "#73daca")
+    '(org-italic :inherit italic)
     '(org-tag :foreground "#565f89" :weight normal)
     '(org-checkbox :foreground "#7aa2f7" :weight bold)))
 
