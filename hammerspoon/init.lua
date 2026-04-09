@@ -35,7 +35,7 @@ local TARGET_ORDER = { "emacs", "obsidian" }
 
 local state = {
   cachedWindowIds = {},
-  currentTarget = "emacs",
+  currentTarget = "obsidian",
   switchHud = nil,
   switchHudTimer = nil,
   switchHudAnimTimer = nil,
@@ -484,7 +484,8 @@ local function toggleCurrentScratchpad()
 end
 
 hs.hotkey.bind(TOGGLE_MODS, TOGGLE_KEY, toggleCurrentScratchpad)
-hs.hotkey.bind(SWITCH_MODS, SWITCH_KEY, cycleScratchpadTarget)
+-- switch hotkey disabled by default
+-- hs.hotkey.bind(SWITCH_MODS, SWITCH_KEY, cycleScratchpadTarget)
 
 hs.urlevent.bind("scratchpad", function(_, params, _)
   local target = params and (params.target or params.app)
@@ -499,4 +500,4 @@ hs.urlevent.bind("scratchpad", function(_, params, _)
   toggleScratchpad(target)
 end)
 
-log.i("Hammerspoon config loaded: alt+s toggles current scratchpad, alt+shift+s switches Emacs/Obsidian, plus hammerspoon://scratchpad?target=emacs|obsidian")
+log.i("Hammerspoon config loaded: alt+s toggles current scratchpad (default obsidian); switch hotkey disabled; URL: hammerspoon://scratchpad?target=emacs|obsidian")
