@@ -17,6 +17,7 @@ font-codepoint-map = U+E000-U+F8FF=Symbols Nerd Font Mono
 
 # kitty current-theme.conf -> Ghostty
 theme = TokyoNight Storm
+background = #222437
 
 # kitty keyboard/UI migration
 macos-option-as-alt = true
