@@ -1,0 +1,10 @@
+patch:
+  schema_list:
+    - schema: double_pinyin_flypy
+    - schema: rime_ice
+  menu/page_size: 7
+  switcher/save_options:
+    - ascii_punct
+    - emoji
+    - full_shape
+    - search_single_char
