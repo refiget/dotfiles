@@ -2,12 +2,12 @@ patch:
   style/color_scheme: blue_reverie
   style/color_scheme_dark: blue_reverie_dark
   style/status_message_type: mix
-  style/candidate_format: '[label]. [candidate] [comment]'
+  style/candidate_format: '[label]. [candidate]'
   style/text_orientation: horizontal
   style/inline_preedit: true
   style/inline_candidate: false
   style/translucency: true
-  style/blur: true
+  style/blur: false
   style/mutual_exclusive: false
   style/memorize_size: true
   style/show_paging: false
@@ -45,7 +45,7 @@ patch:
     back_color: 0x3F000000
     hilited_back_color: 0x252320
     hilited_candidate_back_color: 0xFF7A00
-    text_color: 0xD8000000
+    text_color: 0xE6FFFFFF
     hilited_text_color: 0xDEDDDD
     candidate_text_color: 0xFFFFFF
     hilited_candidate_text_color: 0xFFFFFF

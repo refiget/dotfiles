@@ -1,2 +1,10 @@
 patch:
   switches/@2/reset: 0
+
+  # 方案级 editor 仅保留基础键位，放行 Ctrl/Alt 组合给系统/应用
+  editor/bindings:
+    space: confirm
+    Return: commit_raw_input
+    BackSpace: revert
+    Delete: delete
+    Escape: cancel
