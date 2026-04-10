@@ -8,3 +8,8 @@ patch:
     - emoji
     - full_shape
     - search_single_char
+  app_options/com.runningwithcrayons.Alfred:
+    ascii_mode: true
+  app_options/com.mitchellh.ghostty:
+    ascii_mode: true
+
