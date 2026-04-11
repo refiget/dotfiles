@@ -1,6 +1,7 @@
 patch:
-  # traditionalization: 0=简体, 1=繁体
+  # 第 3 个开关是 traditionalization: [简, 繁]，这里强制默认简体
   switches/@2/reset: 0
+  # 硬压简体输出，避免会话残留把你又带回繁体
   traditionalize/opencc_config: t2s.json
 
   # 小鹤双拼 in / ing 双向模糊：in(B) <-> ing(K)
