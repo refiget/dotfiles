@@ -1,6 +1,10 @@
 patch:
   switches/@2/reset: 0
 
+  # 单向模糊音：允许 in 当 ing 用；不反向放开，避免 ing 过度命中 in
+  speller/algebra/+: 
+    - derive/in$/ing/
+
   # 方案级 editor 仅保留基础键位，放行 Ctrl/Alt 组合给系统/应用
   editor/bindings:
     space: confirm

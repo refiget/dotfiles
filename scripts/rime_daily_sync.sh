@@ -12,13 +12,6 @@ TARGET_FILES=(
   "rime_ice.custom.yaml"
   "double_pinyin_flypy.custom.yaml"
   "squirrel.custom.yaml"
-  "melt_eng.schema.yaml"
-  "melt_eng.dict.yaml"
-  "en_dicts/en.dict.yaml"
-  "en_dicts/en_ext.dict.yaml"
-  "lua/reduce_english_filter.lua"
-  "lua/cn_en_spacer.lua"
-  "lua/en_spacer.lua"
 )
 
 log() {
@@ -145,9 +138,9 @@ done
 rm -f "$MERGED_CP"
 log "custom_phrase merged and synced"
 
-# for other files: pick newer one among all devices and copy to all
+# for other config files: pick newer one among all devices and copy to all
 mtime() { stat -f %m "$1" 2>/dev/null || echo 0; }
-for f in "default.custom.yaml" "rime_ice.custom.yaml" "double_pinyin_flypy.custom.yaml" "squirrel.custom.yaml" "melt_eng.schema.yaml" "melt_eng.dict.yaml" "en_dicts/en.dict.yaml" "en_dicts/en_ext.dict.yaml" "lua/reduce_english_filter.lua" "lua/cn_en_spacer.lua" "lua/en_spacer.lua"; do
+for f in "default.custom.yaml" "rime_ice.custom.yaml" "double_pinyin_flypy.custom.yaml" "squirrel.custom.yaml"; do
   src=""
   best_mtime=0
   for d in "${DEV_DIRS[@]}"; do
