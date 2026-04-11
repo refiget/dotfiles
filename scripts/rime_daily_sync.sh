@@ -12,6 +12,13 @@ TARGET_FILES=(
   "rime_ice.custom.yaml"
   "double_pinyin_flypy.custom.yaml"
   "squirrel.custom.yaml"
+  "melt_eng.schema.yaml"
+  "melt_eng.dict.yaml"
+  "en_dicts/en.dict.yaml"
+  "en_dicts/en_ext.dict.yaml"
+  "lua/reduce_english_filter.lua"
+  "lua/cn_en_spacer.lua"
+  "lua/en_spacer.lua"
 )
 
 log() {
@@ -48,15 +55,13 @@ if (( ${#DEV_DIRS[@]} < 2 )); then
   exit 1
 fi
 
-# only sync first two device dirs (your current two devices)
-DEV_A="${DEV_DIRS[0]}"
-DEV_B="${DEV_DIRS[1]}"
-
-log "start sync: A=$(basename "$DEV_A") B=$(basename "$DEV_B")"
+log "start sync: devices=$(printf '%s ' "${DEV_DIRS[@]##*/}")"
 
 TS="$(date +%Y%m%d-%H%M%S)"
 BK_DIR="$BACKUP_ROOT/$TS"
-mkdir -p "$BK_DIR/$(basename "$DEV_A")" "$BK_DIR/$(basename "$DEV_B")"
+for d in "${DEV_DIRS[@]}"; do
+  mkdir -p "$BK_DIR/$(basename "$d")"
+done
 
 copy_if_exists() {
   local src="$1" dst="$2"
@@ -67,13 +72,15 @@ copy_if_exists() {
 }
 
 # backup current files
-for f in "${TARGET_FILES[@]}"; do
-  copy_if_exists "$DEV_A/$f" "$BK_DIR/$(basename "$DEV_A")/$f"
-  copy_if_exists "$DEV_B/$f" "$BK_DIR/$(basename "$DEV_B")/$f"
+for d in "${DEV_DIRS[@]}"; do
+  for f in "${TARGET_FILES[@]}"; do
+    mkdir -p "$BK_DIR/$(basename "$d")/$(dirname "$f")"
+    copy_if_exists "$d/$f" "$BK_DIR/$(basename "$d")/$f"
+  done
 done
 log "backup created: $BK_DIR"
 
-# merge custom_phrase.txt from A+B -> merged
+# merge custom_phrase.txt from all devices -> merged
 MERGED_CP="$(mktemp)"
 {
   echo '# Rime table'
@@ -83,12 +90,12 @@ MERGED_CP="$(mktemp)"
   echo
 } > "$MERGED_CP"
 
-python3 - "$DEV_A/custom_phrase.txt" "$DEV_B/custom_phrase.txt" "$MERGED_CP" <<'PY'
+python3 - "${DEV_DIRS[@]/%//custom_phrase.txt}" "$MERGED_CP" <<'PY'
 import sys, re
 from pathlib import Path
 
-srcs=[Path(sys.argv[1]), Path(sys.argv[2])]
-out=Path(sys.argv[3])
+srcs=[Path(p) for p in sys.argv[1:-1]]
+out=Path(sys.argv[-1])
 
 best={}  # term -> (code, quality)
 
@@ -129,8 +136,8 @@ with out.open('a', encoding='utf-8') as f:
         f.write(f"{term}\t{code}\t{q}\n")
 PY
 
-# write merged custom phrase to both devices atomically
-for d in "$DEV_A" "$DEV_B"; do
+# write merged custom phrase to all devices atomically
+for d in "${DEV_DIRS[@]}"; do
   tmp="$d/custom_phrase.txt.tmp.$$"
   cp "$MERGED_CP" "$tmp"
   mv "$tmp" "$d/custom_phrase.txt"
@@ -138,27 +145,25 @@ done
 rm -f "$MERGED_CP"
 log "custom_phrase merged and synced"
 
-# for yaml files: pick newer one (mtime) and copy to both
+# for other files: pick newer one among all devices and copy to all
 mtime() { stat -f %m "$1" 2>/dev/null || echo 0; }
-for f in "default.custom.yaml" "rime_ice.custom.yaml" "double_pinyin_flypy.custom.yaml" "squirrel.custom.yaml"; do
-  A="$DEV_A/$f"
-  B="$DEV_B/$f"
-  if [[ ! -f "$A" && ! -f "$B" ]]; then
-    continue
-  fi
-
+for f in "default.custom.yaml" "rime_ice.custom.yaml" "double_pinyin_flypy.custom.yaml" "squirrel.custom.yaml" "melt_eng.schema.yaml" "melt_eng.dict.yaml" "en_dicts/en.dict.yaml" "en_dicts/en_ext.dict.yaml" "lua/reduce_english_filter.lua" "lua/cn_en_spacer.lua" "lua/en_spacer.lua"; do
   src=""
-  if [[ -f "$A" && -f "$B" ]]; then
-    ma="$(mtime "$A")"
-    mb="$(mtime "$B")"
-    if (( ma >= mb )); then src="$A"; else src="$B"; fi
-  elif [[ -f "$A" ]]; then
-    src="$A"
-  else
-    src="$B"
-  fi
+  best_mtime=0
+  for d in "${DEV_DIRS[@]}"; do
+    cand="$d/$f"
+    if [[ -f "$cand" ]]; then
+      mc="$(mtime "$cand")"
+      if [[ -z "$src" ]] || (( mc >= best_mtime )); then
+        src="$cand"
+        best_mtime="$mc"
+      fi
+    fi
+  done
+  [[ -n "$src" ]] || continue
 
-  for d in "$DEV_A" "$DEV_B"; do
+  for d in "${DEV_DIRS[@]}"; do
+    mkdir -p "$d/$(dirname "$f")"
     tmp="$d/$f.tmp.$$"
     cp "$src" "$tmp"
     mv "$tmp" "$d/$f"
