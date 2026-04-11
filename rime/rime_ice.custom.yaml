@@ -8,3 +8,16 @@ patch:
     BackSpace: revert
     Delete: delete
     Escape: cancel
+
+  # 中英混输权重：中文优先，英文次之
+  translator/initial_quality: 1.2
+  melt_eng/initial_quality: 1.1
+  melt_eng/enable_sentence: false
+  melt_eng/enable_user_dict: false
+
+  # 降低部分短英文单词，避免压过常用中文词
+  reduce_english_filter/idx: 2
+  reduce_english_filter/words:
+    - rug
+    - bus
+    - ship
