@@ -1,5 +1,6 @@
 patch:
   switches/@2/reset: 0
+  traditionalize/opencc_config: t2s.json
 
   # in / ing 双向模糊
   speller/algebra/+:

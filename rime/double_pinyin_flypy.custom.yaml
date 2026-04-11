@@ -1,6 +1,7 @@
 patch:
-  # simplification: 0=繁體, 1=简体
-  switches/@2/reset: 1
+  # traditionalization: 0=简体, 1=繁体
+  switches/@2/reset: 0
+  traditionalize/opencc_config: t2s.json
 
   # 小鹤双拼 in / ing 双向模糊：in(B) <-> ing(K)
   speller/algebra/+:
