@@ -14,6 +14,11 @@ TARGET_FILES=(
   "squirrel.custom.yaml"
 )
 
+USERDB_FILES=(
+  "luna_pinyin.userdb.txt"
+  "rime_ice.userdb.txt"
+)
+
 log() {
   mkdir -p "$(dirname "$LOG_FILE")"
   printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG_FILE"
@@ -66,7 +71,7 @@ copy_if_exists() {
 
 # backup current files
 for d in "${DEV_DIRS[@]}"; do
-  for f in "${TARGET_FILES[@]}"; do
+  for f in "${TARGET_FILES[@]}" "${USERDB_FILES[@]}"; do
     mkdir -p "$BK_DIR/$(basename "$d")/$(dirname "$f")"
     copy_if_exists "$d/$f" "$BK_DIR/$(basename "$d")/$f"
   done
@@ -138,9 +143,9 @@ done
 rm -f "$MERGED_CP"
 log "custom_phrase merged and synced"
 
-# for other config files: pick newer one among all devices and copy to all
+# for other config files and userdb text files: pick newer one among all devices and copy to all
 mtime() { stat -f %m "$1" 2>/dev/null || echo 0; }
-for f in "default.custom.yaml" "rime_ice.custom.yaml" "double_pinyin_flypy.custom.yaml" "squirrel.custom.yaml"; do
+for f in "default.custom.yaml" "rime_ice.custom.yaml" "double_pinyin_flypy.custom.yaml" "squirrel.custom.yaml" "luna_pinyin.userdb.txt" "rime_ice.userdb.txt"; do
   src=""
   best_mtime=0
   for d in "${DEV_DIRS[@]}"; do
