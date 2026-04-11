@@ -2,6 +2,7 @@ patch:
   # simplification: 0=繁體, 1=简体
   switches/@2/reset: 1
 
-  # 小鹤双拼单向模糊：允许 in(B) 当 ing(K) 用；不反向放开
+  # 小鹤双拼 in / ing 双向模糊：in(B) <-> ing(K)
   speller/algebra/+:
     - derive/^(.*)b$/$1k/
+    - derive/^(.*)k$/$1b/
