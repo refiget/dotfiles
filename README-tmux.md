@@ -1,53 +1,66 @@
-# tmux
+# tmux 配置说明
 
-Modular tmux config tuned for macOS, with a refined status bar and safer clipboard behavior.
+这套 tmux 配置强调三件事：
 
-## Highlights
+1. **结构化脚本分层**（hooks / session / pane / window / status）
+2. **稳定的剪贴板行为**（复制与粘贴统一入口）
+3. **低抖动状态栏**（模块化 segment + 可控动态信息）
 
-- **Status bar UI**: centered tab strip, explicit badges (activity/bell/zoom), calmer typography.
-- **Safer paste**: clipboard scripts strip trailing newlines to reduce accidental “paste + Enter”.
-- **Copy-mode (vi)**: selection/copy bindings tuned for speed and minimal mode churn.
-- **No scratchpad**: scratchpad feature removed entirely.
+---
 
-## Files & structure
+## 目录与入口
 
-- Loader: `~/.tmux.conf` (symlinked from `~/dotfiles/.tmux.conf`)
-- Modular configs: `~/dotfiles/tmux/conf.d/*.conf`
-- Scripts: `~/.config/tmux/scripts/` → symlinked to `~/dotfiles/tmux/scripts/`
-- Status segments:
-  - `~/dotfiles/tmux/tmux-status/left.sh`
-  - `~/dotfiles/tmux/tmux-status/right.sh`
+- 主配置：`~/.tmux.conf`（来自 `~/dotfiles/.tmux.conf`）
+- 模块配置：`tmux/conf.d/*.conf`
+- 脚本根：`~/.config/tmux/scripts/`（链接到仓库 `tmux/scripts/`）
+- 状态栏脚本：`tmux/tmux-status/`
 
-## Key operations
+### 架构文档
 
-### Reload
+- 总览：`tmux/ARCHITECTURE.md`
+- 契约：`tmux/docs/contracts/*.md`
+
+---
+
+## Hook 架构（重构后）
+
+统一由 dispatcher 处理：
+
+- `scripts/hooks/dispatch.sh`
+- 事件脚本：`scripts/hooks/events/*.sh`
+
+这样可以把 tmux hook 与业务逻辑解耦，降低配置文件复杂度。
+
+---
+
+## 剪贴板策略
+
+- 复制入口：`scripts/copy_to_clipboard.sh`
+- 粘贴入口：`scripts/paste_from_clipboard.sh`
+- 目标：键盘复制、鼠标复制、复制模式复制都走统一后端
+
+额外处理：对换行做安全处理，减少“粘贴即执行”的误触风险。
+
+---
+
+## 状态栏策略
+
+- 右侧状态栏已拆分为 `tmux-status/lib/*` 与 `right.sh`
+- 动态信息默认“低干扰”，避免频繁跳变
+- 主题更新与刷新间隔脚本已独立到 `scripts/status/`
+
+---
+
+## 常用命令
 
 ```bash
-tmux source-file ~/.tmux.conf
+tmux source-file ~/.tmux.conf   # 重载配置
+tmux list-keys                  # 查看最终绑定
+tmux show -g                    # 查看全局选项
 ```
 
-### Inspect bindings (source of truth)
+---
 
-```bash
-tmux list-keys
-```
+## 兼容性说明
 
-### Clipboard behavior
-
-- System clipboard writes are unified through tmux `copy-command` → `copy_to_clipboard.sh`
-- Paste uses `paste_from_clipboard.sh`
-- Keyboard copy, Enter copy, mouse drag copy, double-click, and triple-click should all resolve to the same clipboard backend
-- Clipboard scripts sanitize trailing newlines for safety
-- This avoids intermittent behavior where different copy actions silently use different clipboard paths
-
-## Status bar conventions
-
-- **Mode colors are not used to theme the whole UI** (avoid abrupt switching).
-- Dynamic indicators are limited to small, meaningful cues:
-  - Window badges: activity/bell/zoom
-  - Optional timer dot (breathing UI) on the right when enabled
-
-## Dependencies (optional)
-
-- `reattach-to-user-namespace` (older macOS setups)
-- `pbcopy/pbpaste` (macOS clipboard)
+重构后采用了新的子系统路径；旧脚本路径保留 wrapper，以降低外部调用和历史绑定断裂风险。
