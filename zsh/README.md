@@ -15,8 +15,10 @@ This directory contains the zsh configuration.
 - `30_*` = tool integrations and shell helpers
 - `40_*` = UI / keybindings / hooks / behavior fixes
 - `50_*` = language-specific helpers
-- `80_*` = local overrides
-- `90_*` = checks and autostart
+- `80_*` = local pre-overrides
+- `90_*` = checks
+- `95_*` = autostart
+- `99_*` = final local overrides
 - prefer keeping tool-specific setup out of the loader
 - prefer `path=( ... $path )` over repeated raw `export PATH=...:$PATH`
 
@@ -36,6 +38,7 @@ For an overview, see the repo-level **README-zsh.md**.
 - `35_tools_history.conf` → atuin
 - `40_keybindings.conf` → vi mode and readline-style bindings
 - `50_python_venv.conf` → Python virtualenv helpers
-- `80_local_overrides.conf` → machine-local overrides
+- `80_local_overrides.conf` → machine-local pre-overrides
 - `90_dep_checks.conf` → soft startup checks
 - `95_autostart_tmux.conf` → optional tmux auto-entry
+- `99_local_overrides.conf` → final machine-local overrides
