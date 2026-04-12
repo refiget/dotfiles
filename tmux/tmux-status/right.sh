@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# hide entire right status if terminal width is below threshold
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/runtime.sh
+source "$script_dir/lib/runtime.sh"
+# shellcheck source=lib/segments.sh
+source "$script_dir/lib/segments.sh"
+# shellcheck source=lib/metrics.sh
+source "$script_dir/lib/metrics.sh"
+
 min_width=${TMUX_RIGHT_MIN_WIDTH:-90}
-width=$(tmux display-message -p '#{client_width}' 2>/dev/null || true)
-if [[ -z "${width:-}" || "$width" == "0" ]]; then
-  width=$(tmux display-message -p '#{window_width}' 2>/dev/null || true)
-fi
-if [[ -z "${width:-}" || "$width" == "0" ]]; then
-  width=${COLUMNS:-}
-fi
+width=$(status_client_width)
 if [[ -n "${width:-}" && "$width" =~ ^[0-9]+$ ]]; then
   if (( width < min_width )); then
     exit 0
   fi
 fi
 
-status_bg=$(tmux show -gqv status-bg)
-[[ -z "$status_bg" || "$status_bg" == "default" ]] && status_bg="default"
+status_bg=$(status_bg_value)
 
 # Palette (Catppuccin Mocha-ish)
 text="#cdd6f4"
@@ -26,171 +26,17 @@ overlay0="#6c7086"
 peach="#fab387"
 
 # Keep segments on the terminal background to avoid color blocks on transparent themes
-segment_fg=$(tmux show -gqv '@status_fg')
-[[ -z "$segment_fg" ]] && segment_fg="$overlay0"
+segment_fg=$(status_option_or '@status_fg' "$overlay0")
 
-# Time segment: keep static, calm color (mode accent is reserved for the session pill)
-host_bg="$status_bg"
-host_fg=$(tmux show -gqv "@time_fg")
-[[ -z "$host_fg" ]] && host_fg="$subtext0"
-# Time format (C): HH:MM · MM-DD
-# Keep this short and consistent to reduce visual jitter.
-time_fmt="${TMUX_TIME_FMT:-%H:%M · %m-%d}"
-separator=""
+session_segment=$(status_build_session_segment "$width" "$subtext0")
+rainbarf_segment=$(status_build_rainbarf_segment "$width" "$segment_fg")
+time_segment=$(status_build_time_segment "$status_bg" "$subtext0")
+date_segment=$(status_build_date_segment "$status_bg" "$subtext0")
 right_cap=""
-session_segment=""
-rainbarf_segment=""
 
-# Rainbarf: keep it low-contrast and width-stable to match minimalist UI.
-rainbarf_toggle="${TMUX_RAINBARF:-1}"
-rainbarf_min_width="${TMUX_RAINBARF_MIN_WIDTH:-120}"
-rainbarf_width="${TMUX_RAINBARF_WIDTH:-18}"
-
-case "$rainbarf_toggle" in
-  0|false|FALSE|off|OFF|no|NO)
-    rainbarf_toggle="0"
-    ;;
-  *)
-    rainbarf_toggle="1"
-    ;;
-esac
-
-# Session label on right side (replaces old left block, keeps hierarchy clean)
-show_session=1
-session_min_width="${TMUX_SESSION_RIGHT_MIN_WIDTH:-105}"
-if [[ -n "${width:-}" && "$width" =~ ^[0-9]+$ ]] && (( width < session_min_width )); then
-  show_session=0
-fi
-if (( show_session == 1 )); then
-  current_session_name=$(tmux display-message -p '#{session_name}' 2>/dev/null || true)
-  # Canonical naming: <index>__<label>
-  # Keep index for icon mapping; display only label.
-  session_name_clean="$current_session_name"
-  session_idx=""
-  if [[ "$current_session_name" =~ ^([0-9]+)__(.*)$ ]]; then
-    session_idx="${BASH_REMATCH[1]}"
-    session_name_clean="${BASH_REMATCH[2]}"
-  elif [[ "$current_session_name" =~ ^([0-9]+)[:_-](.*)$ ]]; then
-    # Backward compatibility with older names.
-    session_idx="${BASH_REMATCH[1]}"
-    session_name_clean="${BASH_REMATCH[2]}"
-  fi
-  session_name_clean=${session_name_clean:-$current_session_name}
-
-  # Icon mapping by session index (1-based):
-  # TMUX_SESSION_ICONS="i1,i2,i3,..."
-  # If session name has no numeric prefix, use index 1.
-
-  session_icons_csv="${TMUX_SESSION_ICONS:-}"
-  session_icon="1"
-  display_idx="1"
-
-  if [[ -n "$session_idx" && "$session_idx" =~ ^[0-9]+$ ]]; then
-    display_idx="$session_idx"
-  fi
-
-  if [[ -n "$session_icons_csv" ]]; then
-    IFS=',' read -r -a session_icons_arr <<< "$session_icons_csv"
-
-    arr_index=0
-    if [[ -n "$session_idx" && "$session_idx" =~ ^[0-9]+$ ]]; then
-      if (( session_idx >= 1 )); then
-        arr_index=$((session_idx - 1))
-      fi
-    fi
-
-    if (( arr_index < ${#session_icons_arr[@]} )); then
-      mapped_icon="${session_icons_arr[$arr_index]}"
-      if [[ -n "$mapped_icon" ]]; then
-        session_icon="$mapped_icon"
-      else
-        session_icon="$display_idx"
-      fi
-    else
-      session_icon="$display_idx"
-    fi
-  else
-    session_icon="$display_idx"
-  fi
-
-  session_fg=$(tmux show -gqv '@session_label_fg')
-  [[ -z "$session_fg" ]] && session_fg="$subtext0"
-  session_bg=$(tmux show -gqv '@session_label_bg')
-  # Truncate to keep right bar stable.
-  max_slen=${TMUX_SESSION_RIGHT_MAXLEN:-12}
-  if (( ${#session_name_clean} > max_slen )); then
-    session_name_clean="${session_name_clean:0:max_slen-1}…"
-  fi
-  if [[ -n "$session_bg" ]]; then
-    session_segment=$(printf '#[fg=%s,bg=%s] %s %s #[default]' "$session_fg" "$session_bg" "$session_icon" "$session_name_clean")
-  else
-    session_segment=$(printf '#[fg=%s] %s %s #[default]' "$session_fg" "$session_icon" "$session_name_clean")
-  fi
-fi
-
-if [[ "$rainbarf_toggle" == "1" ]] && command -v rainbarf >/dev/null 2>&1; then
-  show_rainbarf=1
-  if [[ -n "${width:-}" && "$width" =~ ^[0-9]+$ ]] && (( width < rainbarf_min_width )); then
-    show_rainbarf=0
-  fi
-
-  if (( show_rainbarf == 1 )); then
-    # Keep chart monochrome, but tint segment by a smoothed CPU signal.
-    # Smoothing avoids abrupt color jumps while keeping runtime overhead tiny.
-    cpu_busy=$(top -l 1 -n 0 2>/dev/null | awk -F'[:,% ]+' '/CPU usage/ {print $3; exit}')
-    if [[ ! "$cpu_busy" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-      cpu_busy="0"
-    fi
-
-    # EMA in tmux global option: ema = a*current + (1-a)*prev
-    alpha="${TMUX_RAINBARF_SMOOTHING:-0.30}"  # higher=faster response, lower=smoother
-    prev_ema=$(tmux show -gqv '@cpu_ema' 2>/dev/null || true)
-    if [[ ! "$prev_ema" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-      prev_ema="$cpu_busy"
-    fi
-    cpu_ema=$(awk -v a="$alpha" -v c="$cpu_busy" -v p="$prev_ema" 'BEGIN {printf "%.2f", (a*c)+((1-a)*p)}')
-    tmux set -gq @cpu_ema "$cpu_ema"
-
-    metric_fg="$segment_fg"
-    # More tiers + smoothing => visually silkier transitions.
-    if awk "BEGIN {exit !($cpu_ema >= 90)}"; then
-      metric_fg="#f38ba8"   # critical
-    elif awk "BEGIN {exit !($cpu_ema >= 75)}"; then
-      metric_fg="#fab387"   # high
-    elif awk "BEGIN {exit !($cpu_ema >= 60)}"; then
-      metric_fg="#f9e2af"   # warm
-    elif awk "BEGIN {exit !($cpu_ema >= 45)}"; then
-      metric_fg="#a6e3a1"   # moderate
-    elif awk "BEGIN {exit !($cpu_ema >= 30)}"; then
-      metric_fg="#89dceb"   # light
-    else
-      metric_fg="#6c7086"   # calm
-    fi
-
-    rainbarf_output=$(rainbarf --tmux --width "$rainbarf_width" --no-battery --no-remaining --no-bolt --no-rgb --fg colour244 2>/dev/null || true)
-    rainbarf_output=${rainbarf_output//$'\n'/}
-    if [[ -n "$rainbarf_output" ]]; then
-      rainbarf_segment=$(printf '#[fg=%s] %s #[default]' \
-        "$metric_fg" "$rainbarf_output")
-    fi
-  fi
-fi
-
-# Split time/date into separate filled segments so each can use its own color.
-time_value=$(date +"${TMUX_TIME_ONLY_FMT:-%H:%M}")
-date_value=$(date +"${TMUX_DATE_ONLY_FMT:-%m-%d}")
-
-time_fg=$(tmux show -gqv '@time_fg')
-[[ -z "$time_fg" ]] && time_fg="$host_fg"
-time_bg=$(tmux show -gqv '@time_bg')
-[[ -z "$time_bg" ]] && time_bg="$status_bg"
-
-date_fg=$(tmux show -gqv '@date_fg')
-[[ -z "$date_fg" ]] && date_fg="$host_fg"
-date_bg=$(tmux show -gqv '@date_bg')
-[[ -z "$date_bg" ]] && date_bg="$status_bg"
-
-time_segment=$(printf '#[fg=%s,bg=%s] %s #[default]' "$time_fg" "$time_bg" "$time_value")
-date_segment=$(printf '#[fg=%s,bg=%s] %s #[default]' "$date_fg" "$date_bg" "$date_value")
-
-printf '%s%s%s%s%s'   "$session_segment"   "$rainbarf_segment"   "$time_segment"   "$date_segment"   "$right_cap"
+printf '%s%s%s%s%s' \
+  "$session_segment" \
+  "$rainbarf_segment" \
+  "$time_segment" \
+  "$date_segment" \
+  "$right_cap"
