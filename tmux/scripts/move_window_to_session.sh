@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-index="${1:-}"
-if [[ -z "$index" || ! "$index" =~ ^[0-9]+$ ]]; then
-  exit 0
-fi
-
-python3 "$HOME/.config/tmux/scripts/session_manager.py" move-window-to "$index"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+exec "$script_dir/session/move_window_to_session.sh" "$@"

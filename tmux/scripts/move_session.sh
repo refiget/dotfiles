@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-direction="${1:-}"
-if [[ -z "$direction" ]]; then
-  exit 0
-fi
-
-python3 "$HOME/.config/tmux/scripts/session_manager.py" move "$direction"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+exec "$script_dir/session/move_session.sh" "$@"

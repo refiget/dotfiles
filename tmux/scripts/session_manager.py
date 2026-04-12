@@ -8,6 +8,17 @@ import time
 from typing import List, Dict, Optional, Tuple
 
 
+def tmux_base_cmd() -> List[str]:
+    cmd = ["tmux"]
+    socket_name = os.environ.get("TMUX_SOCKET_NAME", "").strip()
+    socket_path = os.environ.get("TMUX_SOCKET_PATH", "").strip()
+    if socket_name:
+        cmd.extend(["-L", socket_name])
+    elif socket_path:
+        cmd.extend(["-S", socket_path])
+    return cmd
+
+
 def run_tmux(args: List[str], check: bool = True, capture: bool = False) -> str:
     kwargs = {
         "check": check,
@@ -15,7 +26,7 @@ def run_tmux(args: List[str], check: bool = True, capture: bool = False) -> str:
     if capture:
         kwargs["stdout"] = subprocess.PIPE
         kwargs["text"] = True
-    result = subprocess.run(["tmux", *args], **kwargs)
+    result = subprocess.run([*tmux_base_cmd(), *args], **kwargs)
     if capture:
         return result.stdout.rstrip("\n")
     return ""
