@@ -2,6 +2,7 @@ return {
   {
     "neovim/nvim-lspconfig",
     opts = function(_, opts)
+      -- Single local entry point for nvim-lspconfig opts.servers mutations.
       local common = require("lsp.common")
       local python = require("lsp.python")
       local java = require("lsp.java")
