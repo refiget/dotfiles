@@ -1,55 +1,68 @@
-# Neovim
+# Neovim 配置说明
 
-Neovim config focused on LSP-first editing, fast navigation, and minimal friction for Python.
+面向日常开发的 Neovim 配置，核心目标：**LSP-first、低摩擦、可演进**。
 
-## Highlights
+---
 
-- LSP setup with sensible defaults
-- Python: **project venv auto-detection** for Pyright
-  - searches `./.venv`, `./venv`, `./.env`, or `$VIRTUAL_ENV`
-  - pushes settings to the LSP server on init (more reliable than only `on_new_config`)
-- Diagnostics: use built-in navigation (`]d`, `[d`) and lists (`:lopen`)
+## 重点能力
 
-## Files
+- 以 LSP 为中心的语言支持
+- Python 虚拟环境自动识别（优先项目本地环境）
+- 诊断与导航遵循原生高效路径
+- 插件配置尽量模块化，避免单文件失控
 
-- Config dir: `~/dotfiles/nvim/`
-- Deployed to: `~/.config/nvim` (via `deploy.sh`)
+---
 
-Key implementation points live in:
+## 路径约定
 
-- `~/.config/nvim/lua/config/lsp.lua`
+- 仓库目录：`~/dotfiles/nvim/`
+- 部署目录：`~/.config/nvim`
+- 关键实现：`lua/config/`、`lua/plugins/`、`lua/lsp/`
 
-## Install / bootstrap
+---
 
-1) Deploy symlinks:
+## 快速初始化
+
+1. 部署链接
 
 ```bash
 cd ~/dotfiles
 ./deploy.sh
 ```
 
-2) Ensure Neovim Python host is available (one-time):
+2. 准备 Python host（一次性）
 
 ```bash
 python3 -m venv ~/venvs/nvim
 ~/venvs/nvim/bin/pip install -U pip pynvim
 ```
 
-3) LSP tools (example):
+3. 安装/更新常见语言工具（示例）
 
 ```bash
 npm i -g pyright
 ```
 
-## Tips
+---
 
-- If imports are unresolved in Python:
-  - confirm the project venv exists (`.venv` recommended)
-  - restart LSP (`:LspRestart`) after creating venv
+## 常用维护动作
 
-## Source of truth
+- 同步插件：`:Lazy sync`
+- 重启 LSP：`:LspRestart`
+- 查看映射：`:map` / `:nmap` / `:imap`
 
-READMEs stay intentionally high-level. For exact behavior:
+---
 
-- inspect Lua: `~/.config/nvim/lua/`
-- inspect mappings: `:map`, `:nmap`, `:imap`
+## 故障排查（Python）
+
+如果出现导入无法解析：
+
+1. 确认项目存在 venv（推荐 `.venv`）
+2. 打开项目根目录再启动 nvim
+3. 执行 `:LspRestart`
+
+---
+
+## 说明
+
+README 聚焦稳定使用方式；精确行为请以 Lua 配置源码为准。
