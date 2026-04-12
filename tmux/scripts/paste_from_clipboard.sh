@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/tmux_runtime.sh
+source "$script_dir/lib/tmux_runtime.sh"
+
 read_clipboard() {
   if command -v pbpaste >/dev/null 2>&1; then
     env LANG="${LANG:-en_US.UTF-8}" LC_CTYPE="${LC_CTYPE:-en_US.UTF-8}" pbpaste

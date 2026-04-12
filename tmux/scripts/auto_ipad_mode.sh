@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/tmux_runtime.sh
+source "$script_dir/lib/tmux_runtime.sh"
+
 # Auto-toggle iPad (low-flicker) tmux bar mode based on SSH tmux clients.
 # Single-iPad-friendly behavior:
 # - when an SSH tmux client attaches -> enable iPad mode (off)

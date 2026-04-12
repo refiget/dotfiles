@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/tmux_runtime.sh
+source "$script_dir/lib/tmux_runtime.sh"
+
 # Routes tmux/vim copy to the right clipboard backend.
 # Defaults:
 #   - 默认优先系统剪贴板，失败时 OSC52。
