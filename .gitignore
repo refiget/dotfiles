@@ -18,6 +18,7 @@ outcome.png
 **/yabairc.bak.*
 
 # Local overrides
+.zshrc.pre.local
 .zshrc.local
 .tmux.conf.local
 .viminfo
